@@ -8,13 +8,13 @@ Tested on:
 1. Navigate to root of repository:
     ```bash
     cd path/to/repository
-    ````
+    ```
 2. Create virtual environment:
     ```bash
     python -m venv .venv
     source .venv/bin/activate
     pip install -r requirements.txt
-    ````
+    ```
 3. Create database (if it doesn't exist):
     ```bash
     ./control.sh init
