@@ -29,8 +29,8 @@ Tested on:
 1. Navigate to root of repository:
     ```bash
     cd path/to/repository
-    ````
+    ```
 2. Build:
     ```bash
     make build
-    ````
+    ```
