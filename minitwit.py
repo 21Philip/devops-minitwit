@@ -26,7 +26,7 @@ class G(Protocol):
 g = cast(G, g)
 
 # configuration
-DATABASE = 'minitwit.db'
+DATABASE = '/tmp/minitwit.db'
 PER_PAGE = 30
 DEBUG = True
 SECRET_KEY = 'development key'
@@ -43,8 +43,8 @@ def connect_db():
 def init_db():
     """Creates the database tables."""
     with closing(connect_db()) as db:
-        with app.open_resource('schema.sql') as f:
-            db.cursor().executescript(f.read())
+        with app.open_resource('schema.sql', mode='r') as f:
+            db.executescript(f.read())
         db.commit()
 
 
