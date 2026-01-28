@@ -9,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import with_statement
-import re
 import time
 import sqlite3
 from hashlib import md5
@@ -17,11 +16,17 @@ from datetime import datetime
 from contextlib import closing
 from flask import Flask, request, session, url_for, redirect, \
      render_template, abort, g, flash
-from werkzeug import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
+# hack to type flask request global variables
+from typing import Optional, Protocol, cast
+class G(Protocol):
+    db: sqlite3.Connection
+    user: Optional[dict]
+g = cast(G, g)
 
 # configuration
-DATABASE = '/tmp/minitwit.db'
+DATABASE = 'minitwit.db'
 PER_PAGE = 30
 DEBUG = True
 SECRET_KEY = 'development key'
@@ -43,12 +48,19 @@ def init_db():
         db.commit()
 
 
-def query_db(query, args=(), one=False):
+def query_many(query, args=()):
     """Queries the database and returns a list of dictionaries."""
     cur = g.db.execute(query, args)
     rv = [dict((cur.description[idx][0], value)
                for idx, value in enumerate(row)) for row in cur.fetchall()]
-    return (rv[0] if rv else None) if one else rv
+    return rv
+
+def query_one(query, args=()):
+    """Queries the database and returns a list of dictionaries."""
+    cur = g.db.execute(query, args)
+    rv = [dict((cur.description[idx][0], value)
+               for idx, value in enumerate(row)) for row in cur.fetchall()]
+    return rv[0] if len(rv) > 0 else None
 
 
 def get_user_id(username):
@@ -77,8 +89,9 @@ def before_request():
     g.db = connect_db()
     g.user = None
     if 'user_id' in session:
-        g.user = query_db('select * from user where user_id = ?',
-                          [session['user_id']], one=True)
+        g.user = query_one(
+            'select * from user where user_id = ?',
+            [session['user_id']])
 
 
 @app.after_request
@@ -94,11 +107,10 @@ def timeline():
     redirect to the public timeline.  This timeline shows the user's
     messages as well as all the messages of followed users.
     """
-    print "We got a visitor from: " + str(request.remote_addr)
+    print("We got a visitor from: " + str(request.remote_addr))
     if not g.user:
         return redirect(url_for('public_timeline'))
-    offset = request.args.get('offset', type=int)
-    return render_template('timeline.html', messages=query_db('''
+    return render_template('timeline.html', messages=query_many('''
         select message.*, user.* from message, user
         where message.flagged = 0 and message.author_id = user.user_id and (
             user.user_id = ? or
@@ -111,7 +123,7 @@ def timeline():
 @app.route('/public')
 def public_timeline():
     """Displays the latest messages of all users."""
-    return render_template('timeline.html', messages=query_db('''
+    return render_template('timeline.html', messages=query_many('''
         select message.*, user.* from message, user
         where message.flagged = 0 and message.author_id = user.user_id
         order by message.pub_date desc limit ?''', [PER_PAGE]))
@@ -120,16 +132,16 @@ def public_timeline():
 @app.route('/<username>')
 def user_timeline(username):
     """Display's a users tweets."""
-    profile_user = query_db('select * from user where username = ?',
-                            [username], one=True)
+    profile_user = query_one('select * from user where username = ?',
+                            [username])
     if profile_user is None:
         abort(404)
     followed = False
     if g.user:
-        followed = query_db('''select 1 from follower where
+        followed = query_one('''select 1 from follower where
             follower.who_id = ? and follower.whom_id = ?''',
-            [session['user_id'], profile_user['user_id']], one=True) is not None
-    return render_template('timeline.html', messages=query_db('''
+            [session['user_id'], profile_user['user_id']]) is not None
+    return render_template('timeline.html', messages=query_many('''
             select message.*, user.* from message, user where
             user.user_id = message.author_id and user.user_id = ?
             order by message.pub_date desc limit ?''',
@@ -188,8 +200,9 @@ def login():
         return redirect(url_for('timeline'))
     error = None
     if request.method == 'POST':
-        user = query_db('''select * from user where
-            username = ?''', [request.form['username']], one=True)
+        user = query_one(
+            '''select * from user where username = ?''', 
+            [request.form['username']])
         if user is None:
             error = 'Invalid username'
         elif not check_password_hash(user['pw_hash'],
