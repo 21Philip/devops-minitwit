@@ -23,6 +23,10 @@ Tested on:
     ```bash
     ./control.sh start
     ```
+   Or, do this:
+    ```bash
+    python3 minitwit.py
+    ```
 5. Application can be reached at localhost:5000
 
 ## How to build flag_tool.c
