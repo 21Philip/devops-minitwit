@@ -1,14 +1,15 @@
+
 name: Release Chirp Executables
 
 permissions:
   contents: write
   pull-requests: write
 
-on:
-  # Trigger workflow on tag creation matching 'v*'
-  push:
-    tags:
-      - 'v*.*.*'
+# on:
+#   # Trigger workflow on tag creation matching 'v*'
+#   push:
+#     tags:
+#       - 'v*.*.*'
 
 jobs:
   build-and-release:
@@ -61,3 +62,4 @@ jobs:
             my_project_linux.zip
             my_project_mac.zip
             my_project_win.zip
+
