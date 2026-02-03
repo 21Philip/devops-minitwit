@@ -3,11 +3,11 @@
 
 name: Build and deploy ASP.Net Core app to Azure Web App - bdsagroup16chirprazor1
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - main
+#   workflow_dispatch:
 
 jobs:
   build:
@@ -65,4 +65,5 @@ jobs:
           app-name: 'bdsagroup16chirprazor1'
           slot-name: 'Production'
           package: .
+
           
