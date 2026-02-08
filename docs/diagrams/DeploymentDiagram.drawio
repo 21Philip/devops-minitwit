@@ -13,7 +13,7 @@
         <mxCell id="wERA_-9tcClfYGp_6WcB-26" value="&lt;font color=&quot;#000000&quot; style=&quot;font-size: 20px;&quot;&gt;Client A&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;strokeColor=none;" parent="1" vertex="1">
           <mxGeometry x="200" y="170" width="80" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="wERA_-9tcClfYGp_6WcB-27" value="&lt;font color=&quot;#000000&quot; style=&quot;font-size: 15px;&quot;&gt;Browser:&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot; style=&quot;font-size: 15px;&quot;&gt;&amp;nbsp;Chirp!&amp;nbsp;&lt;/font&gt;&lt;span style=&quot;font-size: 15px; color: rgb(0, 0, 0); background-color: initial;&quot;&gt;Webpage&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#000000;" parent="1" vertex="1">
+        <mxCell id="wERA_-9tcClfYGp_6WcB-27" value="&lt;font color=&quot;#000000&quot; style=&quot;font-size: 15px;&quot;&gt;Browser:&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot; style=&quot;font-size: 15px;&quot;&gt;&amp;nbsp;ITU-MiniTwit&amp;nbsp;&lt;/font&gt;&lt;span style=&quot;font-size: 15px; color: rgb(0, 0, 0); background-color: initial;&quot;&gt;Webpage&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#000000;" parent="1" vertex="1">
           <mxGeometry x="167.5" y="210" width="145" height="60" as="geometry" />
         </mxCell>
         <mxCell id="wERA_-9tcClfYGp_6WcB-28" value="" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=none;strokeColor=#000000;" parent="1" vertex="1">
@@ -22,7 +22,7 @@
         <mxCell id="wERA_-9tcClfYGp_6WcB-29" value="&lt;font color=&quot;#000000&quot; style=&quot;font-size: 20px;&quot;&gt;Client B&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;strokeColor=none;" parent="1" vertex="1">
           <mxGeometry x="200" y="490" width="80" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="wERA_-9tcClfYGp_6WcB-30" value="&lt;font color=&quot;#000000&quot; style=&quot;font-size: 15px;&quot;&gt;Browser:&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot; style=&quot;font-size: 15px;&quot;&gt;Chirp! Webpage&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#000000;" parent="1" vertex="1">
+        <mxCell id="wERA_-9tcClfYGp_6WcB-30" value="&lt;font color=&quot;#000000&quot; style=&quot;font-size: 15px;&quot;&gt;Browser:&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot; style=&quot;font-size: 15px;&quot;&gt;ITU-MiniTwit Webpage&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#000000;" parent="1" vertex="1">
           <mxGeometry x="167.5" y="530" width="145" height="60" as="geometry" />
         </mxCell>
         <mxCell id="wERA_-9tcClfYGp_6WcB-31" value="&lt;font color=&quot;#000000&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;Authentication&amp;nbsp;&lt;/span&gt;&lt;/font&gt;" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=none;strokeColor=#000000;" parent="1" vertex="1">

@@ -4,7 +4,7 @@
 @using Microsoft.CodeAnalysis.Scripting
 @model Chirp.Web.Pages.PublicModel
 @{
-    ViewData["Title"] = "Chirp!";
+    ViewData["Title"] = "ITU-MiniTwit!";
     Layout = "Shared/_Layout";
     var authorName = User.FindFirst("Name")?.Value ?? "User";
     @inject SignInManager<Author> SignInManager
