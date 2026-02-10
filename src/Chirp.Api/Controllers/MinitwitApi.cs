@@ -19,6 +19,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Attributes;
 using Org.OpenAPITools.Models;
+using Chirp.Infrastructure;
 
 namespace Chirp.API.Controllers
 { 
@@ -28,6 +29,18 @@ namespace Chirp.API.Controllers
     [ApiController]
     public class MinitwitApiController : ControllerBase
     { 
+        private readonly IAuthorRepository _authorRepository;
+        private readonly ICheepRepository _cheepRepository;
+
+        /// <summary>
+        /// Constructor for MinitwitApiController. Dependency Injection of IAuthorRepository and ICheepRepository is used to access the data layer.
+        /// </summary>
+        public MinitwitApiController(IAuthorRepository authorRepository, ICheepRepository cheepRepository)
+        {
+            _authorRepository = authorRepository;
+            _cheepRepository = cheepRepository;
+        }
+
         /// <summary>
         /// 
         /// </summary>

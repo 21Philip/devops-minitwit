@@ -24,6 +24,8 @@ using Org.OpenAPITools.Authentication;
 using Org.OpenAPITools.Filters;
 using Org.OpenAPITools.OpenApi;
 using Org.OpenAPITools.Formatters;
+using Chirp.Core;
+using Chirp.Infrastructure;
 
 namespace Org.OpenAPITools
 {
@@ -99,6 +101,8 @@ namespace Org.OpenAPITools
                 });
                 services
                     .AddSwaggerGenNewtonsoftSupport();
+                services.AddScoped<ICheepRepository, CheepRepository>();
+                services.AddScoped<IAuthorRepository, AuthorRepository>();
         }
 
         /// <summary>
