@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) [2024] [Johan Ingeholm, Noa Bracha Andersen, Cecilie Wall Elkjaer, Freya Nørlund Wentzel, Jacques Puvis de Chavannes]
+Copyright (c) [2024] [Johan Ingeholm, Cecilie Wall Elkjaer, Marcus Frandsen, Benjamin Ormstrup & Phillip Rosenhagen]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
