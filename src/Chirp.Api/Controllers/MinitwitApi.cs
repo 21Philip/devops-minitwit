@@ -20,7 +20,7 @@ using Newtonsoft.Json;
 using Org.OpenAPITools.Attributes;
 using Org.OpenAPITools.Models;
 
-namespace Org.OpenAPITools.Controllers
+namespace Chirp.API.Controllers
 { 
     /// <summary>
     /// 
