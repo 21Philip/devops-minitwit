@@ -14,7 +14,7 @@ public class PublicModel : PageModel
     public readonly ICheepRepository CheepRepository;
     public readonly SignInManager<Author> SignInManager;
     public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
-    public  int PageSize = 32;
+    public int PageSize = 32;
     public int PageNumber { get; set; }
     [BindProperty]
     [StringLength(160, ErrorMessage = "Cheep cannot be more than 160 characters.")]
@@ -40,21 +40,21 @@ public class PublicModel : PageModel
     public async Task<ActionResult> OnGet()
     {
         //check if logged-in user exists in database, otherwise log out and redirect to public timeline
-        if (SignInManager.IsSignedIn(User) 
-            && !string.IsNullOrEmpty(User.Identity?.Name) 
+        if (SignInManager.IsSignedIn(User)
+            && !string.IsNullOrEmpty(User.Identity?.Name)
             && await AuthorRepository.FindIfAuthorExistsWithEmail(User.Identity.Name) == false)
         {
             await SignInManager.SignOutAsync();
-            var baseUrl = $"{Request.Scheme}://{Request.Host}"; 
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
             return Redirect($"{baseUrl}/");
         }
-        
+
         //default to page number 1 if no page is specified
         var pageQuery = Request.Query["page"];
         PageNumber = int.TryParse(pageQuery, out int page) ? page : 1;
-        
+
         Cheeps = await CheepRepository.GetCheeps(PageNumber, PageSize);
-        
+
         if (User.Identity?.IsAuthenticated == true)
         {
             var authorEmail = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -66,7 +66,7 @@ public class PublicModel : PageModel
         }
         return Page();
     }
-    
+
     /// <summary>
     /// Handles POST requests to publish a new cheep by the logged-in user.
     /// </summary>
@@ -79,7 +79,7 @@ public class PublicModel : PageModel
         {
             throw new ArgumentException("Author name cannot be null or empty.");
         }
-        
+
         var author = await AuthorRepository.FindAuthorWithEmail(authorName);
         var cheep = new Cheep
         {
@@ -88,12 +88,12 @@ public class PublicModel : PageModel
             TimeStamp = DateTime.Now,
             Author = author
         };
-        
+
         await CheepRepository.SaveCheep(cheep, author);
-        
+
         return RedirectToPage();
     }
-    
+
     /// <summary>
     /// Allows the logged-in user to follow another user.
     /// </summary>
@@ -108,20 +108,20 @@ public class PublicModel : PageModel
         {
             throw new ArgumentException("Author name cannot be null or empty.");
         }
-        
+
         var author = await AuthorRepository.FindAuthorWithEmail(authorName);
-        
+
         //Finds the author that the logged in author wants to follow
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
-        
+
         await AuthorRepository.FollowUserAsync(author.AuthorId, followAuthor.AuthorId);
-        
+
         //updates the current author's list of followed authors
         FollowedAuthors = await AuthorRepository.GetFollowing(author.AuthorId);
-        
+
         return RedirectToPage();
     }
-    
+
     /// <summary>
     /// Allows the logged-in user to unfollow another user.
     /// </summary>
@@ -136,17 +136,17 @@ public class PublicModel : PageModel
         {
             throw new ArgumentException("Author name cannot be null or empty.");
         }
-        
+
         var author = await AuthorRepository.FindAuthorWithEmail(authorName);
-        
+
         //Finds the author that the logged in author wants to follow
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
-        
+
         await AuthorRepository.UnFollowUserAsync(author.AuthorId, followAuthor.AuthorId);
-        
+
         //updates the current author's list of followed authors
         FollowedAuthors = await AuthorRepository.GetFollowing(author.AuthorId);
-        
+
         return RedirectToPage();
     }
 
@@ -168,18 +168,18 @@ public class PublicModel : PageModel
         }
 
         var author = await AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await CheepRepository.FindCheep(text,timeStamp, cheepAuthorName);
-        
+        var cheep = await CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
+
         if (cheep == null)
         {
             throw new ArgumentException("Cheep could not be found.");
         }
-        
+
         // Adds the cheep to the author's list of liked cheeps
         await CheepRepository.LikeCheep(cheep, author);
-        
+
         LikedCheeps = await AuthorRepository.GetLikedCheeps(author.AuthorId);
-        
+
         return RedirectToPage();
     }
 
@@ -201,21 +201,21 @@ public class PublicModel : PageModel
         }
 
         var author = await AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await CheepRepository.FindCheep(text,timeStamp,cheepAuthorName);
-        
+        var cheep = await CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
+
         if (cheep == null)
         {
             throw new ArgumentException("Cheep could not be found.");
         }
-        
+
         await CheepRepository.UnLikeCheep(cheep, author);
-        
+
         LikedCheeps = await AuthorRepository.GetLikedCheeps(author.AuthorId);
-        
+
         return RedirectToPage();
     }
 
-    
+
     /// <summary>
     /// Determines whether the logged-in user has liked a specific cheep.
     /// </summary>
@@ -233,13 +233,13 @@ public class PublicModel : PageModel
         }
 
         var author = await AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await CheepRepository.FindCheep(text,timeStamp,cheepAuthorName);
-        
+        var cheep = await CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
+
         if (cheep == null)
         {
             throw new ArgumentException("Cheep could not be found.");
         }
-        
+
         return await CheepRepository.DoesUserLikeCheep(cheep, author);
     }
 }

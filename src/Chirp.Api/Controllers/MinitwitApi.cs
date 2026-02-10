@@ -22,13 +22,13 @@ using Org.OpenAPITools.Models;
 using Chirp.Infrastructure;
 
 namespace Chirp.API.Controllers
-{ 
+{
     /// <summary>
     /// 
     /// </summary>
     [ApiController]
     public class MinitwitApiController : ControllerBase
-    { 
+    {
         private readonly IAuthorRepository _authorRepository;
         private readonly ICheepRepository _cheepRepository;
 
@@ -58,7 +58,7 @@ namespace Chirp.API.Controllers
         [SwaggerOperation("GetFollow")]
         [SwaggerResponse(statusCode: 200, type: typeof(FollowsResponse), description: "Success")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult GetFollow([FromRoute (Name = "username")][Required]string username, [FromHeader (Name = "Authorization")][Required()]string authorization, [FromQuery (Name = "latest")]int? latest, [FromQuery (Name = "no")]int? no)
+        public virtual IActionResult GetFollow([FromRoute(Name = "username")][Required] string username, [FromHeader(Name = "Authorization")][Required()] string authorization, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -70,7 +70,7 @@ namespace Chirp.API.Controllers
             string exampleJson = null;
             exampleJson = "{\n  \"follows\" : [ \"Helge\", \"John\" ]\n}";
             exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-            
+
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<FollowsResponse>(exampleJson)
             : default;
@@ -100,7 +100,7 @@ namespace Chirp.API.Controllers
             string exampleJson = null;
             exampleJson = "{\n  \"latest\" : 0\n}";
             exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-            
+
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<LatestValue>(exampleJson)
             : default;
@@ -123,7 +123,7 @@ namespace Chirp.API.Controllers
         [SwaggerOperation("GetMessages")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Message>), description: "Success")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult GetMessages([FromHeader (Name = "Authorization")][Required()]string authorization, [FromQuery (Name = "latest")]int? latest, [FromQuery (Name = "no")]int? no)
+        public virtual IActionResult GetMessages([FromHeader(Name = "Authorization")][Required()] string authorization, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -133,7 +133,7 @@ namespace Chirp.API.Controllers
             string exampleJson = null;
             exampleJson = "[ {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n}, {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n} ]";
             exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-            
+
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<List<Message>>(exampleJson)
             : default;
@@ -158,7 +158,7 @@ namespace Chirp.API.Controllers
         [SwaggerOperation("GetMessagesPerUser")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Message>), description: "Success")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult GetMessagesPerUser([FromRoute (Name = "username")][Required]string username, [FromHeader (Name = "Authorization")][Required()]string authorization, [FromQuery (Name = "latest")]int? latest, [FromQuery (Name = "no")]int? no)
+        public virtual IActionResult GetMessagesPerUser([FromRoute(Name = "username")][Required] string username, [FromHeader(Name = "Authorization")][Required()] string authorization, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -170,7 +170,7 @@ namespace Chirp.API.Controllers
             string exampleJson = null;
             exampleJson = "[ {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n}, {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n} ]";
             exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-            
+
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<List<Message>>(exampleJson)
             : default;
@@ -195,7 +195,7 @@ namespace Chirp.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostFollow")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult PostFollow([FromRoute (Name = "username")][Required]string username, [FromHeader (Name = "Authorization")][Required()]string authorization, [FromBody]FollowAction payload, [FromQuery (Name = "latest")]int? latest)
+        public virtual IActionResult PostFollow([FromRoute(Name = "username")][Required] string username, [FromHeader(Name = "Authorization")][Required()] string authorization, [FromBody] FollowAction payload, [FromQuery(Name = "latest")] int? latest)
         {
 
             //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -224,7 +224,7 @@ namespace Chirp.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostMessagesPerUser")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult PostMessagesPerUser([FromRoute (Name = "username")][Required]string username, [FromHeader (Name = "Authorization")][Required()]string authorization, [FromBody]PostMessage payload, [FromQuery (Name = "latest")]int? latest)
+        public virtual IActionResult PostMessagesPerUser([FromRoute(Name = "username")][Required] string username, [FromHeader(Name = "Authorization")][Required()] string authorization, [FromBody] PostMessage payload, [FromQuery(Name = "latest")] int? latest)
         {
 
             //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -249,7 +249,7 @@ namespace Chirp.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostRegister")]
         [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Bad Request | Possible reasons:  - missing username  - invalid email  - password missing  - username already taken")]
-        public virtual IActionResult PostRegister([FromBody]RegisterRequest payload, [FromQuery (Name = "latest")]int? latest)
+        public virtual IActionResult PostRegister([FromBody] RegisterRequest payload, [FromQuery(Name = "latest")] int? latest)
         {
 
             //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...

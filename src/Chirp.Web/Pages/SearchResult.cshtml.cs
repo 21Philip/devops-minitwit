@@ -15,12 +15,12 @@ namespace Chirp.Web.Pages
         public string? SearchWord { get; set; }
         public List<AuthorDTO> AuthorDTOs { get; set; } = new List<AuthorDTO>();
 
-        
+
         public SearchResultsModel(IAuthorRepository authorRepository)
         {
             _authorRepository = authorRepository;
         }
-        
+
         /// <summary>
         /// Handles the GET request to search authors based on the search input.
         /// </summary>
@@ -29,7 +29,7 @@ namespace Chirp.Web.Pages
             if (!string.IsNullOrEmpty(SearchWord))
             {
                 AuthorDTOs = await _authorRepository.SearchAuthorsAsync(SearchWord);
-                
+
             }
         }
     }

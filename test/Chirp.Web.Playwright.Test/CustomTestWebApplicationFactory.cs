@@ -127,7 +127,7 @@ public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>
         testHost.Start();
         return testHost;
     }
-    
+
     protected override void Dispose(bool disposing)
     {
         _host?.StopAsync().Wait();

@@ -12,7 +12,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
 {
     public const string AuthenticationScheme = "Identity.Application";
 
-    public TestAuthenticationHandler (
+    public TestAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder)

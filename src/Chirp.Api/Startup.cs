@@ -58,7 +58,8 @@ namespace Org.OpenAPITools
             // Add framework services.
             services
                 // Don't need the full MVC stack for an API, see https://andrewlock.net/comparing-startup-between-the-asp-net-core-3-templates/
-                .AddControllers(options => {
+                .AddControllers(options =>
+                {
                     options.InputFormatters.Insert(0, new InputFormatterStream());
                 })
                 .AddNewtonsoftJson(opts =>
@@ -73,7 +74,7 @@ namespace Org.OpenAPITools
                 .AddSwaggerGen(c =>
                 {
                     c.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
-                    
+
                     c.SwaggerDoc("1.0", new OpenApiInfo
                     {
                         Title = "Minitwit API",
@@ -99,10 +100,9 @@ namespace Org.OpenAPITools
                     // Use [ValidateModelState] on Actions to actually validate it in C# as well!
                     c.OperationFilter<GeneratePathParamsValidationFilter>();
                 });
-                services
-                    .AddSwaggerGenNewtonsoftSupport();
-                services.AddScoped<ICheepRepository, CheepRepository>();
-                services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddSwaggerGenNewtonsoftSupport();
+            services.AddScoped<ICheepRepository, CheepRepository>();
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
         }
 
         /// <summary>

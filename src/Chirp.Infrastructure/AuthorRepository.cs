@@ -27,7 +27,7 @@ namespace Chirp.Infrastructure
             DbContext = dbContext;
             SQLitePCL.Batteries.Init();
         }
-        
+
         /// <summary>
         /// Retrieves an author along with their relationships (e.g., followers, followed authors, liked Cheeps) using a username.
         /// </summary>
@@ -67,7 +67,7 @@ namespace Chirp.Infrastructure
 
             return author;
         }
-        
+
         /// <summary>
         /// Checks whether an author exists with the specified email.
         /// </summary>
@@ -83,8 +83,8 @@ namespace Chirp.Infrastructure
 
             return true;
         }
-        
-        
+
+
         public async Task<Author> FindAuthorWithId(int authorId)
         {
             var author = await DbContext.Authors.FirstOrDefaultAsync(author => author.AuthorId == authorId);
@@ -95,7 +95,7 @@ namespace Chirp.Infrastructure
 
             return author;
         }
-        
+
         /// <summary>
         /// Adds a follower-followed relationship between two authors.
         /// </summary>
@@ -113,7 +113,7 @@ namespace Chirp.Infrastructure
             var follower = await DbContext.Authors.SingleOrDefaultAsync(a => a.AuthorId == followerId);
             //the user that the logged in user wants to follow
             var followed = await DbContext.Authors.SingleOrDefaultAsync(a => a.AuthorId == followedId);
-            
+
             if (follower == null || follower.Name == null)
             {
                 throw new InvalidOperationException("Follower or follower's name is null.");
@@ -123,7 +123,7 @@ namespace Chirp.Infrastructure
             {
                 throw new InvalidOperationException("Followed author or followed author's name is null.");
             }
-            
+
             if (!await IsFollowingAsync(followerId, followedId))
             {
                 follower.FollowedAuthors?.Add(followed);
@@ -144,10 +144,10 @@ namespace Chirp.Infrastructure
         {
             // The logged in Author
             var follower = await DbContext.Authors
-                .Include(a => a.FollowedAuthors) 
+                .Include(a => a.FollowedAuthors)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(a => a.AuthorId == followerId);
-        
+
             // The author whom the logged in author is unfollowing
             var followed = await DbContext.Authors
                 .SingleOrDefaultAsync(a => a.AuthorId == followedId);
@@ -161,7 +161,7 @@ namespace Chirp.Infrastructure
                 }
             }
         }
-        
+
         /// <summary>
         /// Checks if one user is following another.
         /// </summary>
@@ -177,7 +177,7 @@ namespace Chirp.Infrastructure
 
             return loggedInUser?.FollowedAuthors?.Any(f => f.AuthorId == followedId) ?? false;
         }
-        
+
         /// <summary>
         /// Retrieves the list of authors a specific user is following.
         /// </summary>
@@ -217,7 +217,7 @@ namespace Chirp.Infrastructure
             }
             return user.LikedCheeps;
         }
-        
+
         /// <summary>
         /// Searches for authors based on a name fragment.
         /// </summary>

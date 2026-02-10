@@ -27,7 +27,7 @@ namespace Chirp.Infrastructure.Test
                 HandleCookies = true
             });
         }
-        
+
 
         [Fact]
         public async Task CanAccessHomePage()
@@ -46,7 +46,7 @@ namespace Chirp.Infrastructure.Test
             response.EnsureSuccessStatusCode();
         }
 
-        
+
         [Fact]
         public async Task FindTimelineByAuthor()
         {
@@ -59,14 +59,14 @@ namespace Chirp.Infrastructure.Test
             Assert.Contains("Jacqualine", content);
         }
 
-        
+
         [Fact]
         public async Task CanCreateUserAndFindUser()
         {
             using var scope = _factory.Services.CreateScope();
             var services = scope.ServiceProvider;
             var dbContext = services.GetRequiredService<CheepDBContext>();
-            
+
             var testAuthor1 = new Author
             {
                 Name = "Lars McKoy11",
@@ -82,9 +82,9 @@ namespace Chirp.Infrastructure.Test
                 Author = testAuthor1,
                 AuthorId = 1
             };
-            
+
             testAuthor1.Cheeps.Add(TestCheep);
-            
+
 
             // Add the new author to the database
             await dbContext.Authors.AddAsync(testAuthor1);
@@ -101,13 +101,13 @@ namespace Chirp.Infrastructure.Test
             Assert.Contains("Chirp!", content);
             Assert.Contains("Lars", content);
         }
-        
-        
+
+
         [Fact]
         public async Task UserCanSearchForAuthors()
         {
             string SearchWord = "jacq";
-            
+
             HttpResponseMessage response = await _client.GetAsync($"/SearchResults?searchWord=" + SearchWord);
             response.EnsureSuccessStatusCode();
             string content = await response.Content.ReadAsStringAsync();
@@ -116,17 +116,17 @@ namespace Chirp.Infrastructure.Test
 
             Assert.Contains("Jacq", content);
         }
-        
-        
+
+
         [Fact]
         public async Task IfNoAuthorsAreFoundShowNoAuthors()
         {
             using var scope = _factory.Services.CreateScope();
             var services = scope.ServiceProvider;
             var dbContext = services.GetRequiredService<CheepDBContext>();
-            
+
             string searchWord = "12345æøå";
-            
+
             HttpResponseMessage response = await _client.GetAsync($"/SearchResults?searchWord=" + searchWord);
             response.EnsureSuccessStatusCode();
             string content = await response.Content.ReadAsStringAsync();
@@ -134,15 +134,15 @@ namespace Chirp.Infrastructure.Test
             _output.WriteLine("content: {0}", content);
 
             List<Author> authors = dbContext.Authors.ToList();
-            
+
             //THis iterates over all the authors in the database, making sure that they are not in the content
             foreach (Author author in authors)
             {
                 Assert.DoesNotContain(author.Name, content);
             }
         }
-        
-        
+
+
         [Fact]
         public async Task IfOnFirstPageCantGoToPreviousPage()
         {
@@ -151,7 +151,7 @@ namespace Chirp.Infrastructure.Test
             string content = await response.Content.ReadAsStringAsync();
 
             _output.WriteLine("content: {0}", content);
-            
+
             Assert.DoesNotContain("Previous", content);
         }
 
@@ -163,10 +163,10 @@ namespace Chirp.Infrastructure.Test
             string content = await response.Content.ReadAsStringAsync();
 
             _output.WriteLine("content: {0}", content);
-            
+
             Assert.Contains("Next", content);
         }
-        
+
         [Fact]
         public async Task IfOnSecondPageCanGoToNextAndPreviousPage()
         {
@@ -175,25 +175,25 @@ namespace Chirp.Infrastructure.Test
             string content = await response.Content.ReadAsStringAsync();
 
             _output.WriteLine("content: {0}", content);
-            
+
             Assert.Contains("Next", content);
             Assert.Contains("Previous", content);
 
-            
+
         }
-        
+
         [Fact]
         public async Task IfOnLastPageCantGoToNextPage()
         {
-            
+
             HttpResponseMessage response = await _client.GetAsync($"/?page=21");
             response.EnsureSuccessStatusCode();
             string content = await response.Content.ReadAsStringAsync();
 
             _output.WriteLine("content: {0}", content);
-            
+
             Assert.DoesNotContain("Next", content);
-            
+
         }
 
         [Fact]
@@ -208,7 +208,7 @@ namespace Chirp.Infrastructure.Test
 
 
             _output.WriteLine("content: {0}", content);
-            
+
             Assert.DoesNotContain("Follow", content);
             Assert.DoesNotContain("Unfollow", content);
             Assert.DoesNotContain("Follow", content2);

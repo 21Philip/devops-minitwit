@@ -95,10 +95,10 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
                 }
             }
 
-            var authorName = User.FindFirst("Name")?.Value ?? "User";                                                                                   
-                                                                                                                                            
+            var authorName = User.FindFirst("Name")?.Value ?? "User";
+
             var author = await _authorRepository.FindAuthorWithName(authorName);
-            
+
             if (author != null)
             {
                 var cheepsToDelete = author.Cheeps.ToList();
@@ -108,10 +108,10 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
                 }
                 _context.Authors.Remove(author);
                 await _context.SaveChangesAsync();
-            } 
-            
+            }
+
             await _signInManager.SignOutAsync();
-            
+
             return Redirect("~/");
         }
     }

@@ -46,7 +46,7 @@ public class CustomWebApplicationFactory
                 var connection = container.GetRequiredService<DbConnection>();
                 options.UseSqlite(connection);
             });
-         
+
         });
 
         builder.UseEnvironment("Development");

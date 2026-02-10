@@ -12,7 +12,7 @@ public class UnitTestChirpInfrastructure : IAsyncLifetime
 {
     private SqliteConnection? _connection;
     private readonly ITestOutputHelper _output;
-    
+
     public UnitTestChirpInfrastructure(ITestOutputHelper output)
     {
         _output = output; // Assigning the output to the private field
@@ -27,9 +27,9 @@ public class UnitTestChirpInfrastructure : IAsyncLifetime
     public async Task DisposeAsync()
     {
         if (_connection != null)
-            {
-                await _connection.DisposeAsync();
-            }
+        {
+            await _connection.DisposeAsync();
+        }
     }
 
     private CheepDBContext CreateContext()
@@ -38,56 +38,56 @@ public class UnitTestChirpInfrastructure : IAsyncLifetime
         {
             throw new InvalidOperationException("Connection is null.");
         }
-    
+
         var options = new DbContextOptionsBuilder<CheepDBContext>()
-            .UseSqlite(_connection) 
+            .UseSqlite(_connection)
             .Options;
-    
+
         var context = new CheepDBContext(options);
-        context.Database.EnsureCreated(); 
+        context.Database.EnsureCreated();
         return context;
     }
 
 
-/*
-    [Fact]
-    public async Task UnitTestGetNonexistingAuthor()
-    {
-        await using var dbContext = CreateContext();
-        var _cheepRepository = new CheepRepository(new DBFacade(dbContext), dbContext);
+    /*
+        [Fact]
+        public async Task UnitTestGetNonexistingAuthor()
+        {
+            await using var dbContext = CreateContext();
+            var _cheepRepository = new CheepRepository(new DBFacade(dbContext), dbContext);
 
-        var author = await _cheepRepository.FindAuthorWithName("DrDontExist");
+            var author = await _cheepRepository.FindAuthorWithName("DrDontExist");
 
-        Assert.Null(author);
-    }
-    */
-    
+            Assert.Null(author);
+        }
+        */
+
     [Fact]
     public async Task UnitTestDuplicateAuthors()
     {
         await using var dbContext = CreateContext();
-        
+
         var testAuthor1 = new Author
         {
             Name = "Test Name",
             Email = "test@gmail.com",
             Cheeps = new List<Cheep>(),
         };
-        
+
         await dbContext.Authors.AddAsync(testAuthor1);
-        await dbContext.SaveChangesAsync(); 
+        await dbContext.SaveChangesAsync();
 
         var testAuthor2 = new Author
         {
-            Name = "Test Name", 
-            Email = "test@gmail.com", 
+            Name = "Test Name",
+            Email = "test@gmail.com",
             Cheeps = new List<Cheep>(),
         };
-        
+
         await Assert.ThrowsAsync<DbUpdateException>(async () =>
         {
             await dbContext.Authors.AddAsync(testAuthor2);
-            await dbContext.SaveChangesAsync(); 
+            await dbContext.SaveChangesAsync();
         });
     }
 
@@ -96,18 +96,18 @@ public class UnitTestChirpInfrastructure : IAsyncLifetime
     {
         await using var dbContext = CreateContext();
         DbInitializer.SeedDatabase(dbContext);
-        
+
         var testAuthor1 = new Author
         {
             Name = "Jacqualine Gilcoine",
             Email = "test@gmail.com",
             Cheeps = new List<Cheep>(),
         };
-        
+
         await Assert.ThrowsAsync<DbUpdateException>(async () =>
         {
             await dbContext.Authors.AddAsync(testAuthor1);
-            await dbContext.SaveChangesAsync(); 
+            await dbContext.SaveChangesAsync();
         });
     }
 
@@ -123,13 +123,13 @@ public class UnitTestChirpInfrastructure : IAsyncLifetime
             Email = "Jacqualine.Gilcoine@gmail.com",
             Cheeps = new List<Cheep>(),
         };
-        
+
         await Assert.ThrowsAsync<DbUpdateException>(async () =>
         {
             await dbContext.Authors.AddAsync(testAuthor1);
-            await dbContext.SaveChangesAsync(); 
+            await dbContext.SaveChangesAsync();
         });
     }
-  
-    
+
+
 }

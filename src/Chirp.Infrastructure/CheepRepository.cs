@@ -63,8 +63,8 @@ namespace Chirp.Infrastructure
                 .ToListAsync();
             return cheepsQuery;
         }
-        
-        
+
+
         /// <summary>
         /// Saves a new Cheep to the database and reloads the Author's Cheeps collection.
         /// </summary>
@@ -78,12 +78,12 @@ namespace Chirp.Infrastructure
             {
                 throw new InvalidOperationException("Author's Cheeps collection is null.");
             }
-            
+
             await _dbContext.Cheeps.AddAsync(cheep);
             await _dbContext.SaveChangesAsync();
             await _dbContext.Entry(author).Collection(a => a.Cheeps!).LoadAsync();
         }
-        
+
         /// <summary>
         /// Checks if the specified Author has liked the given Cheep.
         /// </summary>
@@ -111,8 +111,8 @@ namespace Chirp.Infrastructure
             return Task.FromResult(false);
         }
 
-        
-        
+
+
         /// <summary>
         /// Adds the specified Cheep to the Authors liked Cheeps collection and increments the Cheeps like count.
         /// </summary>
@@ -128,7 +128,7 @@ namespace Chirp.Infrastructure
             }
             await _dbContext.SaveChangesAsync();
         }
-        
+
         /// <summary>
         /// Removes the specified Cheep to the Authors liked Cheeps collection and decrements the Cheeps like count.
         /// </summary>
@@ -142,7 +142,7 @@ namespace Chirp.Infrastructure
                 author.LikedCheeps.Remove(cheep);
                 cheep.Likes -= 1;
             }
-            
+
             await _dbContext.SaveChangesAsync();
         }
 
@@ -163,11 +163,11 @@ namespace Chirp.Infrastructure
             {
                 throw new ArgumentException("Invalid timestamp format.");
             }
-            
+
             var cheeps = await _dbContext.Cheeps
                 .Include(c => c.Author)
                 .ToListAsync();
-            
+
             foreach (var cheep in cheeps)
             {
                 if (cheep.Text?.ToLower() == text.ToLower() && cheep.TimeStamp.ToString().ToLower() == parsedTimestamp.ToString().ToLower() && cheep.Author != null && cheep.Author.Name?.ToLower() == authorName.ToLower())
