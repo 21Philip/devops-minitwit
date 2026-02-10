@@ -26,6 +26,7 @@ using Org.OpenAPITools.OpenApi;
 using Org.OpenAPITools.Formatters;
 using Chirp.Core;
 using Chirp.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Org.OpenAPITools
 {
@@ -101,6 +102,8 @@ namespace Org.OpenAPITools
                     c.OperationFilter<GeneratePathParamsValidationFilter>();
                 });
             services.AddSwaggerGenNewtonsoftSupport();
+
+            services.AddDbContext<CheepDBContext>(options => options.UseSqlite("Data Source=/tmp/Chat.db")); //TODO: Hvordan fuck får jeg adgang til appsettings her
             services.AddScoped<ICheepRepository, CheepRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
         }
