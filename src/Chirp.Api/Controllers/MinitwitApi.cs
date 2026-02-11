@@ -229,7 +229,7 @@ namespace Chirp.API.Controllers
                     return NotFound();
                 }
 
-                await _authorRepository.FollowUserAsync(follower.AuthorId, unfollowee.AuthorId);
+                await _authorRepository.UnFollowUserAsync(follower.AuthorId, unfollowee.AuthorId);
                 return NoContent();
             }
 
@@ -297,20 +297,54 @@ namespace Chirp.API.Controllers
                 await _globalIntRepository.Put("latest", value);
             }
 
+            int id = _userManager.Users.Count() + 1;
             var user = new Author
             {
-                UserName = payload.Username,
                 Email = payload.Email,
+                UserName = payload.Email,
+                Name = payload.Username,
+                AuthorId = id,
+                Id = id,
+                Cheeps = [],
             };
 
-            var result = await _userManager.CreateAsync(user, payload.Pwd);
+            IdentityResult result = await _userManager.CreateAsync(user, payload.Pwd);
 
             if (result.Succeeded)
             {
                 return NoContent();
             }
 
-            return BadRequest();
+            return BadRequest(result.Errors);
+        }
+
+        /// <summary>
+        /// Deletes a user from the database. Currently only used for testing. 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <response code="204">No Content</response>
+        /// <response code="400">Bad Request</response>
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("/delete/{username}")]
+        [Consumes("application/json")]
+        [ValidateModelState]
+        public virtual async Task<IActionResult> Delete([FromRoute(Name = "username")][Required] string username)
+        {
+            Author? author = await _authorRepository.FindAuthorWithNameNullable(username);
+            if (author is null)
+            {
+                return NotFound();
+            }
+
+            IdentityResult result = await _userManager.DeleteAsync(author);
+            
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return BadRequest(result.Errors);
         }
     }
 }

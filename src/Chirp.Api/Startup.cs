@@ -131,8 +131,18 @@ namespace Org.OpenAPITools
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IGlobalIntRepository, GlobalIntRepository>();
 
-            // Identity for creation of accounts
-            services.AddDefaultIdentity<Author>().AddEntityFrameworkStores<CheepDBContext>();
+            // Identity for creation of accounts through the API. The tests uses
+            // weak passwords so we must override deafult settings to allow for
+            // this
+            services.AddDefaultIdentity<Author>(options => 
+            {
+                options.Password.RequiredLength = 1;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+            })
+            .AddEntityFrameworkStores<CheepDBContext>();
         }
 
         /// <summary>
