@@ -129,6 +129,7 @@ namespace Org.OpenAPITools
             services.AddDbContext<CheepDBContext>(options => options.UseSqlite("Data Source=/tmp/Chat.db")); //TODO: Hvordan fuck får jeg adgang til appsettings her
             services.AddScoped<ICheepRepository, CheepRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IGlobalIntRepository, GlobalIntRepository>();
         }
 
         /// <summary>

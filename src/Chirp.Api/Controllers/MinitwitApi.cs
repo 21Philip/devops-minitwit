@@ -35,14 +35,16 @@ namespace Chirp.API.Controllers
     {
         private readonly IAuthorRepository _authorRepository;
         private readonly ICheepRepository _cheepRepository;
+        private readonly IGlobalIntRepository _globalIntRepository;
 
         /// <summary>
         /// Constructor for MinitwitApiController. Dependency Injection of IAuthorRepository and ICheepRepository is used to access the data layer.
         /// </summary>
-        public MinitwitApiController(IAuthorRepository authorRepository, ICheepRepository cheepRepository)
+        public MinitwitApiController(IAuthorRepository authorRepository, ICheepRepository cheepRepository, IGlobalIntRepository globalIntRepository)
         {
             _authorRepository = authorRepository;
             _cheepRepository = cheepRepository;
+            _globalIntRepository = globalIntRepository;
         }
 
         /// <summary>
@@ -63,6 +65,11 @@ namespace Chirp.API.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual async Task<IActionResult> GetFollow([FromRoute(Name = "username")][Required] string username, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
+            if (latest is int value)
+            {
+                await _globalIntRepository.Put("latest", value);
+            }
+
             if (!await _authorRepository.FindIfAuthorExistsWithName(username))
             {
                 return NotFound();
@@ -90,22 +97,14 @@ namespace Chirp.API.Controllers
         [SwaggerOperation("GetLatestValue")]
         [SwaggerResponse(statusCode: 200, type: typeof(LatestValue), description: "Success")]
         [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Internal Server Error")]
-        public virtual IActionResult GetLatestValue()
+        public virtual async Task<IActionResult> GetLatestValue()
         {
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default);
-            //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(500, default);
-            string exampleJson = null;
-            exampleJson = "{\n  \"latest\" : 0\n}";
-            exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<LatestValue>(exampleJson)
-            : default;
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            if (await _globalIntRepository.Get("latest") is int value)
+            {
+                return Ok(value);
+            }
+            
+            return NotFound();
         }
 
         /// <summary>
