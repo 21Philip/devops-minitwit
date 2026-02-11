@@ -15,6 +15,8 @@ namespace Chirp.Infrastructure
 
         public DbSet<Author> Authors { get; set; }
 
+        public DbSet<GlobalInteger> GlobalIntegers { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CheepDBContext"/> class with specified options.
         /// </summary>
@@ -71,6 +73,11 @@ namespace Chirp.Infrastructure
             modelBuilder.Entity<Cheep>()
                 .Property(c => c.Text)
                 .HasMaxLength(160);
+            
+            // Limit the maximum length of GlobalInteger keys
+            modelBuilder.Entity<GlobalInteger>()
+                .Property(c => c.Key)
+                .HasMaxLength(32);
 
             base.OnModelCreating(modelBuilder);
         }
