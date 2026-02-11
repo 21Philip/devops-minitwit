@@ -161,6 +161,9 @@ namespace Org.OpenAPITools
                 app.UseHsts();
             }
 
+            // Check if database exists, otherwise create it. 
+            app.ApplicationServices.GetRequiredService<CheepDBContext>().Database.EnsureCreated();
+
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
             app.UseStaticFiles();

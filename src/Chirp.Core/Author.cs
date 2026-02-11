@@ -1,4 +1,5 @@
 using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,6 @@ namespace Chirp.Core
     /// </summary>
     public class Author : IdentityUser<int>
     {
-        public int AuthorId { get; set; }
         public string? Name { get; set; }
         [NotMapped]
         public ICollection<Cheep>? Cheeps { get; set; } = new List<Cheep>();

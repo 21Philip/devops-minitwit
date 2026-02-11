@@ -303,8 +303,8 @@ namespace Chirp.API.Controllers
                 Email = payload.Email,
                 UserName = payload.Email,
                 Name = payload.Username,
-                AuthorId = id,
-                Id = id,
+                //AuthorId = id,
+                //Id = id,
                 Cheeps = [],
             };
 
