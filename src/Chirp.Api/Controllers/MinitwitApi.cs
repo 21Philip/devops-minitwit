@@ -29,6 +29,7 @@ namespace Chirp.API.Controllers
     /// <summary>
     /// 
     /// </summary>
+    [Authorize(Policy = "SimulatorAuth")]
     [ApiController]
     public class MinitwitApiController : ControllerBase
     {
@@ -49,7 +50,6 @@ namespace Chirp.API.Controllers
         /// </summary>
         /// <remarks>Get list of users followed by the given user.  - Query param &#x60;?no&#x3D;&#x60; limits result count. - Optionally updates a &#39;latest&#39; global value via &#x60;?latest&#x3D;&#x60; query param.</remarks>
         /// <param name="username"></param>
-        /// <param name="authorization">Authorization string of the form &#x60;Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh&#x60;. Used to authenticate as simulator</param>
         /// <param name="latest">Optional: &#x60;latest&#x60; value to update</param>
         /// <param name="no">Optional: &#x60;no&#x60; limits result count</param>
         /// <response code="200">Success</response>
@@ -61,7 +61,7 @@ namespace Chirp.API.Controllers
         [SwaggerOperation("GetFollow")]
         [SwaggerResponse(statusCode: 200, type: typeof(FollowsResponse), description: "Success")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual async Task<IActionResult> GetFollow([FromRoute(Name = "username")][Required] string username, [FromHeader(Name = "Authorization")][Required()] string authorization, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
+        public virtual async Task<IActionResult> GetFollow([FromRoute(Name = "username")][Required] string username, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
             if (!await _authorRepository.FindIfAuthorExistsWithName(username))
             {

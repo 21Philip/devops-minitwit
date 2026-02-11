@@ -103,6 +103,19 @@ namespace Org.OpenAPITools
                 });
             services.AddSwaggerGenNewtonsoftSupport();
 
+            // Add authorization for the simulator
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("SimulatorAuth", policy => 
+                    policy.Requirements.Add(new ApiKeyRequirement(
+                        ["Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"], 
+                        "SimulatorAuth"
+                    ))
+                );
+            });
+            services.AddSingleton<IAuthorizationHandler, ApiKeyRequirementHandler>();
+
+            // Setup data layer
             services.AddDbContext<CheepDBContext>(options => options.UseSqlite("Data Source=/tmp/Chat.db")); //TODO: Hvordan fuck får jeg adgang til appsettings her
             services.AddScoped<ICheepRepository, CheepRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
@@ -142,6 +155,7 @@ namespace Org.OpenAPITools
                     // c.SwaggerEndpoint("/openapi-original.json", "Minitwit API Original");
                 });
             app.UseRouting();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();
