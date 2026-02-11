@@ -101,7 +101,7 @@ namespace Chirp.API.Controllers
         {
             if (await _globalIntRepository.Get("latest") is int value)
             {
-                return Ok(value);
+                return Ok(new LatestValue {Latest = value});
             }
             
             return NotFound();

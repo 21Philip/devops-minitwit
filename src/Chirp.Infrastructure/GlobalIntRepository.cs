@@ -22,7 +22,7 @@ namespace Chirp.Infrastructure
         }
 
         /// <summary>
-        /// Returns the integer assoiciated with the given key.
+        /// Returns the integer associated with the given key.
         /// </summary>
         /// <param name="key">The key to search by.</param>
         /// <returns>An integer if key was found, otherwise null</returns>
@@ -43,8 +43,17 @@ namespace Chirp.Infrastructure
         /// <returns>An integer if key was found, otherwise null</returns>
         public async Task Put(string key, int value)
         {
-            var entity = new GlobalInteger { Key = key, Value = value };
-            _dbContext.GlobalIntegers.Update(entity);
+            var existing = await _dbContext.GlobalIntegers.FirstOrDefaultAsync(i => i.Key == key);
+            if (existing != null)
+            {
+                existing.Value = value;
+            } 
+            else
+            {
+                var entity = new GlobalInteger { Key = key, Value = value };
+                await _dbContext.GlobalIntegers.AddAsync(entity);
+            }
+            
             await _dbContext.SaveChangesAsync();
         }
     }
