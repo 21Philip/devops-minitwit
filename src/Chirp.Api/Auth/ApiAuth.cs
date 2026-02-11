@@ -10,6 +10,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace Chirp.Api.Auth
 {
@@ -20,7 +21,7 @@ namespace Chirp.Api.Auth
     public class ApiAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         /// <summary>
-        /// Constructor
+        /// 
         /// </summary>
         public ApiAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -31,12 +32,12 @@ namespace Chirp.Api.Auth
         }
 
         /// <summary>
-        /// Handler
+        /// 
         /// </summary>
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            // Create a generic identity - actual validation happens in authorization
-            var claims = new[] { new Claim(ClaimTypes.Name, "ApiKeyUser") };
+            // Create a generic identity. Actual validation happens in authorization
+            var claims = new[] { new Claim(ClaimTypes.Name, "ApiUser") };
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
@@ -73,7 +74,7 @@ namespace Chirp.Api.Auth
     }
 
     /// <summary>
-    /// Enforce that an api key is present.
+    /// Authorization handler. Enforces that the correct api key is present.
     /// </summary>
     public class ApiAuthorizationHandler : AuthorizationHandler<ApiKeyRequirement>
     {
@@ -86,8 +87,8 @@ namespace Chirp.Api.Auth
 
         private void SucceedRequirementIfApiKeyPresentAndValid(AuthorizationHandlerContext context, ApiKeyRequirement requirement)
         {
-            if (context.Resource is not AuthorizationFilterContext mvcContext) return;
-            var headers = mvcContext.HttpContext.Request.Headers;
+            if (context.Resource is not HttpContext httpContext) return;
+            var headers = httpContext.Request.Headers;
 
             if (!headers.TryGetValue("Authorization", out var values)) return;
             string? apiKey = values.FirstOrDefault();

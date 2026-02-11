@@ -27,6 +27,7 @@ using Org.OpenAPITools.Formatters;
 using Chirp.Core;
 using Chirp.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Org.OpenAPITools
 {
@@ -103,6 +104,15 @@ namespace Org.OpenAPITools
                 });
             services.AddSwaggerGenNewtonsoftSupport();
 
+            // Add dummy authentication. Necessary for using the authorization pipeline.
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "ApiScheme";
+                options.DefaultChallengeScheme = "ApiScheme";
+            })
+            .AddScheme<AuthenticationSchemeOptions, ApiAuthenticationHandler>("ApiScheme", null);
+
+
             // Add authorization for the simulator
             services.AddAuthorization(options =>
             {
@@ -155,6 +165,7 @@ namespace Org.OpenAPITools
                     // c.SwaggerEndpoint("/openapi-original.json", "Minitwit API Original");
                 });
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
                 {
