@@ -88,8 +88,7 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
             user.Email = Input.Email;
             user.Name = Input.Username;
-            user.AuthorId = await _userManager.Users.CountAsync() + 1;
-            user.Id = user.AuthorId;
+            user.Id = await _userManager.Users.CountAsync() + 1;
             user.Cheeps = new List<Cheep>();
             user.EmailConfirmed = true;
 

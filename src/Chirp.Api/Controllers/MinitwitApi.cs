@@ -81,7 +81,7 @@ namespace Chirp.API.Controllers
                 return NotFound();
             }
 
-            IEnumerable<Author> follows = await _authorRepository.GetFollowing(author.AuthorId);
+            IEnumerable<Author> follows = await _authorRepository.GetFollowing(author.Id);
             IEnumerable<string> names = follows.Take(no ?? int.MaxValue).Select(f => f.Name);
 
             return Ok(new FollowsResponse
@@ -171,7 +171,7 @@ namespace Chirp.API.Controllers
                 return NotFound();
             }
 
-            IEnumerable<Cheep> cheeps = await _cheepRepository.GetCheepsByAuthor(author.AuthorId);
+            IEnumerable<Cheep> cheeps = await _cheepRepository.GetCheepsByAuthor(author.Id);
             return Ok(cheeps.Select(c => new Message
             {
                 Content = c.Text,
@@ -217,7 +217,7 @@ namespace Chirp.API.Controllers
                     return NotFound();
                 }
 
-                await _authorRepository.FollowUserAsync(follower.AuthorId, followee.AuthorId);
+                await _authorRepository.FollowUserAsync(follower.Id, followee.Id);
                 return NoContent();
             }
 
@@ -229,7 +229,7 @@ namespace Chirp.API.Controllers
                     return NotFound();
                 }
 
-                await _authorRepository.UnFollowUserAsync(follower.AuthorId, unfollowee.AuthorId);
+                await _authorRepository.UnFollowUserAsync(follower.Id, unfollowee.Id);
                 return NoContent();
             }
 
@@ -266,7 +266,7 @@ namespace Chirp.API.Controllers
 
             var cheep = new Cheep
             {
-                AuthorId = author.AuthorId,
+                AuthorId = author.Id,
                 Text = payload.Content,
                 TimeStamp = DateTime.Now,
                 Author = author
@@ -297,14 +297,11 @@ namespace Chirp.API.Controllers
                 await _globalIntRepository.Put("latest", value);
             }
 
-            int id = _userManager.Users.Count() + 1;
             var user = new Author
             {
                 Email = payload.Email,
                 UserName = payload.Email,
                 Name = payload.Username,
-                //AuthorId = id,
-                //Id = id,
                 Cheeps = [],
             };
 

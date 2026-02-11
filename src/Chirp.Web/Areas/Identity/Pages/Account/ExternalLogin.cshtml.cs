@@ -105,7 +105,7 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
                 // Set user properties from external provider
                 user.Name = info.Principal.Identity.Name ?? "Unknown";
-                user.AuthorId = await _userManager.Users.CountAsync() + 1;
+                user.Id = await _userManager.Users.CountAsync() + 1;
 
                 var createUserResult = await _userManager.CreateAsync(user);
                 if (createUserResult.Succeeded)
@@ -164,7 +164,7 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
                 // Set Name from external provider if available
                 user.Name = info.Principal.Identity.Name ?? "Unknown";
-                user.AuthorId = await _userManager.Users.CountAsync() + 1;
+                user.Id = await _userManager.Users.CountAsync() + 1;
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)

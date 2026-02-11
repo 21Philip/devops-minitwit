@@ -145,14 +145,14 @@ public class UnitTestAuthorRepository : IAsyncLifetime
         dbContext.Authors.Add(testAuthor2);
         await dbContext.SaveChangesAsync();
         //Act - testAuthor1 follows testAuthor2
-        await authorRepository.FollowUserAsync(testAuthor1.AuthorId, testAuthor2.AuthorId);
+        await authorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
 
         //assert
         Assert.NotNull(testAuthor1);
         Assert.NotNull(testAuthor2);
         Assert.NotNull(testAuthor1.FollowedAuthors);
         Assert.NotNull(testAuthor2.Followers);
-        Assert.True(await authorRepository.IsFollowingAsync(testAuthor1.AuthorId, testAuthor2.AuthorId));
+        Assert.True(await authorRepository.IsFollowingAsync(testAuthor1.Id, testAuthor2.Id));
         Assert.Contains(testAuthor1, testAuthor2.Followers);
         Assert.Contains(testAuthor2, testAuthor1.FollowedAuthors);
 
@@ -183,10 +183,10 @@ public class UnitTestAuthorRepository : IAsyncLifetime
         dbContext.Authors.Add(testAuthor2);
         await dbContext.SaveChangesAsync();
         //Act - testAuthor1 follows testAuthor2
-        await authorRepository.FollowUserAsync(testAuthor1.AuthorId, testAuthor2.AuthorId);
+        await authorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
 
-        await authorRepository.FollowUserAsync(testAuthor1.AuthorId, testAuthor2.AuthorId);
-        Assert.True(await authorRepository.IsFollowingAsync(testAuthor1.AuthorId, testAuthor2.AuthorId));
+        await authorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
+        Assert.True(await authorRepository.IsFollowingAsync(testAuthor1.Id, testAuthor2.Id));
     }
 
 
@@ -206,7 +206,7 @@ public class UnitTestAuthorRepository : IAsyncLifetime
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await authorRepository.FollowUserAsync(9999999, testAuthor.AuthorId);
+            await authorRepository.FollowUserAsync(9999999, testAuthor.Id);
         });
 
         Assert.Equal("Follower or follower's name is null.", exception.Message);
@@ -227,7 +227,7 @@ public class UnitTestAuthorRepository : IAsyncLifetime
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await authorRepository.FollowUserAsync(testAuthor.AuthorId, 99999);
+            await authorRepository.FollowUserAsync(testAuthor.Id, 99999);
         });
 
         Assert.Equal("Follower or follower's name is null.", exception.Message);
@@ -251,7 +251,7 @@ public class UnitTestAuthorRepository : IAsyncLifetime
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await authorRepository.FollowUserAsync(testAuthor.AuthorId, 888888);
+            await authorRepository.FollowUserAsync(testAuthor.Id, 888888);
         });
 
         Assert.Equal("Followed author or followed author's name is null.", exception.Message);
@@ -281,7 +281,7 @@ public class UnitTestAuthorRepository : IAsyncLifetime
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await authorRepository.FollowUserAsync(testAuthor.AuthorId, testAuthor2.AuthorId);
+            await authorRepository.FollowUserAsync(testAuthor.Id, testAuthor2.Id);
         });
 
         Assert.Equal("Followed author or followed author's name is null.", exception.Message);
@@ -319,9 +319,9 @@ public class UnitTestAuthorRepository : IAsyncLifetime
         await dbContext.SaveChangesAsync();
 
         //Act - testAuthor1 follows testAuthor2
-        await authorRepository.FollowUserAsync(testAuthor1.AuthorId, testAuthor2.AuthorId);
+        await authorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
         //testAuthor1 unfollows testAuthor2
-        await authorRepository.UnFollowUserAsync(testAuthor1.AuthorId, testAuthor2.AuthorId);
+        await authorRepository.UnFollowUserAsync(testAuthor1.Id, testAuthor2.Id);
 
         //assert
         Assert.NotNull(testAuthor1);
@@ -503,8 +503,8 @@ public class UnitTestAuthorRepository : IAsyncLifetime
         dbContext.Authors.Add(testAuthor2);
         await dbContext.SaveChangesAsync();
 
-        await authorRepository.FollowUserAsync(testAuthor1.AuthorId, testAuthor2.AuthorId);
-        List<Author> author1Following = await authorRepository.GetFollowing(testAuthor1.AuthorId);
+        await authorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
+        List<Author> author1Following = await authorRepository.GetFollowing(testAuthor1.Id);
 
         Assert.Contains(testAuthor2, author1Following);
     }
@@ -534,11 +534,11 @@ public class UnitTestAuthorRepository : IAsyncLifetime
 
         string authorName1 = "Malcolm Janski";
         Author author1 = await authorRepository.FindAuthorWithName(authorName1);
-        int authorId1 = author1.AuthorId;
+        int authorId1 = author1.Id;
 
         string authorName2 = "Jacqualine Gilcoine";
         Author author2 = await authorRepository.FindAuthorWithName(authorName2);
-        int authorId2 = author2.AuthorId;
+        int authorId2 = author2.Id;
 
         var testCheep = new Cheep
         {
@@ -552,7 +552,7 @@ public class UnitTestAuthorRepository : IAsyncLifetime
 
         await cheepRepository.LikeCheep(testCheep, author1);
         await dbContext.SaveChangesAsync();
-        List<Cheep> likedCheeps = await authorRepository.GetLikedCheeps(author1.AuthorId);
+        List<Cheep> likedCheeps = await authorRepository.GetLikedCheeps(author1.Id);
 
         Assert.Contains(testCheep, likedCheeps);
     }

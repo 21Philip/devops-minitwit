@@ -108,7 +108,7 @@ public class UnitTestCheepRepository : IAsyncLifetime
         var testCheep = new Cheep
         {
             Text = "Hello, my name is Nicola!",
-            AuthorId = testAuthor1.AuthorId,
+            AuthorId = testAuthor1.Id,
             Author = testAuthor1,
         };
 
@@ -117,7 +117,7 @@ public class UnitTestCheepRepository : IAsyncLifetime
         await dbContext.SaveChangesAsync();
 
         //Act
-        cheeps = await cheepRepository.GetCheepsByAuthor(testAuthor1.AuthorId);
+        cheeps = await cheepRepository.GetCheepsByAuthor(testAuthor1.Id);
         await dbContext.SaveChangesAsync();
 
         //Assert
@@ -142,7 +142,7 @@ public class UnitTestCheepRepository : IAsyncLifetime
         List<CheepDTO> cheeps = new List<CheepDTO>();
         string authorName = "Jacqualine Gilcoine";
         Author author = await authorRepository.FindAuthorWithName(authorName);
-        int authorId = author.AuthorId;
+        int authorId = author.Id;
 
         var cheep = new Cheep
         {
@@ -159,10 +159,10 @@ public class UnitTestCheepRepository : IAsyncLifetime
 
         Assert.NotNull(savedCheep);
         Assert.Equal("Hello, I am from France", savedCheep.Text);
-        Assert.Equal(author.AuthorId, savedCheep.AuthorId);
+        Assert.Equal(author.Id, savedCheep.Id);
 
         // Check that the author's cheeps collection is loaded
-        var updatedAuthor = await dbContext.Authors.FindAsync(author.AuthorId);
+        var updatedAuthor = await dbContext.Authors.FindAsync(author.Id);
         Assert.NotNull(updatedAuthor);
         Assert.NotNull(updatedAuthor.Cheeps);
         Assert.Contains(updatedAuthor.Cheeps, c => c.Text == "Hello, I am from France");

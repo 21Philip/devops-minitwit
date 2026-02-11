@@ -100,7 +100,7 @@ namespace Chirp.Infrastructure
 
         public async Task<Author> FindAuthorWithId(int authorId)
         {
-            var author = await DbContext.Authors.FirstOrDefaultAsync(author => author.AuthorId == authorId);
+            var author = await DbContext.Authors.FirstOrDefaultAsync(author => author.Id == authorId);
             if (author == null)
             {
                 throw new InvalidOperationException($"Author with ID {authorId} was not found.");
@@ -123,9 +123,9 @@ namespace Chirp.Infrastructure
         public async Task FollowUserAsync(int followerId, int followedId)
         {
             //logged in user
-            var follower = await DbContext.Authors.SingleOrDefaultAsync(a => a.AuthorId == followerId);
+            var follower = await DbContext.Authors.SingleOrDefaultAsync(a => a.Id == followerId);
             //the user that the logged in user wants to follow
-            var followed = await DbContext.Authors.SingleOrDefaultAsync(a => a.AuthorId == followedId);
+            var followed = await DbContext.Authors.SingleOrDefaultAsync(a => a.Id == followedId);
 
             if (follower == null || follower.Name == null)
             {
@@ -159,11 +159,11 @@ namespace Chirp.Infrastructure
             var follower = await DbContext.Authors
                 .Include(a => a.FollowedAuthors)
                 .AsSplitQuery()
-                .SingleOrDefaultAsync(a => a.AuthorId == followerId);
+                .SingleOrDefaultAsync(a => a.Id == followerId);
 
             // The author whom the logged in author is unfollowing
             var followed = await DbContext.Authors
-                .SingleOrDefaultAsync(a => a.AuthorId == followedId);
+                .SingleOrDefaultAsync(a => a.Id == followedId);
 
             if (follower != null && followed != null)
             {
@@ -186,9 +186,9 @@ namespace Chirp.Infrastructure
             var loggedInUser = await DbContext.Authors.Include(a => a.FollowedAuthors)
                 .Include(a => a.FollowedAuthors)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(a => a.AuthorId == followerId);
+                .FirstOrDefaultAsync(a => a.Id == followerId);
 
-            return loggedInUser?.FollowedAuthors?.Any(f => f.AuthorId == followedId) ?? false;
+            return loggedInUser?.FollowedAuthors?.Any(f => f.Id == followedId) ?? false;
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace Chirp.Infrastructure
             var follower = await DbContext.Authors.Include(a => a.FollowedAuthors)
                 .Include(a => a.FollowedAuthors)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(a => a.AuthorId == followerId);
+                .FirstOrDefaultAsync(a => a.Id == followerId);
             if (follower == null || follower.FollowedAuthors == null)
             {
                 throw new InvalidOperationException("Follower or followed authors is null.");
@@ -221,7 +221,7 @@ namespace Chirp.Infrastructure
             var user = await DbContext.Authors
                 .Include(a => a.LikedCheeps)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(a => a.AuthorId == userId);
+                .FirstOrDefaultAsync(a => a.Id == userId);
             // user.LikedCheeps cannot be null here because the query ensures it's at least an empty list
             // we added the check so the compiler doesn't give us a warning in the return statement
             if (user == null || user.LikedCheeps == null)

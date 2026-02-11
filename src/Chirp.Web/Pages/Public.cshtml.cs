@@ -61,7 +61,7 @@ public class PublicModel : PageModel
             if (!string.IsNullOrEmpty(authorEmail))
             {
                 var loggedInAuthor = await AuthorRepository.FindAuthorWithEmail(authorEmail);
-                FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.AuthorId);
+                FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.Id);
             }
         }
         return Page();
@@ -83,7 +83,7 @@ public class PublicModel : PageModel
         var author = await AuthorRepository.FindAuthorWithEmail(authorName);
         var cheep = new Cheep
         {
-            AuthorId = author.AuthorId,
+            AuthorId = author.Id,
             Text = Text,
             TimeStamp = DateTime.Now,
             Author = author
@@ -114,10 +114,10 @@ public class PublicModel : PageModel
         //Finds the author that the logged in author wants to follow
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
 
-        await AuthorRepository.FollowUserAsync(author.AuthorId, followAuthor.AuthorId);
+        await AuthorRepository.FollowUserAsync(author.Id, followAuthor.Id);
 
         //updates the current author's list of followed authors
-        FollowedAuthors = await AuthorRepository.GetFollowing(author.AuthorId);
+        FollowedAuthors = await AuthorRepository.GetFollowing(author.Id);
 
         return RedirectToPage();
     }
@@ -142,10 +142,10 @@ public class PublicModel : PageModel
         //Finds the author that the logged in author wants to follow
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
 
-        await AuthorRepository.UnFollowUserAsync(author.AuthorId, followAuthor.AuthorId);
+        await AuthorRepository.UnFollowUserAsync(author.Id, followAuthor.Id);
 
         //updates the current author's list of followed authors
-        FollowedAuthors = await AuthorRepository.GetFollowing(author.AuthorId);
+        FollowedAuthors = await AuthorRepository.GetFollowing(author.Id);
 
         return RedirectToPage();
     }
@@ -178,7 +178,7 @@ public class PublicModel : PageModel
         // Adds the cheep to the author's list of liked cheeps
         await CheepRepository.LikeCheep(cheep, author);
 
-        LikedCheeps = await AuthorRepository.GetLikedCheeps(author.AuthorId);
+        LikedCheeps = await AuthorRepository.GetLikedCheeps(author.Id);
 
         return RedirectToPage();
     }
@@ -210,7 +210,7 @@ public class PublicModel : PageModel
 
         await CheepRepository.UnLikeCheep(cheep, author);
 
-        LikedCheeps = await AuthorRepository.GetLikedCheeps(author.AuthorId);
+        LikedCheeps = await AuthorRepository.GetLikedCheeps(author.Id);
 
         return RedirectToPage();
     }
