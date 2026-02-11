@@ -20,7 +20,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using Org.OpenAPITools.Authentication;
+using Chirp.Api.Auth;
 using Org.OpenAPITools.Filters;
 using Org.OpenAPITools.OpenApi;
 using Org.OpenAPITools.Formatters;
@@ -113,7 +113,7 @@ namespace Org.OpenAPITools
                     ))
                 );
             });
-            services.AddSingleton<IAuthorizationHandler, ApiKeyRequirementHandler>();
+            services.AddSingleton<IAuthorizationHandler, ApiAuthorizationHandler>();
 
             // Setup data layer
             services.AddDbContext<CheepDBContext>(options => options.UseSqlite("Data Source=/tmp/Chat.db")); //TODO: Hvordan fuck får jeg adgang til appsettings her
