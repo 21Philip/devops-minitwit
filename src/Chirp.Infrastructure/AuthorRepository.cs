@@ -6,7 +6,7 @@ namespace Chirp.Infrastructure
     public interface IAuthorRepository
     {
         Task<Author> FindAuthorWithName(string userName);
-        Task<bool> FindIfAuthorExistsWithName(string userName);
+        Task<Author?> FindAuthorWithNameNullable(string userName);
         Task<Author> FindAuthorWithEmail(string email);
         Task<bool> IsFollowingAsync(int followerId, int followedId);
         Task<List<Author>> GetFollowing(int followerId);
@@ -54,14 +54,14 @@ namespace Chirp.Infrastructure
         }
 
         /// <summary>
-        /// Checks whether an author exists with the specified name.
+        /// Retrieves and author (without relationsships) by their username. May return null
         /// </summary>
-        /// <param name="name">The name to check.</param>
-        /// <returns><c>true</c> if an author exists with the specified name; otherwise, <c>false</c>.</returns>
-        public async Task<bool> FindIfAuthorExistsWithName(string userName)
+        /// <param name="userName">The username of the author to retrieve.</param>
+        /// <returns>An <see cref="Author"/> object if exists; otherwise <c>null</c>.</returns>
+        public async Task<Author?> FindAuthorWithNameNullable(string userName)
         {
             var author = await DbContext.Authors.FirstOrDefaultAsync(author => author.Name == userName);
-            return author != null;
+            return author;
         }
 
         /// <summary>

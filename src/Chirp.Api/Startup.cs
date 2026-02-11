@@ -130,6 +130,10 @@ namespace Org.OpenAPITools
             services.AddScoped<ICheepRepository, CheepRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IGlobalIntRepository, GlobalIntRepository>();
+
+            // Identity for creation of accounts
+            services.AddDefaultIdentity<Author>(options =>
+                options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CheepDBContext>();
         }
 
         /// <summary>

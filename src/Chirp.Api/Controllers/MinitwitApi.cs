@@ -13,9 +13,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Attributes;
 using Org.OpenAPITools.Models;
@@ -23,6 +21,7 @@ using Chirp.Infrastructure;
 using Chirp.Core;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace Chirp.API.Controllers
 {
@@ -36,15 +35,21 @@ namespace Chirp.API.Controllers
         private readonly IAuthorRepository _authorRepository;
         private readonly ICheepRepository _cheepRepository;
         private readonly IGlobalIntRepository _globalIntRepository;
+        private readonly UserManager<Author> _userManager;
 
         /// <summary>
         /// Constructor for MinitwitApiController. Dependency Injection of IAuthorRepository and ICheepRepository is used to access the data layer.
         /// </summary>
-        public MinitwitApiController(IAuthorRepository authorRepository, ICheepRepository cheepRepository, IGlobalIntRepository globalIntRepository)
+        public MinitwitApiController(
+            IAuthorRepository authorRepository, 
+            ICheepRepository cheepRepository, 
+            IGlobalIntRepository globalIntRepository, 
+            UserManager<Author> userManager)
         {
             _authorRepository = authorRepository;
             _cheepRepository = cheepRepository;
             _globalIntRepository = globalIntRepository;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -70,12 +75,12 @@ namespace Chirp.API.Controllers
                 await _globalIntRepository.Put("latest", value);
             }
 
-            if (!await _authorRepository.FindIfAuthorExistsWithName(username))
+            Author? author = await _authorRepository.FindAuthorWithNameNullable(username);
+            if (author is null)
             {
                 return NotFound();
             }
 
-            Author author = await _authorRepository.FindAuthorWithName(username);
             IEnumerable<Author> follows = await _authorRepository.GetFollowing(author.AuthorId);
             IEnumerable<string> names = follows.Take(no ?? int.MaxValue).Select(f => f.Name);
 
@@ -111,7 +116,6 @@ namespace Chirp.API.Controllers
         /// 
         /// </summary>
         /// <remarks>Get recent messages.  - Filters out flagged messages - Returns a list of recent messages (max defined by &#x60;?no&#x3D;&#x60; param) - Optionally updates a &#39;latest&#39; global value via &#x60;?latest&#x3D;&#x60; query param.</remarks>
-        /// <param name="authorization">Authorization string of the form &#x60;Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh&#x60;. Used to authenticate as simulator</param>
         /// <param name="latest">Optional: &#x60;latest&#x60; value to update</param>
         /// <param name="no">Optional: &#x60;no&#x60; limits result count</param>
         /// <response code="200">Success</response>
@@ -122,22 +126,20 @@ namespace Chirp.API.Controllers
         [SwaggerOperation("GetMessages")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Message>), description: "Success")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult GetMessages([FromHeader(Name = "Authorization")][Required()] string authorization, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
+        public virtual async Task<IActionResult> GetMessages([FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
-            string exampleJson = null;
-            exampleJson = "[ {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n}, {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n} ]";
-            exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Message>>(exampleJson)
-            : default;
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            if (latest is int value)
+            {
+                await _globalIntRepository.Put("latest", value);
+            }
+            
+            List<CheepDTO> cheeps = await _cheepRepository.GetCheeps(0, no ?? int.MaxValue);
+            return Ok(cheeps.Select(c => new Message
+            {
+                Content = c.Text,
+                PubDate = c.TimeStamp,
+                User = c.AuthorName,
+            }));
         }
 
         /// <summary>
@@ -145,7 +147,6 @@ namespace Chirp.API.Controllers
         /// </summary>
         /// <remarks>Get messages for a specific user.  - Returns messages authored by the specified user - Filtered by unflagged - Returns a list of recent messages for the user (max defined by &#x60;?no&#x3D;&#x60; param) - Optionally updates a &#39;latest&#39; global value via &#x60;?latest&#x3D;&#x60; query param.</remarks>
         /// <param name="username"></param>
-        /// <param name="authorization">Authorization string of the form &#x60;Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh&#x60;. Used to authenticate as simulator</param>
         /// <param name="latest">Optional: &#x60;latest&#x60; value to update</param>
         /// <param name="no">Optional: &#x60;no&#x60; limits result count</param>
         /// <response code="200">Success</response>
@@ -157,24 +158,26 @@ namespace Chirp.API.Controllers
         [SwaggerOperation("GetMessagesPerUser")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<Message>), description: "Success")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult GetMessagesPerUser([FromRoute(Name = "username")][Required] string username, [FromHeader(Name = "Authorization")][Required()] string authorization, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
+        public virtual async Task<IActionResult> GetMessagesPerUser([FromRoute(Name = "username")][Required] string username, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
+            if (latest is int value)
+            {
+                await _globalIntRepository.Put("latest", value);
+            }
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
-            string exampleJson = null;
-            exampleJson = "[ {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n}, {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n} ]";
-            exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Message>>(exampleJson)
-            : default;
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            Author? author = await _authorRepository.FindAuthorWithNameNullable(username);
+            if (author is null)
+            {
+                return NotFound();
+            }
+            
+            IEnumerable<Cheep> cheeps = await _cheepRepository.GetCheepsByAuthor(author.AuthorId);
+            return Ok(cheeps.Select(c => new Message
+            {
+                Content = c.Text,
+                PubDate = c.TimeStamp.ToString(),
+                User = username,
+            }));
         }
 
         /// <summary>
@@ -182,7 +185,6 @@ namespace Chirp.API.Controllers
         /// </summary>
         /// <remarks>Follow or unfollow a user on behalf of &#x60;username&#x60;.  - Body must contain either &#x60;follow: &lt;user&gt;&#x60; or &#x60;unfollow: &lt;user&gt;&#x60;</remarks>
         /// <param name="username"></param>
-        /// <param name="authorization">Authorization string of the form &#x60;Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh&#x60;. Used to authenticate as simulator</param>
         /// <param name="payload"></param>
         /// <param name="latest">Optional: &#x60;latest&#x60; value to update</param>
         /// <response code="204">No Content</response>
@@ -194,25 +196,51 @@ namespace Chirp.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostFollow")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult PostFollow([FromRoute(Name = "username")][Required] string username, [FromHeader(Name = "Authorization")][Required()] string authorization, [FromBody] FollowAction payload, [FromQuery(Name = "latest")] int? latest)
+        public virtual async Task<IActionResult> PostFollow([FromRoute(Name = "username")][Required] string username, [FromBody] FollowAction payload, [FromQuery(Name = "latest")] int? latest)
         {
+            if (latest is int value)
+            {
+                await _globalIntRepository.Put("latest", value);
+            }
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            Author? follower = await _authorRepository.FindAuthorWithNameNullable(username);
+            if (follower is null)
+            {
+                return NotFound();
+            }
 
-            throw new NotImplementedException();
-        }
+            if (payload.Follow is string followeeName)
+            {
+                Author? followee = await _authorRepository.FindAuthorWithNameNullable(followeeName);
+                if (followee is null)
+                {
+                    return NotFound();
+                }
+
+                await _authorRepository.FollowUserAsync(follower.AuthorId, followee.AuthorId);
+                return NoContent();
+            }
+
+            if (payload.Unfollow is string unfolloweeName)
+            {
+                Author? unfollowee = await _authorRepository.FindAuthorWithNameNullable(unfolloweeName);
+                if (unfollowee is null)
+                {
+                    return NotFound();
+                }
+
+                await _authorRepository.FollowUserAsync(follower.AuthorId, unfollowee.AuthorId);
+                return NoContent();
+            }
+
+            return BadRequest();
+        } 
 
         /// <summary>
         /// 
         /// </summary>
         /// <remarks>Post a new message as a specific user.  - Message must include &#x60;content&#x60; in the body - Stored with timestamp and &#x60;flagged&#x3D;0&#x60; - Returns empty body on success - Optionally updates a &#39;latest&#39; global value via &#x60;?latest&#x3D;&#x60; query param.</remarks>
         /// <param name="username"></param>
-        /// <param name="authorization">Authorization string of the form &#x60;Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh&#x60;. Used to authenticate as simulator</param>
         /// <param name="payload"></param>
         /// <param name="latest">Optional: &#x60;latest&#x60; value to update</param>
         /// <response code="204">No Content</response>
@@ -223,15 +251,29 @@ namespace Chirp.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostMessagesPerUser")]
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
-        public virtual IActionResult PostMessagesPerUser([FromRoute(Name = "username")][Required] string username, [FromHeader(Name = "Authorization")][Required()] string authorization, [FromBody] PostMessage payload, [FromQuery(Name = "latest")] int? latest)
+        public virtual async Task<IActionResult> PostMessagesPerUser([FromRoute(Name = "username")][Required] string username, [FromBody] PostMessage payload, [FromQuery(Name = "latest")] int? latest)
         {
+            if (latest is int value)
+            {
+                await _globalIntRepository.Put("latest", value);
+            }
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
+            Author? author = await _authorRepository.FindAuthorWithNameNullable(username);
+            if (author == null)
+            {
+                return NotFound();
+            }
 
-            throw new NotImplementedException();
+            var cheep = new Cheep
+            {
+                AuthorId = author.AuthorId,
+                Text = payload.Content,
+                TimeStamp = DateTime.Now,
+                Author = author
+            };
+
+            await _cheepRepository.SaveCheep(cheep, author);
+            return NoContent();
         }
 
         /// <summary>
@@ -248,15 +290,27 @@ namespace Chirp.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostRegister")]
         [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Bad Request | Possible reasons:  - missing username  - invalid email  - password missing  - username already taken")]
-        public virtual IActionResult PostRegister([FromBody] RegisterRequest payload, [FromQuery(Name = "latest")] int? latest)
+        public virtual async Task<IActionResult> PostRegister([FromBody] RegisterRequest payload, [FromQuery(Name = "latest")] int? latest)
         {
+            if (latest is int value)
+            {
+                await _globalIntRepository.Put("latest", value);
+            }
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400, default);
+            var user = new Author 
+            { 
+                UserName = payload.Username, 
+                Email = payload.Email, 
+            };
 
-            throw new NotImplementedException();
+            var result = await _userManager.CreateAsync(user, payload.Pwd);
+
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return BadRequest();
         }
     }
 }
