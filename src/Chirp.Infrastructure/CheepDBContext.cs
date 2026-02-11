@@ -73,7 +73,7 @@ namespace Chirp.Infrastructure
             modelBuilder.Entity<Cheep>()
                 .Property(c => c.Text)
                 .HasMaxLength(160);
-            
+
             // Limit the maximum length of GlobalInteger keys
             modelBuilder.Entity<GlobalInteger>()
                 .Property(c => c.Key)

@@ -47,13 +47,13 @@ namespace Chirp.Infrastructure
             if (existing != null)
             {
                 existing.Value = value;
-            } 
+            }
             else
             {
                 var entity = new GlobalInteger { Key = key, Value = value };
                 await _dbContext.GlobalIntegers.AddAsync(entity);
             }
-            
+
             await _dbContext.SaveChangesAsync();
         }
     }

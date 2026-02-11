@@ -116,9 +116,9 @@ namespace Org.OpenAPITools
             // Add authorization for the simulator
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("SimulatorAuth", policy => 
+                options.AddPolicy("SimulatorAuth", policy =>
                     policy.Requirements.Add(new ApiKeyRequirement(
-                        ["Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"], 
+                        ["Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"],
                         "SimulatorAuth"
                     ))
                 );
@@ -132,8 +132,7 @@ namespace Org.OpenAPITools
             services.AddScoped<IGlobalIntRepository, GlobalIntRepository>();
 
             // Identity for creation of accounts
-            services.AddDefaultIdentity<Author>(options =>
-                options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CheepDBContext>();
+            services.AddDefaultIdentity<Author>().AddEntityFrameworkStores<CheepDBContext>();
         }
 
         /// <summary>

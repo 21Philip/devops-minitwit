@@ -41,9 +41,9 @@ namespace Chirp.API.Controllers
         /// Constructor for MinitwitApiController. Dependency Injection of IAuthorRepository and ICheepRepository is used to access the data layer.
         /// </summary>
         public MinitwitApiController(
-            IAuthorRepository authorRepository, 
-            ICheepRepository cheepRepository, 
-            IGlobalIntRepository globalIntRepository, 
+            IAuthorRepository authorRepository,
+            ICheepRepository cheepRepository,
+            IGlobalIntRepository globalIntRepository,
             UserManager<Author> userManager)
         {
             _authorRepository = authorRepository;
@@ -86,7 +86,7 @@ namespace Chirp.API.Controllers
 
             return Ok(new FollowsResponse
             {
-                Follows = [..names],
+                Follows = [.. names],
             });
         }
 
@@ -106,9 +106,9 @@ namespace Chirp.API.Controllers
         {
             if (await _globalIntRepository.Get("latest") is int value)
             {
-                return Ok(new LatestValue {Latest = value});
+                return Ok(new LatestValue { Latest = value });
             }
-            
+
             return NotFound();
         }
 
@@ -132,7 +132,7 @@ namespace Chirp.API.Controllers
             {
                 await _globalIntRepository.Put("latest", value);
             }
-            
+
             List<CheepDTO> cheeps = await _cheepRepository.GetCheeps(0, no ?? int.MaxValue);
             return Ok(cheeps.Select(c => new Message
             {
@@ -170,7 +170,7 @@ namespace Chirp.API.Controllers
             {
                 return NotFound();
             }
-            
+
             IEnumerable<Cheep> cheeps = await _cheepRepository.GetCheepsByAuthor(author.AuthorId);
             return Ok(cheeps.Select(c => new Message
             {
@@ -234,7 +234,7 @@ namespace Chirp.API.Controllers
             }
 
             return BadRequest();
-        } 
+        }
 
         /// <summary>
         /// 
@@ -297,10 +297,10 @@ namespace Chirp.API.Controllers
                 await _globalIntRepository.Put("latest", value);
             }
 
-            var user = new Author 
-            { 
-                UserName = payload.Username, 
-                Email = payload.Email, 
+            var user = new Author
+            {
+                UserName = payload.Username,
+                Email = payload.Email,
             };
 
             var result = await _userManager.CreateAsync(user, payload.Pwd);

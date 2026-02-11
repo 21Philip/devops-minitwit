@@ -26,7 +26,7 @@ namespace Chirp.Api.Auth
         public ApiAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
-            UrlEncoder encoder) 
+            UrlEncoder encoder)
             : base(options, logger, encoder)
         {
         }
@@ -41,7 +41,7 @@ namespace Chirp.Api.Auth
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
-            
+
             return Task.FromResult(AuthenticateResult.Success(ticket));
         }
     }
