@@ -4,20 +4,23 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS base
 FROM base AS build
 WORKDIR /src
 
-COPY . .
-RUN dotnet restore
+COPY src/Chirp.Core ./Chirp.Core
+COPY src/Chirp.Infrastructure ./Chirp.Infrastructure
+COPY src/Chirp.Web ./Chirp.Web
 
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet restore Chirp.Web
+
+RUN dotnet publish -c Release -o /app/publish Chirp.Web
 
 # Run
 FROM base AS runner
 WORKDIR /app
 COPY --from=build /app/publish .
 
-ENV ASPNETCORE_URLS="http://+:5273"
+ENV ASPNETCORE_URLS="http://+:5000"
 ENV DOTNET_RUNNING_IN_CONTAINER="true"
 
 # Expose port for http
-EXPOSE 5273
+EXPOSE 5000
 
 ENTRYPOINT ["dotnet", "Chirp.Web.dll"]
