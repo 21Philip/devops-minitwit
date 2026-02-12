@@ -1,9 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$DB_USER = "chirpuser"
-$DB_PASS = "chirppass"
-$DB_NAME = "chirpdb"
+$DB_USER = "postgres"
+$DB_PASS = "pg123"
+$DB_NAME = "primarydb"
 
 Vagrant.configure("2") do |config|
   config.vm.box = 'digital_ocean'
@@ -78,11 +78,9 @@ Vagrant.configure("2") do |config|
       # Build and run image
       cp -r /src $HOME
       docker build -t apiserver -f src/Chirp.Api/Dockerfile .
-      docker run -d -p 5000:5000 \
-        -e DB_HOST=$DB_IP \
-        -e POSTGRES_USER=$DB_USER \
-        -e POSTGRES_PASSWORD=$DB_PASS \
-        -e POSTGRES_DB=$DB_NAME \
+
+      docker run -d -p 5000:8080 \
+        -e "ConnectionStrings__DefaultConnection=Host=$DB_IP;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS" \
         apiserver:latest
 
       echo "Api available at:"
@@ -124,16 +122,13 @@ Vagrant.configure("2") do |config|
       cp -r /src $HOME
       docker build -t webserver -f src/Chirp.Web/Dockerfile .
 
-      docker run -d -p 5000:5000 \
-        -e DB_HOST=$DB_IP \
-        -e POSTGRES_USER=$DB_USER \
-        -e POSTGRES_PASSWORD=$DB_PASS \
-        -e POSTGRES_DB=$DB_NAME \
+      docker run -d -p 5001:8080 \
+        -e "ConnectionStrings__DefaultConnection=Host=$DB_IP;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASS" \
         webserver:latest
 
       echo "Website available at:"
       THIS_IP=`hostname -I | cut -d" " -f1`
-      echo "http://${THIS_IP}:5000"
+      echo "http://${THIS_IP}:5001"
     SHELL
   end
 end
