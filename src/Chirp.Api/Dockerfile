@@ -17,10 +17,4 @@ FROM base AS runner
 WORKDIR /app
 COPY --from=build /app/publish .
 
-ENV ASPNETCORE_URLS="http://+:5000"
-ENV DOTNET_RUNNING_IN_CONTAINER="true"
-
-# Expose port for http
-EXPOSE 5000
-
 ENTRYPOINT ["dotnet", "Chirp.Api.dll"]

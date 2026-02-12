@@ -28,6 +28,7 @@ using Chirp.Core;
 using Chirp.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Org.OpenAPITools
 {
@@ -144,6 +145,11 @@ namespace Org.OpenAPITools
                 options.Password.RequireUppercase = false;
             })
             .AddEntityFrameworkStores<CheepDBContext>();
+
+            // Must be changed if we ever deploy several instances
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
+                .SetApplicationName("minitwit");
         }
 
         /// <summary>
