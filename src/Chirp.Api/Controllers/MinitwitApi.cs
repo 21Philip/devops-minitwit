@@ -133,7 +133,7 @@ namespace Chirp.API.Controllers
                 await _globalIntRepository.Put("latest", value);
             }
 
-            List<CheepDTO> cheeps = await _cheepRepository.GetCheeps(0, no ?? int.MaxValue);
+            List<CheepDTO> cheeps = await _cheepRepository.GetCheeps(1, no ?? int.MaxValue);
             return Ok(cheeps.Select(c => new Message
             {
                 Content = c.Text,
@@ -268,7 +268,7 @@ namespace Chirp.API.Controllers
             {
                 AuthorId = author.Id,
                 Text = payload.Content,
-                TimeStamp = DateTime.Now,
+                TimeStamp = DateTime.UtcNow,
                 Author = author
             };
 

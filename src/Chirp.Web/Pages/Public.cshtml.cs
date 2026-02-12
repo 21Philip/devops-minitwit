@@ -85,7 +85,7 @@ public class PublicModel : PageModel
         {
             AuthorId = author.Id,
             Text = Text,
-            TimeStamp = DateTime.Now,
+            TimeStamp = DateTime.UtcNow,
             Author = author
         };
 

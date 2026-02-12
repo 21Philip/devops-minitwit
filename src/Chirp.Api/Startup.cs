@@ -126,7 +126,8 @@ namespace Org.OpenAPITools
             services.AddSingleton<IAuthorizationHandler, ApiAuthorizationHandler>();
 
             // Setup data layer
-            services.AddDbContext<CheepDBContext>(options => options.UseSqlite("Data Source=/tmp/Chat.db")); //TODO: Hvordan fuck får jeg adgang til appsettings her
+            string connectionStr = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<CheepDBContext>(options => options.UseNpgsql(connectionStr));
             services.AddScoped<ICheepRepository, CheepRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IGlobalIntRepository, GlobalIntRepository>();
@@ -162,7 +163,11 @@ namespace Org.OpenAPITools
             }
 
             // Check if database exists, otherwise create it. 
-            app.ApplicationServices.GetRequiredService<CheepDBContext>().Database.EnsureCreated();
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
+                db.Database.EnsureCreated();
+            }
 
             app.UseHttpsRedirection();
             app.UseDefaultFiles();

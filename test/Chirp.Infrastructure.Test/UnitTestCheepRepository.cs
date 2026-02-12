@@ -97,7 +97,7 @@ public class UnitTestCheepRepository : IAsyncLifetime
 
         var testAuthor1 = new Author
         {
-            AuthorId = 1,
+            Id = 1,
             Name = "Nicola Schwarowski",
             Email = "test@gmail.com",
             Cheeps = new List<Cheep>(),
@@ -159,7 +159,7 @@ public class UnitTestCheepRepository : IAsyncLifetime
 
         Assert.NotNull(savedCheep);
         Assert.Equal("Hello, I am from France", savedCheep.Text);
-        Assert.Equal(author.Id, savedCheep.Id);
+        Assert.Equal(author.Id, savedCheep.AuthorId);
 
         // Check that the author's cheeps collection is loaded
         var updatedAuthor = await dbContext.Authors.FindAsync(author.Id);
@@ -297,7 +297,7 @@ public class UnitTestCheepRepository : IAsyncLifetime
         string timeStamp = DateTime.TryParse(dateTimeTimeStamp.ToString(), out dateTimeTimeStamp) ? dateTimeTimeStamp.ToString() : dateTimeTimeStamp.ToString();
         string name = "TestAuthor";
 
-        var author = new Author { Name = name, Cheeps = new List<Cheep>(), AuthorId = 1, Id = 1 };
+        var author = new Author { Name = name, Cheeps = new List<Cheep>(), Id = 1 };
         var cheep = new Cheep { Author = author, Text = text, TimeStamp = dateTimeTimeStamp };
 
         dbContext.Authors.Add(author);
@@ -325,7 +325,7 @@ public class UnitTestCheepRepository : IAsyncLifetime
         string timeStamp = DateTime.TryParse(dateTimeTimeStamp.ToString(), out dateTimeTimeStamp) ? dateTimeTimeStamp.ToString() : dateTimeTimeStamp.ToString();
         string name = "TestAuthor";
 
-        var author = new Author { Name = name, Cheeps = new List<Cheep>(), AuthorId = 1, Id = 1 };
+        var author = new Author { Name = name, Cheeps = new List<Cheep>(), Id = 1 };
         var cheep = new Cheep { Author = author, Text = text1, TimeStamp = dateTimeTimeStamp };
 
         dbContext.Authors.Add(author);

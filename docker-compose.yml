@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: dbserver
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "pg123"
+      POSTGRES_DB: "primarydb"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+    
+  api:
+    build:
+      context: .
+      dockerfile: src/Chirp.Api/Dockerfile
+    container_name: apiserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres: 
+        condition: service_healthy
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:
+    driver: bridge
+    name: internal
+    

@@ -164,7 +164,7 @@ public class UserTimelineModel : PageModel
         {
             AuthorId = author.Id,
             Text = Text,
-            TimeStamp = DateTime.Now,
+            TimeStamp = DateTime.UtcNow,
             Author = author
         };
 

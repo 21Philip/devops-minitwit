@@ -78,7 +78,7 @@ namespace Chirp.Infrastructure.Test
             {
                 CheepId = 10000010,
                 Text = "Lorem ipsum dolor sit amet",
-                TimeStamp = DateTime.Now,
+                TimeStamp = DateTime.UtcNow,
                 Author = testAuthor1,
                 AuthorId = 1
             };
