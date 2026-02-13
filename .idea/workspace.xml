@@ -1,31 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="" />
+    <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator-ignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator/FILES" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator/VERSION" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/Org.OpenAPITools.sln" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/build.bat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/build.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Attributes/ValidateModelStateAttribute.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Authentication/ApiAuthentication.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Controllers/MinitwitApi.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Converters/CustomEnumConverter.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Filters/BasePathFilter.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Filters/GeneratePathParamsValidationFilter.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Formatters/InputFormatterStream.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/ErrorResponse.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/FollowAction.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/FollowsResponse.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/LatestValue.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/Message.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/PostMessage.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/RegisterRequest.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/OpenApi/TypeExtensions.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Org.OpenAPITools.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Program.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Properties/launchSettings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Startup.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/appsettings.Development.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/appsettings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/openapi-original.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/swagger3.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_/home/johaningeholm/Documents/6.Sem/DevOps/devops-minitwit" value="2oTwhEwzIEltvuAEeu6uyxAG6H6" />
+    </persistenceIdMap>
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "JacquesPuvis"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JacquesPuvis&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
-    "url": "https://github.com/ITU-BDSA2024-GROUP16/Chirp.git",
-    "accountId": "3f80a407-1ba9-4fd7-a1f5-4577bb40702d"
+    "url": "git@github.com:21Philip/devops-minitwit.git",
+    "accountId": "24d7f064-434d-4b5a-bdf5-04ae69714e4a"
   }
 }]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 2
-}]]></component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="false" />
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2oTwhEwzIEltvuAEeu6uyxAG6H6" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -34,7 +87,11 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "api-johan",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
   }
@@ -54,9 +111,29 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="false" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="LOCAL_CHANGES_DETAILS_PREVIEW_SHOWN" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

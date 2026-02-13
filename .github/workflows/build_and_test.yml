@@ -4,6 +4,10 @@ permissions:
   contents: write
   pull-requests: write
 
+on:
+  workflow_dispatch:
+
+# Disabled - uncomment the triggers below to re-enable
 # on:
 #   push:
 #     branches: 
