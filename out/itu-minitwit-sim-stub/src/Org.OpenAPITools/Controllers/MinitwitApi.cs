@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -26,8 +27,24 @@ namespace Org.OpenAPITools.Controllers
     /// 
     /// </summary>
     [ApiController]
-    public class MinitwitApiController : ControllerBase
+    public partial class MinitwitApiController : ControllerBase
     { 
+        private static int _latest = 0;
+        private const string VALID_AUTH = "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh";
+        private static Dictionary<string, User> _users = new();
+        private static List<Message> _messages = new();
+
+        private bool ValidateAuth(string authorization)
+        {
+            return authorization == VALID_AUTH;
+        }
+
+        private void UpdateLatest(int? latest)
+        {
+            if (latest.HasValue && latest.Value > _latest)
+                _latest = latest.Value;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -47,22 +64,15 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual IActionResult GetFollow([FromRoute (Name = "username")][Required]string username, [FromHeader (Name = "Authorization")][Required()]string authorization, [FromQuery (Name = "latest")]int? latest, [FromQuery (Name = "no")]int? no)
         {
+            UpdateLatest(latest);
+            if (!ValidateAuth(authorization))
+                return StatusCode(403, new ErrorResponse { Status = 403, ErrorMsg = "You are not authorized to use this resource!" });
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
-            string exampleJson = null;
-            exampleJson = "{\n  \"follows\" : [ \"Helge\", \"John\" ]\n}";
-            exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<FollowsResponse>(exampleJson)
-            : default;
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            if (!_users.ContainsKey(username))
+                return NotFound();
+
+            var follows = _users[username].Following;
+            return Ok(new FollowsResponse { Follows = follows });
         }
 
         /// <summary>
@@ -79,20 +89,7 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Internal Server Error")]
         public virtual IActionResult GetLatestValue()
         {
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default);
-            //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(500, default);
-            string exampleJson = null;
-            exampleJson = "{\n  \"latest\" : 0\n}";
-            exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<LatestValue>(exampleJson)
-            : default;
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            return Ok(new LatestValue { Latest = _latest });
         }
 
         /// <summary>
@@ -112,20 +109,13 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual IActionResult GetMessages([FromHeader (Name = "Authorization")][Required()]string authorization, [FromQuery (Name = "latest")]int? latest, [FromQuery (Name = "no")]int? no)
         {
+            UpdateLatest(latest);
+            if (!ValidateAuth(authorization))
+                return StatusCode(403, new ErrorResponse { Status = 403, ErrorMsg = "You are not authorized to use this resource!" });
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
-            string exampleJson = null;
-            exampleJson = "[ {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n}, {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n} ]";
-            exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Message>>(exampleJson)
-            : default;
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            var limit = no ?? 100;
+            var messages = _messages.OrderByDescending(m => m.PubDate).Take(limit).ToList();
+            return Ok(messages);
         }
 
         /// <summary>
@@ -147,22 +137,16 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual IActionResult GetMessagesPerUser([FromRoute (Name = "username")][Required]string username, [FromHeader (Name = "Authorization")][Required()]string authorization, [FromQuery (Name = "latest")]int? latest, [FromQuery (Name = "no")]int? no)
         {
+            UpdateLatest(latest);
+            if (!ValidateAuth(authorization))
+                return StatusCode(403, new ErrorResponse { Status = 403, ErrorMsg = "You are not authorized to use this resource!" });
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
-            string exampleJson = null;
-            exampleJson = "[ {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n}, {\n  \"pub_date\" : \"2019-12-01 12:00:00\",\n  \"user\" : \"Helge\",\n  \"content\" : \"Hello, World!\"\n} ]";
-            exampleJson = "{\n  \"error_msg\" : \"You are not authorized to use this resource!\",\n  \"status\" : 403\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Message>>(exampleJson)
-            : default;
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            if (!_users.ContainsKey(username))
+                return NotFound();
+
+            var limit = no ?? 100;
+            var messages = _messages.Where(m => m.User == username).OrderByDescending(m => m.PubDate).Take(limit).ToList();
+            return Ok(messages);
         }
 
         /// <summary>
@@ -184,15 +168,19 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual IActionResult PostFollow([FromRoute (Name = "username")][Required]string username, [FromHeader (Name = "Authorization")][Required()]string authorization, [FromBody]FollowAction payload, [FromQuery (Name = "latest")]int? latest)
         {
+            UpdateLatest(latest);
+            if (!ValidateAuth(authorization))
+                return StatusCode(403, new ErrorResponse { Status = 403, ErrorMsg = "You are not authorized to use this resource!" });
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            if (!_users.ContainsKey(username))
+                return NotFound();
 
-            throw new NotImplementedException();
+            if (payload.Follow != null)
+                _users[username].Following.Add(payload.Follow);
+            else if (payload.Unfollow != null)
+                _users[username].Following.Remove(payload.Unfollow);
+
+            return NoContent();
         }
 
         /// <summary>
@@ -213,13 +201,15 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual IActionResult PostMessagesPerUser([FromRoute (Name = "username")][Required]string username, [FromHeader (Name = "Authorization")][Required()]string authorization, [FromBody]PostMessage payload, [FromQuery (Name = "latest")]int? latest)
         {
+            UpdateLatest(latest);
+            if (!ValidateAuth(authorization))
+                return StatusCode(403, new ErrorResponse { Status = 403, ErrorMsg = "You are not authorized to use this resource!" });
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403, default);
+            if (!_users.ContainsKey(username))
+                return NotFound();
 
-            throw new NotImplementedException();
+            _messages.Add(new Message { User = username, Content = payload.Content, PubDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") });
+            return NoContent();
         }
 
         /// <summary>
@@ -238,13 +228,24 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Bad Request | Possible reasons:  - missing username  - invalid email  - password missing  - username already taken")]
         public virtual IActionResult PostRegister([FromBody]RegisterRequest payload, [FromQuery (Name = "latest")]int? latest)
         {
+            UpdateLatest(latest);
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400, default);
+            if (string.IsNullOrEmpty(payload.Username) || string.IsNullOrEmpty(payload.Email) || string.IsNullOrEmpty(payload.Pwd))
+                return BadRequest(new ErrorResponse { Status = 400, ErrorMsg = "Missing username, email, or password" });
 
-            throw new NotImplementedException();
+            if (_users.ContainsKey(payload.Username))
+                return BadRequest(new ErrorResponse { Status = 400, ErrorMsg = "Username already taken" });
+
+            _users[payload.Username] = new User { Username = payload.Username, Email = payload.Email, Pwd = payload.Pwd };
+            return NoContent();
         }
+    }
+
+    public class User
+    {
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string Pwd { get; set; }
+        public List<string> Following { get; set; } = new();
     }
 }

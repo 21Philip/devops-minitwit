@@ -5,40 +5,43 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator-ignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator/FILES" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator/VERSION" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/Org.OpenAPITools.sln" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/build.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/build.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Attributes/ValidateModelStateAttribute.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Authentication/ApiAuthentication.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Controllers/MinitwitApi.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Converters/CustomEnumConverter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Filters/BasePathFilter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Filters/GeneratePathParamsValidationFilter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Formatters/InputFormatterStream.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/ErrorResponse.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/FollowAction.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/FollowsResponse.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/LatestValue.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/Message.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/PostMessage.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/RegisterRequest.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/OpenApi/TypeExtensions.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Org.OpenAPITools.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Program.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Properties/launchSettings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Startup.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/appsettings.Development.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/appsettings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/openapi-original.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/swagger3.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minitwit_scenario.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minitwit_simulator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/Dockerfile.local" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/API_Explanation.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator-ignore" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator-ignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator/FILES" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator/FILES" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator/VERSION" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/.openapi-generator/VERSION" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/Org.OpenAPITools.sln" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/Org.OpenAPITools.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/build.bat" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/build.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/build.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Attributes/ValidateModelStateAttribute.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Attributes/ValidateModelStateAttribute.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Authentication/ApiAuthentication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Authentication/ApiAuthentication.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Controllers/MinitwitApi.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Controllers/MinitwitApi.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Converters/CustomEnumConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Converters/CustomEnumConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Filters/BasePathFilter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Filters/BasePathFilter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Filters/GeneratePathParamsValidationFilter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Filters/GeneratePathParamsValidationFilter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Formatters/InputFormatterStream.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Formatters/InputFormatterStream.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/ErrorResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/ErrorResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/FollowAction.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/FollowAction.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/FollowsResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/FollowsResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/LatestValue.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/LatestValue.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/Message.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/Message.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/PostMessage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/PostMessage.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/RegisterRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Models/RegisterRequest.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/OpenApi/TypeExtensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/OpenApi/TypeExtensions.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Org.OpenAPITools.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Org.OpenAPITools.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Properties/launchSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Properties/launchSettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Startup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Startup.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/appsettings.Development.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/openapi-original.json" beforeDir="false" afterPath="$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/wwwroot/openapi-original.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +52,12 @@
     <persistenceIdMap>
       <entry key="_/home/johaningeholm/Documents/6.Sem/DevOps/devops-minitwit" value="2oTwhEwzIEltvuAEeu6uyxAG6H6" />
     </persistenceIdMap>
+  </component>
+  <component name="CopilotUserSelectedModel">
+    <selectedModels>
+      <entry key="chat-panel" value="Claude Haiku 4.5" />
+      <entry key="agent-panel" value="Claude Haiku 4.5" />
+    </selectedModels>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -70,6 +79,14 @@
     "accountId": "24d7f064-434d-4b5a-bdf5-04ae69714e4a"
   }
 }]]></component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/out/itu-minitwit-sim-stub/Dockerfile.local" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/out/itu-minitwit-sim-stub/README.md" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Controllers/MinitwitApi.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Dockerfile" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/out/itu-minitwit-sim-stub/src/Org.OpenAPITools/Org.OpenAPITools.csproj" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Program.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -106,6 +123,23 @@
       <updated>1730906993595</updated>
       <workItem from="1730906996990" duration="81000" />
     </task>
+    <task id="LOCAL-00001" summary="added swagger3.json and created the initial stub application">
+      <option name="closed" value="true" />
+      <created>1770982787992</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1770982787992</updated>
+    </task>
+    <task id="LOCAL-00002" summary="disable workflows">
+      <option name="closed" value="true" />
+      <created>1770982948809</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1770982948809</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -127,6 +161,9 @@
   <component name="VcsManagerConfiguration">
     <option name="LOCAL_CHANGES_DETAILS_PREVIEW_SHOWN" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="added swagger3.json and created the initial stub application" />
+    <MESSAGE value="disable workflows" />
+    <option name="LAST_COMMIT_MESSAGE" value="disable workflows" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
