@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vagrantfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/setup-vagrant.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -73,6 +70,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHELLCHECK.PATH": "/home/johaningeholm/.local/share/JetBrains/Rider2025.3/Shell Script/shellcheck",
     "git-widget-placeholder": "api-johan",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -124,7 +122,23 @@
       <option name="project" value="LOCAL" />
       <updated>1770988213185</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added Vagrant file and specified a ser 'itu-minitwit'.&#10;&#10;Fix: Change application port from 5273 to 8080 for cloud deployment in Dockerfile">
+      <option name="closed" value="true" />
+      <created>1770993326390</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1770993326390</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Add deployment and release scripts for ITU-MiniTwit application">
+      <option name="closed" value="true" />
+      <created>1770993818934</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1770993818934</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -150,7 +164,9 @@
     <MESSAGE value="disable workflows" />
     <MESSAGE value="Implemented HTTP handler methods in MinitwitApi.cs. Added an explanation for myself of the files in the generated api directory in API_Explanation.md.&#10;&#10;Co-authored-by: Claude Haiku 4.5&#10;Co-authored-by: GitHub Copilot" />
     <MESSAGE value="updated API_Explanation.md" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated API_Explanation.md" />
+    <MESSAGE value="Added Vagrant file and specified a ser 'itu-minitwit'.&#10;&#10;Fix: Change application port from 5273 to 8080 for cloud deployment in Dockerfile" />
+    <MESSAGE value="Add deployment and release scripts for ITU-MiniTwit application" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add deployment and release scripts for ITU-MiniTwit application" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
