@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
 
   ######################################### DB - API - WEBAPP #########################################
 
-  config.vm.define "minitwit_server", primary: true do |server|
+  config.vm.define "minitwit", primary: true do |server|
     server.vm.provider :digital_ocean do |provider|
       provider.ssh_key_name = ENV["SSH_KEY_NAME"]
       provider.token = ENV["DIGITAL_OCEAN_TOKEN"]
@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
       provider.size = 's-1vcpu-1gb'
     end
 
-    server.vm.hostname = "minitwit_server"
+    server.vm.hostname = "minitwit"
 
     server.vm.provision "shell", inline: <<-SHELL
       # The following addresses an issue in DO's Ubuntu images, which still contain a lock file
