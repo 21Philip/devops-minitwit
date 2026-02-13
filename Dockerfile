@@ -14,10 +14,10 @@ FROM base AS runner
 WORKDIR /app
 COPY --from=build /app/publish .
 
-ENV ASPNETCORE_URLS="http://+:5273"
+ENV ASPNETCORE_URLS="http://+:8080"
 ENV DOTNET_RUNNING_IN_CONTAINER="true"
 
 # Expose port for http
-EXPOSE 5273
+EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "Chirp.Web.dll"]

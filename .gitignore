@@ -475,3 +475,18 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Vagrant
+.vagrant/
+*.log
+
+# Sensitive files
+.env
+.env.local
+deployment_ip.txt
+db_ip.txt
+
+# IDE
+.idea/
+.vscode/
+*.swp
