@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "https://github.com/devopsgroup-io/vagrant-digitalocean/raw/master/box/digital_ocean.box"
   config.ssh.private_key_path = '~/.ssh/id_rsa'
 
-  ######################################### DB - API - WebApp #########################################
+  ######################################### DB - API - WEBAPP #########################################
 
   config.vm.define "apiserver", primary: true do |server|
     server.vm.provider :digital_ocean do |provider|
@@ -34,7 +34,7 @@ Vagrant.configure("2") do |config|
       # Get DB private IP
       DB_IP=$(getent hosts dbserver | awk '{ print $1 }')
 
-      # Build and run image
+      # Build and run
       cd /vagrant
       docker compose build
       nohup docker compose up
