@@ -22,7 +22,16 @@ Vagrant.configure("2") do |config|
 
     server.vm.provision "shell", inline: <<-SHELL
       # The following addresses an issue in DO's Ubuntu images, which still contain a lock file
-      sudo fuser -vk -TERM /var/lib/apt/lists/lock
+      while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+        echo "Waiting for apt lock..."
+        sleep 5
+      done
+
+      while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
+        echo "Waiting for apt lists lock..."
+        sleep 5
+      done
+
       sudo apt-get update
 
       # Install Docker
@@ -30,12 +39,12 @@ Vagrant.configure("2") do |config|
       sudo sh get-docker.sh
 
       # Allow running docker without sudo
-      sudo usermod -aG docker $USER
+      sudo usermod -aG docker vagrant
 
       # Build and run
       cd /vagrant
-      docker compose build
-      nohup docker compose up
+      sudo docker compose build
+      nohup sudo docker compose up
 
       THIS_IP=`hostname -I | cut -d" " -f1`
       echo "Api available at:"
