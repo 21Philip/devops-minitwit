@@ -7,8 +7,9 @@ Vagrant.configure("2") do |config|
   config.ssh.private_key_path = '~/.ssh/id_rsa'
   config.vm.synced_folder ".", "/vagrant", type: "rsync"
 
-  ######################################### DB - API - WEBAPP #########################################
-
+  #########################################
+  # DB - API - WEBAPP            (currently all deployed to same server)
+  #########################################
   config.vm.define "minitwit", primary: true do |server|
     server.vm.provider :digital_ocean do |provider|
       provider.ssh_key_name = ENV["SSH_KEY_NAME"]
@@ -19,54 +20,43 @@ Vagrant.configure("2") do |config|
     end
 
     server.vm.hostname = "minitwit"
-
+    
     server.vm.provision "shell", inline: <<-SHELL
-      # The following addresses an issue in DO's Ubuntu images, which still contain a lock file
-      # Disable automatic apt services during provisioning
-      sudo systemctl stop apt-daily.service
-      sudo systemctl stop apt-daily-upgrade.service
-      sudo systemctl kill --kill-who=all apt-daily.service
-      sudo systemctl kill --kill-who=all apt-daily-upgrade.service
-      sudo systemctl disable apt-daily.service
-      sudo systemctl disable apt-daily-upgrade.service
-
-      # Wait until dpkg lock is released
-      while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
-        echo "Waiting for dpkg lock..."
+      # Wait for cloud-init and any initial apt processes
+      echo "Waiting for system initialization..."
+      sudo cloud-init status --wait || true
+      
+      # Wait for locks
+      while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
+            sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 || \
+            sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
         sleep 3
       done
+      
+      sleep 5  # Extra buffer
 
       # Install Docker
-      sudo apt-get update
-      sudo apt-get install -y ca-certificates curl gnupg lsb-release
+      echo "Installing Docker..."
+      curl -fsSL https://get.docker.com -o get-docker.sh
+      sudo sh get-docker.sh
+      rm get-docker.sh
 
-      sudo mkdir -p /etc/apt/keyrings
-      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-        sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      sudo usermod -aG docker vagrant # TODO: vagrant user aparently dont exist??
+      sudo systemctl enable docker
+      sudo systemctl start docker
+      sleep 3
 
-      echo \
-        "deb [arch=$(dpkg --print-architecture) \
-        signed-by=/etc/apt/keyrings/docker.gpg] \
-        https://download.docker.com/linux/ubuntu \
-        $(lsb_release -cs) stable" | \
-        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-      sudo apt-get update
-      sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-      # Allow running docker without sudo
-      sudo usermod -aG docker vagrant
-
-      # Build and run
       cd /vagrant
+      echo "Building and starting containers..."
       sudo docker compose build
-      nohup sudo docker compose up
+      sudo docker compose up -d
 
-      THIS_IP=`hostname -I | cut -d" " -f1`
-      echo "Api available at:"
-      echo "http://${THIS_IP}:5000"
-      echo "Webapp available at:"
-      echo "http://${THIS_IP}:5001"
+      THIS_IP=$(hostname -I | cut -d" " -f1)
+      echo "========================================="
+      echo "Deployment complete!"
+      echo "Api available at: http://${THIS_IP}:5000"
+      echo "Webapp available at: http://${THIS_IP}:5001"
+      echo "========================================="
     SHELL
   end
 end
