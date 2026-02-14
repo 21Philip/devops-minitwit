@@ -22,7 +22,19 @@ Vagrant.configure("2") do |config|
 
     server.vm.provision "shell", inline: <<-SHELL
       # The following addresses an issue in DO's Ubuntu images, which still contain a lock file
-      sudo fuser -vk -TERM /var/lib/apt/lists/lock
+      # Disable automatic apt services during provisioning
+      sudo systemctl stop apt-daily.service
+      sudo systemctl stop apt-daily-upgrade.service
+      sudo systemctl kill --kill-who=all apt-daily.service
+      sudo systemctl kill --kill-who=all apt-daily-upgrade.service
+      sudo systemctl disable apt-daily.service
+      sudo systemctl disable apt-daily-upgrade.service
+
+      # Wait until dpkg lock is released
+      while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+        echo "Waiting for dpkg lock..."
+        sleep 3
+      done
 
       # Install Docker
       sudo apt-get update
