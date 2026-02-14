@@ -22,13 +22,13 @@ public class UserTimelineModel : PageModel
     public string? Text { get; set; }
     public List<Author> FollowedAuthors { get; set; } = new List<Author>();
     public List<Cheep> LikedCheeps { get; set; } = new List<Cheep>();
-    
+
     public UserTimelineModel(ICheepRepository cheepRepository, IAuthorRepository authorRepository)
     {
         CheepRepository = cheepRepository;
         AuthorRepository = authorRepository;
     }
-    
+
     /// <summary>
     /// Handles GET requests to display the user's timeline.
     /// Content of the page differentiate whether it's the logged-in user's timeline, or another user's.
@@ -55,23 +55,23 @@ public class UserTimelineModel : PageModel
             {
                 PageNumber = 1;
             }
-            
-            
+
+
             //Loads the author with their cheeps and followers using the authors name
             Author author = await AuthorRepository.FindAuthorWithName(authorName);
 
             //Creates a list to gather the author and all its followers
             var allAuthors = new List<Author> { author };
-            
+
             //Adds all the followers to the list
             allAuthors.AddRange(author.FollowedAuthors ?? Enumerable.Empty<Author>());
-            
+
             // Ensure PageNumber is valid and greater than 0
             PageNumber = Math.Max(1, PageNumber); // This ensures PageNumber is never less than 1
 
             // Sorts and converts the cheeps into cheepdto
             List<CheepDTO> cheeps = allAuthors
-                .SelectMany(a => a.Cheeps ?? Enumerable.Empty<Cheep>())  
+                .SelectMany(a => a.Cheeps ?? Enumerable.Empty<Cheep>())
                 .OrderByDescending(cheep => cheep.TimeStamp)
                 .Skip((PageNumber - 1) * PageSize)
                 .Take(PageSize)
@@ -99,7 +99,7 @@ public class UserTimelineModel : PageModel
 
                 // Proceed with the method call if the email is valid
                 var loggedInAuthor = await AuthorRepository.FindAuthorWithEmail(authorEmail);
-                FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.AuthorId);
+                FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.Id);
             }
 
             return Page();
@@ -122,7 +122,7 @@ public class UserTimelineModel : PageModel
                 })
                 .ToList() ?? new List<CheepDTO>(); // If Cheeps is null, use an empty list
 
-            
+
             Cheeps = cheeps;
             if (User.Identity?.IsAuthenticated == true)
             {
@@ -137,12 +137,12 @@ public class UserTimelineModel : PageModel
 
                 // Proceed with the method call if the email is valid
                 var loggedInAuthor = await AuthorRepository.FindAuthorWithEmail(authorEmail);
-                FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.AuthorId);
+                FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.Id);
             }
             return Page();
         }
     }
-    
+
     /// <summary>
     /// Handles POST requests to create a new cheep by the logged-in user.
     /// </summary>
@@ -151,7 +151,7 @@ public class UserTimelineModel : PageModel
     public async Task<ActionResult> OnPost()
     {
         var authorName = User.FindFirst("Name")?.Value;
-        
+
         if (string.IsNullOrEmpty(authorName))
         {
             throw new ArgumentException("Author name cannot be null or empty.");
@@ -159,20 +159,20 @@ public class UserTimelineModel : PageModel
 
         Author author = await AuthorRepository.FindAuthorWithName(authorName);
 
-        
+
         var cheep = new Cheep
         {
-            AuthorId = author.AuthorId,
+            AuthorId = author.Id,
             Text = Text,
-            TimeStamp = DateTime.Now,
+            TimeStamp = DateTime.UtcNow,
             Author = author
         };
-        
+
         await CheepRepository.SaveCheep(cheep, author);
-        
+
         return RedirectToPage();
     }
-    
+
     /// <summary>
     /// Allows the logged-in user to follow another author.
     /// </summary>
@@ -187,17 +187,17 @@ public class UserTimelineModel : PageModel
         {
             throw new ArgumentException("Author name cannot be null or empty.");
         }
-        
+
         var author = await AuthorRepository.FindAuthorWithEmail(authorName);
-        
+
         //Finds the author that the logged in author wants to follow
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
-        
-        await AuthorRepository.FollowUserAsync(author.AuthorId, followAuthor.AuthorId);
-        
+
+        await AuthorRepository.FollowUserAsync(author.Id, followAuthor.Id);
+
         //updates the current author's list of followed authors
-        FollowedAuthors = await AuthorRepository.GetFollowing(author.AuthorId);
-        
+        FollowedAuthors = await AuthorRepository.GetFollowing(author.Id);
+
         return RedirectToPage();
     }
 
@@ -216,18 +216,18 @@ public class UserTimelineModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
         var author = await AuthorRepository.FindAuthorWithName(authorName);
-        
+
         //Finds the author that the logged in author wants to follow
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
-        
-        await AuthorRepository.UnFollowUserAsync(author.AuthorId, followAuthor.AuthorId);
-        
+
+        await AuthorRepository.UnFollowUserAsync(author.Id, followAuthor.Id);
+
         //updates the current author's list of followed authors
-        FollowedAuthors = await AuthorRepository.GetFollowing(author.AuthorId);
-        
+        FollowedAuthors = await AuthorRepository.GetFollowing(author.Id);
+
         return RedirectToPage();
     }
-    
+
     /// <summary>
     /// Allows the logged-in user to like other authors cheeps.
     /// </summary>
@@ -246,18 +246,18 @@ public class UserTimelineModel : PageModel
         }
 
         var author = await AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await CheepRepository.FindCheep(text,timeStamp, cheepAuthorName);
+        var cheep = await CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
 
         if (cheep == null)
         {
             throw new ArgumentException("Cheep could not be found.");
         }
-        
+
         // Adds the cheep to the author's list of liked cheeps
         await CheepRepository.LikeCheep(cheep, author);
-        
-        LikedCheeps = await AuthorRepository.GetLikedCheeps(author.AuthorId);
-        
+
+        LikedCheeps = await AuthorRepository.GetLikedCheeps(author.Id);
+
         return RedirectToPage();
     }
 
@@ -279,17 +279,17 @@ public class UserTimelineModel : PageModel
         }
 
         var author = await AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await CheepRepository.FindCheep(text,timeStamp,cheepAuthorName);
-        
+        var cheep = await CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
+
         if (cheep == null)
         {
             throw new ArgumentException("Cheep could not be found.");
         }
-        
+
         await CheepRepository.UnLikeCheep(cheep, author);
-        
-        LikedCheeps = await AuthorRepository.GetLikedCheeps(author.AuthorId);
-        
+
+        LikedCheeps = await AuthorRepository.GetLikedCheeps(author.Id);
+
         return RedirectToPage();
     }
 
@@ -308,15 +308,15 @@ public class UserTimelineModel : PageModel
         {
             throw new ArgumentException("Author name cannot be null or empty.");
         }
-        
+
         var author = await AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await CheepRepository.FindCheep(text,timeStamp,cheepAuthorName);
-        
+        var cheep = await CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
+
         if (cheep == null)
         {
             throw new ArgumentException("Cheep could not be found.");
         }
-        
+
         return await CheepRepository.DoesUserLikeCheep(cheep, author);
     }
 }

@@ -71,8 +71,8 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
         }
 
         // Callback method to handle the response from the external provider
-        public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null) 
-        { 
+        public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
+        {
             returnUrl ??= Url.Content("~/");
 
             if (remoteError != null)
@@ -105,7 +105,7 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
                 // Set user properties from external provider
                 user.Name = info.Principal.Identity.Name ?? "Unknown";
-                user.AuthorId = await _userManager.Users.CountAsync() + 1;
+                user.Id = await _userManager.Users.CountAsync() + 1;
 
                 var createUserResult = await _userManager.CreateAsync(user);
                 if (createUserResult.Succeeded)
@@ -164,14 +164,14 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
                 // Set Name from external provider if available
                 user.Name = info.Principal.Identity.Name ?? "Unknown";
-                user.AuthorId = await _userManager.Users.CountAsync() + 1;
+                user.Id = await _userManager.Users.CountAsync() + 1;
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     var claim = new Claim("Name", user.Name);
                     await _userManager.AddClaimAsync(user, claim);
-                    
+
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {

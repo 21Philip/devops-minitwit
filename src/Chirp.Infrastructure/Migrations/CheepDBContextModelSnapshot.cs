@@ -56,9 +56,6 @@ namespace Chirp.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
@@ -148,6 +145,20 @@ namespace Chirp.Infrastructure.Migrations
                     b.HasIndex("AuthorId");
 
                     b.ToTable("Cheeps");
+                });
+
+            modelBuilder.Entity("Chirp.Core.GlobalInteger", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("GlobalIntegers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>

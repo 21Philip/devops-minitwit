@@ -86,12 +86,8 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
             await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
-            user.Email = Input.Email;
             user.Name = Input.Username;
-            user.AuthorId = await _userManager.Users.CountAsync() + 1;
-            user.Id = user.AuthorId;
             user.Cheeps = new List<Cheep>();
-            user.EmailConfirmed = true;
 
             var result = await _userManager.CreateAsync(user, Input.Password);
 

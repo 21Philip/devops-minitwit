@@ -1,45 +1,26 @@
 using Chirp.Core;
 using Chirp.Infrastructure;
 using Chirp.Web;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<CheepDBContext>(options => options.UseSqlite(connectionString));
-
-
+builder.Services.AddDbContext<CheepDBContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 
-builder.Services.AddDefaultIdentity<Author>(options =>
-    options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CheepDBContext>();
+builder.Services.AddDefaultIdentity<Author>().AddEntityFrameworkStores<CheepDBContext>();
 
-// Add services to the container.
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
+    .SetApplicationName("minitwit");
+
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
-
-//Seeding the CheepDBContext
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<CheepDBContext>();
-
-        context.Database.EnsureCreated();
-
-        // Seed the database using DbInitializer
-        DbInitializer.SeedDatabase(context);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
-    }
-}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

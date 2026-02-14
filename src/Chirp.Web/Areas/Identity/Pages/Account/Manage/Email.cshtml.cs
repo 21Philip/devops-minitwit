@@ -99,83 +99,83 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
             await LoadAsync(user);
             return Page();
         }
-        
+
         public async Task<IActionResult> OnPostChangeEmailAsync()
         {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
-
-        if (!ModelState.IsValid)
-        {
-            await LoadAsync(user);
-            return Page();
-        }
-
-        var email = await _userManager.GetEmailAsync(user);
-        if (Input.NewEmail != email)
-        {
-            // Update Email Claim
-            var existingEmailClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == ClaimTypes.Email);
-            if (existingEmailClaim != null)
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                var removeResult = await _userManager.RemoveClaimAsync(user, existingEmailClaim);
-                if (!removeResult.Succeeded)
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await LoadAsync(user);
+                return Page();
+            }
+
+            var email = await _userManager.GetEmailAsync(user);
+            if (Input.NewEmail != email)
+            {
+                // Update Email Claim
+                var existingEmailClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                if (existingEmailClaim != null)
                 {
-                    StatusMessage = "Unexpected error when trying to remove existing email claim.";
+                    var removeResult = await _userManager.RemoveClaimAsync(user, existingEmailClaim);
+                    if (!removeResult.Succeeded)
+                    {
+                        StatusMessage = "Unexpected error when trying to remove existing email claim.";
+                        return RedirectToPage();
+                    }
+                }
+
+                // Add the new email claim
+                var newEmailClaim = new Claim("Email", Input.NewEmail);
+                var addClaimResult = await _userManager.AddClaimAsync(user, newEmailClaim);
+                if (!addClaimResult.Succeeded)
+                {
+                    StatusMessage = "Unexpected error when trying to add new email claim.";
                     return RedirectToPage();
                 }
-            }
 
-            // Add the new email claim
-            var newEmailClaim = new Claim("Email", Input.NewEmail);
-            var addClaimResult = await _userManager.AddClaimAsync(user, newEmailClaim);
-            if (!addClaimResult.Succeeded)
-            {
-                StatusMessage = "Unexpected error when trying to add new email claim.";
-                return RedirectToPage();
-            }
-            
-            //This updates the users (authors) email, which also makes sure that the cheeps have the NewEmail
-            user.Email = Input.NewEmail;
-            user.UserName = Input.NewEmail;
-            var updateResult = await _userManager.UpdateAsync(user);
-            if (!updateResult.Succeeded)
-            {
-                foreach (var error in updateResult.Errors)
+                //This updates the users (authors) email, which also makes sure that the cheeps have the NewEmail
+                user.Email = Input.NewEmail;
+                user.UserName = Input.NewEmail;
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    foreach (var error in updateResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    StatusMessage = "Unexpected error when trying to update email.";
+                    return RedirectToPage();
                 }
-                StatusMessage = "Unexpected error when trying to update email.";
+
+                /*
+                // Update email in the user manager with verification
+                var userId = await _userManager.GetUserIdAsync(user);
+                var code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmailChange",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId = userId, email = Input.NewEmail, code = code },
+                    protocol: Request.Scheme);
+                await _emailSender.SendEmailAsync(
+                    Input.NewEmail,
+                    "Confirm your email",
+                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    */
+
+                StatusMessage = "Confirmation link to change email sent. Please check your email.";
                 return RedirectToPage();
+
             }
-            
-            /*
-            // Update email in the user manager with verification
-            var userId = await _userManager.GetUserIdAsync(user);
-            var code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var callbackUrl = Url.Page(
-                "/Account/ConfirmEmailChange",
-                pageHandler: null,
-                values: new { area = "Identity", userId = userId, email = Input.NewEmail, code = code },
-                protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
-                Input.NewEmail,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-                */
 
-            StatusMessage = "Confirmation link to change email sent. Please check your email.";
+            StatusMessage = "Your email is unchanged.";
             return RedirectToPage();
-            
         }
-
-        StatusMessage = "Your email is unchanged.";
-        return RedirectToPage();
-    }
 
 
         public async Task<IActionResult> OnPostSendVerificationEmailAsync()

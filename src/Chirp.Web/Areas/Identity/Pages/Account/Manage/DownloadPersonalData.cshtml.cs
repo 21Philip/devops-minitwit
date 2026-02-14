@@ -48,30 +48,30 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var authorName = User.FindFirst("Name")?.Value ?? "User";                                                                                   
-            var author = await _authorRepository.FindAuthorWithName(authorName);                                                                        
+            var authorName = User.FindFirst("Name")?.Value ?? "User";
+            var author = await _authorRepository.FindAuthorWithName(authorName);
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
-            var followedAuthorsLinks = author.FollowedAuthors?.Select(author =>                                                                 
-                $"{baseUrl}/{Uri.EscapeDataString(author.Name)}").ToList() ?? new List<string>();                             
-                                                                                                                                            
-            var data = new                                                                                                                              
-            {                                                                                                                                           
-                Name = author.Name,                                                                                                                     
-                Email = author.Email,                                                                                                                   
-                Phonenumber = author.PhoneNumber,                                                                                                       
-                FollowedAuthors = followedAuthorsLinks,                                                                                                 
-                Cheeps = author.Cheeps                                                                                                                  
-            };  
-            
+            var followedAuthorsLinks = author.FollowedAuthors?.Select(author =>
+                $"{baseUrl}/{Uri.EscapeDataString(author.Name)}").ToList() ?? new List<string>();
+
+            var data = new
+            {
+                Name = author.Name,
+                Email = author.Email,
+                Phonenumber = author.PhoneNumber,
+                FollowedAuthors = followedAuthorsLinks,
+                Cheeps = author.Cheeps
+            };
+
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true // Enables pretty printing
             };
 
             var jsonData = JsonSerializer.Serialize(data, options);
-            var bytes = Encoding.UTF8.GetBytes(jsonData);                                                                                               
-            return File(bytes, "application/json", "PersonalData.json");                                                                                
-                                                                                                                                                        
+            var bytes = Encoding.UTF8.GetBytes(jsonData);
+            return File(bytes, "application/json", "PersonalData.json");
+
         }
     }
 }
