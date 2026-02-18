@@ -42,27 +42,18 @@ jobs:
       - name: Push images
         run: docker compose push
 
-      - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/do_ssh_key
-          chmod 600 ~/.ssh/do_ssh_key
-        env:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /vagrant/
+            docker compose down
+            docker compose pull
+            docker compose up -d
 
-      - name: Deploy to server
-        # Configure the ~./bash_profile and deploy.sh file on the Vagrantfile
-        run: >
-          ssh $SSH_USER@$SSH_HOST
-          -i ~/.ssh/do_ssh_key -o StrictHostKeyChecking=no
-          cd /vagrant
-          docker compose down
-          cd ~/
-          docker compose pull $DOCKER_USERNAME/itu-minitwit:latest
-          docker compose up -d
-        env:
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
 
 
 
