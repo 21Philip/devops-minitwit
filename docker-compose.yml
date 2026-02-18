@@ -19,6 +19,7 @@ services:
       - internal
     
   api:
+    image: xxxxxx/minitwit-api:latest
     build:
       context: .
       dockerfile: src/Chirp.Api/Dockerfile
@@ -39,10 +40,11 @@ services:
       - internal
 
   web:
+    image: xxxxxx/minitwit-web:latest
     build:
       context: .
       dockerfile: src/Chirp.Web/Dockerfile
-    container_name: Webserver
+    container_name: webserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       #- ENV ASPNETCORE_URLS="http://+:5000"
