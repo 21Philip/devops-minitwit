@@ -55,10 +55,14 @@ jobs:
         run: >
           ssh $SSH_USER@$SSH_HOST
           -i ~/.ssh/do_ssh_key -o StrictHostKeyChecking=no
+          cd /vagrant
+          docker compose down
+          cd ~/
           docker compose pull $DOCKER_USERNAME/itu-minitwit:latest
           docker compose up -d
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
+
 
 
