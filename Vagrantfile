@@ -47,7 +47,7 @@ Vagrant.configure("2") do |config|
       sleep 3
 
       cd /vagrant
-      echo "Building and starting containers..."
+      echo "Pulling and running containers"
       sudo docker compose pull
       sudo docker compose up -d
 
