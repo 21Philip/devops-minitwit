@@ -17,17 +17,11 @@ data "digitalocean_ssh_key" "default" {
 }
 
 resource "digitalocean_droplet" "app" {
-  name     = "app-server"
+  name     = "minitwit"
   region   = var.region
   size     = var.droplet_size
   image    = "docker-20-04"
   ssh_keys = [data.digitalocean_ssh_key.default.id]
-
-  # cloud-init script: runs once on first boot
-  user_data = <<-EOF
-    #!/bin/bash
-    mkdir -p /app
-  EOF
 
   connection {
     type        = "ssh"
@@ -36,9 +30,13 @@ resource "digitalocean_droplet" "app" {
     host        = self.ipv4_address
   }
 
+  provisioner "remote-exec" {
+    inline = ["mkdir -p /app"]
+  }
+
   # Copy docker-compose.yml to the droplet
   provisioner "file" {
-    source      = "${path.module}/docker-compose.yml"
+    source      = "${path.module}/../docker-compose.yml"
     destination = "/app/docker-compose.yml"
   }
 

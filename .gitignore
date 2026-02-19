@@ -477,4 +477,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # Terraform
-terraform.tfvars
+terraform*
+.terraform*
