@@ -40,7 +40,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "docker-compose.yml"
-          target: "/app/"
+          target: "/app"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -49,6 +49,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /app/
+            cd /app
             docker compose pull
             docker compose up -d --remove-orphans

@@ -26,7 +26,6 @@ services:
     container_name: apiserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      #- ENV ASPNETCORE_URLS="http://+:5000"
       - ENV DOTNET_RUNNING_IN_CONTAINER="true"
       - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     volumes:
@@ -47,13 +46,12 @@ services:
     container_name: webserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      #- ENV ASPNETCORE_URLS="http://+:5000"
       - ENV DOTNET_RUNNING_IN_CONTAINER="true"
       - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     volumes:
       - dataprotection_keys:/app/keys
     ports:
-      - "5001:8080"
+      - "5002:8080"
     depends_on:
       postgres: 
         condition: service_healthy

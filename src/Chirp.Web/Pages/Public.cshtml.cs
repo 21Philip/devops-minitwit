@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Chirp.Core;
 using Chirp.Infrastructure;
