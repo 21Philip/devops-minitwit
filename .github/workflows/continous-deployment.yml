@@ -9,7 +9,6 @@ on:
       - master
   # allow manual triggers for now too
   workflow_dispatch:
-    manual: true
 
 # Remember to set the following secrets in your repository's settings:
 # https://github.com/your_username/itu-minitwit-ci/settings/secrets/actions
@@ -50,7 +49,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /vagrant/
-            docker compose down
             docker compose pull
             docker compose up -d
 
