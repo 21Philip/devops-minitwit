@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "${{ secrets.SSH_KEY }}" > ssh_key
           chmod 600 ssh_key
-          scp -i ssh_key docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/app/
+          scp -i ssh_key -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/app/
           rm ssh_key
 
       - name: Deploy via SSH
