@@ -10,14 +10,6 @@ on:
   # allow manual triggers for now too
   workflow_dispatch:
 
-# Remember to set the following secrets in your repository's settings:
-# https://github.com/your_username/itu-minitwit-ci/settings/secrets/actions
-# DOCKER_USERNAME
-# DOCKER_PASSWORD
-# SSH_USER
-# SSH_KEY
-# SSH_HOST
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,6 +33,15 @@ jobs:
       - name: Push images
         run: docker compose push
 
+      - name: Copy docker-compose.yml to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "/app/"
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -48,10 +49,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /vagrant/
+            cd /app/
             docker compose pull
-            docker compose up -d
-
-
-
-
+            docker compose up -d --remove-orphans

@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = 'digital_ocean'
   config.vm.box_url = "https://github.com/devopsgroup-io/vagrant-digitalocean/raw/master/box/digital_ocean.box"
   config.ssh.private_key_path = '~/.ssh/id_rsa'
-  config.vm.synced_folder "./docker-compose.yml", "/vagrant", type: "rsync"
+  config.vm.synced_folder "./docker-compose.yml", "/app", type: "rsync"
 
   #########################################
   # DB - API - WEBAPP            (currently all deployed to same server)
@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
       sudo systemctl start docker
       sleep 3
 
-      cd /vagrant
+      cd /app
       echo "Pulling and running containers"
       sudo docker compose pull
       sudo docker compose up -d
