@@ -20,15 +20,17 @@ Requires: docker
    - Web app: localhost:5001. 
 
 ## How to deploy
-Requires: vagrant, Digital Ocean api token, Digital Ocean ssh key. 
+Requires: Terraform
 
-1. Make sure `$DIGITAL_OCEAN_TOKEN` and `$SSH_KEY_NAME` are set in your current environment
+1. Make sure a valid terraform.tfvars is in the ./infra directory
 
-2. Navigate to root of repository:
+2. Navigate to the ./infra directory:
     ```bash
-    cd path/to/repository
+    cd path/to/repository/infra
     ```
 3. Deploy:
     ```bash
-    vagrant up
+    terraform init
+    terraform plan
+    terraform apply
     ```
