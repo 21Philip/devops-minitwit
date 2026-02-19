@@ -19,7 +19,7 @@ services:
       - internal
     
   api:
-    image: xxxxxx/minitwit-api:latest
+    image: cecilieelkjaer/minitwit-api:latest
     build:
       context: .
       dockerfile: src/Chirp.Api/Dockerfile
@@ -40,7 +40,7 @@ services:
       - internal
 
   web:
-    image: xxxxxx/minitwit-web:latest
+    image: cecilieelkjaer/minitwit-web:latest
     build:
       context: .
       dockerfile: src/Chirp.Web/Dockerfile
