@@ -33,7 +33,7 @@ jobs:
       - name: Push images
         run: docker compose push
 
-      - name: Copy docker-compose.yml to server
+      - name: Update docker-compose.yml on server
         run: |
           echo "${{ secrets.SSH_KEY }}" > ssh_key
           chmod 600 ssh_key
