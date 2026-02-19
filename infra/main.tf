@@ -11,6 +11,8 @@ provider "digitalocean" {
   token = var.do_token
 }
 
+###################### Create droplet ######################
+
 # Get ssh key defined on Digital Ocean website
 data "digitalocean_ssh_key" "default" {
   name = "digital-ocean-ssh"
@@ -48,6 +50,18 @@ resource "digitalocean_droplet" "app" {
       "docker compose up -d",
     ]
   }
+}
+
+###################### Assign reserved ip ######################
+
+# Get reserved ip
+data "digitalocean_reserved_ip" "app" {
+  ip_address = var.reserved_ip
+}
+
+resource "digitalocean_reserved_ip_assignment" "app" {
+  ip_address = data.digitalocean_reserved_ip.app.ip_address
+  droplet_id = digitalocean_droplet.app.id
 }
 
 output "droplet_ip" {

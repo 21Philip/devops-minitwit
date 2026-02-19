@@ -15,3 +15,7 @@ variable "region" {
 variable "droplet_size" {
   default = "s-1vcpu-1gb"
 }
+
+variable "reserved_ip" {
+  default = "146.190.204.218"
+}
