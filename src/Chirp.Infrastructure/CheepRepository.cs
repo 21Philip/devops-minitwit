@@ -79,7 +79,31 @@ namespace Chirp.Infrastructure
                 throw new InvalidOperationException("Author's Cheeps collection is null.");
             }
 
-            await _dbContext.Cheeps.AddAsync(cheep);
+            // Ensure we only track a single Cheep instance per key value
+            Cheep cheepToTrack = cheep;
+
+            if (cheep.CheepId != 0)
+            {
+                var trackedEntry = _dbContext.ChangeTracker.Entries<Cheep>()
+                    .FirstOrDefault(e => e.Entity.CheepId == cheep.CheepId);
+
+                if (trackedEntry != null)
+                {
+                    // Reuse the tracked entity to avoid double-tracking conflicts
+                    cheepToTrack = trackedEntry.Entity;
+
+                    // Optionally update its scalar properties from the incoming cheep
+                    cheepToTrack.Text = cheep.Text;
+                    cheepToTrack.AuthorId = cheep.AuthorId;
+                    cheepToTrack.TimeStamp = cheep.TimeStamp;
+                }
+            }
+
+            if (_dbContext.Entry(cheepToTrack).State == EntityState.Detached)
+            {
+                await _dbContext.Cheeps.AddAsync(cheepToTrack);
+            }
+
             await _dbContext.SaveChangesAsync();
             await _dbContext.Entry(author).Collection(a => a.Cheeps!).LoadAsync();
         }
