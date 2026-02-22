@@ -1,6 +1,10 @@
 ---
 name: Continuous Deployment
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   push:
     # Run workflow every time something is pushed to the main branch
@@ -45,10 +49,16 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
       # Build, create a release and create zip files for the release. 
       - name: Create ZIP files
@@ -82,8 +92,9 @@ jobs:
             my_project_win.zip
 
   deploy:
-    needs: [build, release]
+    needs: build
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
 
     steps:
       - name: Checkout repo
