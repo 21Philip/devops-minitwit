@@ -7,10 +7,11 @@ on:
     branches:
       - main
       - master
-    pull_request:
-      branches:
-        - main
-  # allow manual triggers for now too
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -18,22 +19,70 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the repository
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Setup .NET environment
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
+      # Restore dependencies
       - name: Restore
         run: dotnet restore
 
       - name: Build project
-        run: dotnet build --no-restore
+        run: dotnet build --no-restore -c Release
+      
+      - name: Tests (infrastructure only)
+        run: |
+          export Authentication_Github_ClientId="${{ secrets.GITHUBCLIENTID }}"
+          export Authentication_Github_ClientSecret="${{ secrets.GITHUBCLIENTSECRET }}"
+          dotnet test test/Chirp.Infrastructure.Test/Chirp.Infrastructure.Test.csproj --no-build -c Release --verbosity normal
+  
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # Build, create a release and create zip files for the release. 
+      - name: Create ZIP files
+        run: |
+          # Create a release directory to hold all platform-specific releases
+          mkdir release
+
+          # Publish for Linux (default)
+          dotnet publish -c Release -o ./release/linux
+          cd release/linux
+          zip -r ../../my_project_linux.zip .
+
+          # Publish for macOS
+          cd ../../
+          dotnet publish -r osx-x64 -c Release -o ./release/mac
+          cd release/mac
+          zip -r ../../my_project_mac.zip .
+
+          # Publish for Windows
+          cd ../../
+          dotnet publish -r win-x64 -c Release -o ./release/win
+          cd release/win
+          zip -r ../../my_project_win.zip .
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          files: |
+            my_project_linux.zip
+            my_project_mac.zip
+            my_project_win.zip
 
   deploy:
-    needs: build
+    needs: [build, release]
     runs-on: ubuntu-latest
 
     steps:
