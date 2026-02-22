@@ -15,6 +15,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --no-restore
+
+      - name: Install Playwright
+        run: |
+          dotnet tool install --global Microsoft.Playwright.CLI || true
+          playwright install --with-deps
+        
+      - name: Tests
+        run: |
+          export Authentication_Github_ClientId="${{ secrets.GITHUBCLIENTID }}"
+          export Authentication_Github_ClientSecret="${{ secrets.GITHUBCLIENTSECRET }}"
+          dotnet test --no-build -c Release --verbosity normal
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
