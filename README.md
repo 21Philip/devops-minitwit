@@ -34,3 +34,14 @@ Requires: Terraform
     terraform plan
     terraform apply
     ```
+
+Deploy will only run automatically when there's been pushed directly to main. 
+
+## Create release 
+Releases are only made once there has been pushed with a tag. 
+Create a release like this: 
+```bash
+    git tag v1.0.0
+    git push origin v1.0.0
+```
+Tag must begin with v (fx v1.2.3). Pushing with a tag will not trigger deploy. 
