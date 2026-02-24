@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
 {
@@ -101,13 +102,45 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
 
             if (author != null)
             {
-                var cheepsToDelete = author.Cheeps.ToList();
-                foreach (var cheep in cheepsToDelete)
+                // Reload the author from the DbContext with relational collections to manipulate navigation properties
+                var authorEntry = await _context.Authors
+                    .Include(a => a.Cheeps)
+                    .Include(a => a.Followers)
+                    .Include(a => a.FollowedAuthors)
+                    .AsSplitQuery()
+                    .FirstOrDefaultAsync(a => a.Id == author.Id);
+
+                if (authorEntry != null)
                 {
-                    _context.Cheeps.Remove(cheep);
+                    // Remove cheeps
+                    var cheepsToDelete = authorEntry.Cheeps?.ToList() ?? new System.Collections.Generic.List<Chirp.Core.Cheep>();
+                    foreach (var cheep in cheepsToDelete)
+                    {
+                        _context.Cheeps.Remove(cheep);
+                    }
+
+                    // Clear follower relationships (authors who follow this author)
+                    if (authorEntry.Followers != null)
+                    {
+                        foreach (var follower in authorEntry.Followers.ToList())
+                        {
+                            authorEntry.Followers.Remove(follower);
+                        }
+                    }
+
+                    // Clear followed relationships (authors this author follows)
+                    if (authorEntry.FollowedAuthors != null)
+                    {
+                        foreach (var followed in authorEntry.FollowedAuthors.ToList())
+                        {
+                            authorEntry.FollowedAuthors.Remove(followed);
+                        }
+                    }
+
+                    // Now safe to remove the author
+                    _context.Authors.Remove(authorEntry);
+                    await _context.SaveChangesAsync();
                 }
-                _context.Authors.Remove(author);
-                await _context.SaveChangesAsync();
             }
 
             await _signInManager.SignOutAsync();
