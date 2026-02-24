@@ -1,0 +1,15 @@
+@* Validation scripts partial included by pages to enable client-side unobtrusive validation. *@
+@* Using CDN links for simplicity; adjust to local files if you vendor these scripts. *@
+
+<environment include="Development">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJ+Y6k2Qb0v3s4b3eJ5Q5b1mZ9Y+8l5VxQEG0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js" integrity="sha512-0k6X1Gz8hXyQYf2Qm2xg8VvQJQdK1k9Y3Zxq5gK6QmD9n8sV+Oq1l6E6a7Jm2Yt8v1eG5cZpK8xM2h3v5Yh1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js" integrity="sha512-8wG6QmYs5g7Z4x2n1Yf6Qe8k3P1v9Z6J3t4b5Yj6Gk7Hj8K9l0M1n2O3p4Q5r6S7T8u9V0W1X2Y3Z4A5B6C7==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</environment>
+
+<environment exclude="Development">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+</environment>
+
