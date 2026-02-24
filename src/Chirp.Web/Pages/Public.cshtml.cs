@@ -80,27 +80,6 @@ public class PublicModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
-        // Prevent posting empty cheeps
-        if (string.IsNullOrWhiteSpace(Text))
-        {
-            ModelState.AddModelError(nameof(Text), "Cheep cannot be empty.");
-            // Re-render the page so the user sees the validation error
-            // Ensure cheeps are loaded for the page to display correctly
-            var pageQuery = Request.Query["page"];
-            PageNumber = int.TryParse(pageQuery, out int page) ? page : 1;
-            Cheeps = await CheepRepository.GetCheeps(PageNumber, PageSize);
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                var authorEmail = User.FindFirst(ClaimTypes.Name)?.Value;
-                if (!string.IsNullOrEmpty(authorEmail))
-                {
-                    var loggedInAuthor = await AuthorRepository.FindAuthorWithEmail(authorEmail);
-                    FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.Id);
-                }
-            }
-            return Page();
-        }
-
         var author = await AuthorRepository.FindAuthorWithEmail(authorName);
         var cheep = new Cheep
         {

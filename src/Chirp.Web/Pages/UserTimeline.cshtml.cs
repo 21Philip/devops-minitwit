@@ -157,47 +157,8 @@ public class UserTimelineModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
-        // Prevent posting empty cheeps
-        if (string.IsNullOrWhiteSpace(Text))
-        {
-            ModelState.AddModelError(nameof(Text), "Cheep cannot be empty.");
-            // Reload data needed for rendering the page
-            var pageQuery = Request.Query["page"];
-            PageNumber = int.TryParse(pageQuery.ToString(), out int page) ? page : 1;
-            var pageAuthor = await AuthorRepository.FindAuthorWithName(authorName);
-            var allAuthors = new List<Author> { pageAuthor };
-            allAuthors.AddRange(pageAuthor.FollowedAuthors ?? Enumerable.Empty<Author>());
-            PageNumber = Math.Max(1, PageNumber);
-            List<CheepDTO> cheeps = allAuthors
-                .SelectMany(a => a.Cheeps ?? Enumerable.Empty<Cheep>())
-                .OrderByDescending(cheep => cheep.TimeStamp)
-                .Skip((PageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .Select(cheep => new CheepDTO
-                {
-                    AuthorName = cheep.Author != null ? cheep.Author.Name : "Unknown",
-                    Text = cheep.Text,
-                    TimeStamp = cheep.TimeStamp.ToString(),
-                    Likes = cheep.Likes,
-                })
-                .ToList();
-
-            Cheeps = cheeps;
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                var authorEmail = User.FindFirst(ClaimTypes.Name)?.Value;
-                if (!string.IsNullOrEmpty(authorEmail))
-                {
-                    var loggedInAuthor = await AuthorRepository.FindAuthorWithEmail(authorEmail);
-                    FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.Id);
-                }
-            }
-            return Page();
-        }
-
         Author author = await AuthorRepository.FindAuthorWithName(authorName);
-
-
+        
         var cheep = new Cheep
         {
             AuthorId = author.Id,
@@ -205,9 +166,12 @@ public class UserTimelineModel : PageModel
             TimeStamp = DateTime.UtcNow,
             Author = author
         };
-
-        await CheepRepository.SaveCheep(cheep, author);
-
+        
+        if (cheep.Text != null)
+        {
+            await CheepRepository.SaveCheep(cheep, author);
+        }
+        
         return RedirectToPage();
     }
 

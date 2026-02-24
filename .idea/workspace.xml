@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="Changed names in the LICENSE.md to the names of the members of our group">
+    <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Api/Controllers/MinitwitApi.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Api/Controllers/MinitwitApi.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Infrastructure/CheepRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Infrastructure/CheepRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Pages/Public.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Pages/Public.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Pages/Public.cshtml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Pages/Public.cshtml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Pages/UserTimeline.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Pages/UserTimeline.cshtml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Pages/UserTimeline.cshtml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Pages/UserTimeline.cshtml.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -132,7 +128,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770708583346</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Add client-side validation for cheep submissions and prevent empty posts&#10;&#10;Here i altered both the public and private timeline. Made sure you can't post empty cheeps, and provided an error message when you try to do so.&#10;&#10;Also disallows empty cheeps to be posted through the API&#10;&#10;Co-Authored By: GPT-5 mini">
+      <option name="closed" value="true" />
+      <created>1771930115600</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1771930115600</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -154,7 +158,8 @@
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Changed names in the LICENSE.md to the names of the members of our group" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed names in the LICENSE.md to the names of the members of our group" />
+    <MESSAGE value="Add client-side validation for cheep submissions and prevent empty posts&#10;&#10;Here i altered both the public and private timeline. Made sure you can't post empty cheeps, and provided an error message when you try to do so.&#10;&#10;Also disallows empty cheeps to be posted through the API&#10;&#10;Co-Authored By: GPT-5 mini" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add client-side validation for cheep submissions and prevent empty posts&#10;&#10;Here i altered both the public and private timeline. Made sure you can't post empty cheeps, and provided an error message when you try to do so.&#10;&#10;Also disallows empty cheeps to be posted through the API&#10;&#10;Co-Authored By: GPT-5 mini" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
