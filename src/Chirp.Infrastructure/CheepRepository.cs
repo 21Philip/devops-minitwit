@@ -74,6 +74,12 @@ namespace Chirp.Infrastructure
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task SaveCheep(Cheep cheep, Author author)
         {
+            // Prevent saving empty cheeps at repository level
+            if (string.IsNullOrWhiteSpace(cheep?.Text))
+            {
+                throw new ArgumentException("Cheep text cannot be empty.");
+            }
+
             if (author.Cheeps == null)
             {
                 throw new InvalidOperationException("Author's Cheeps collection is null.");

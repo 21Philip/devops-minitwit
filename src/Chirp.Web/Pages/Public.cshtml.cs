@@ -89,7 +89,10 @@ public class PublicModel : PageModel
             Author = author
         };
 
-        await CheepRepository.SaveCheep(cheep, author);
+        if (cheep.Text != null)
+        {
+            await CheepRepository.SaveCheep(cheep, author);
+        }
 
         return RedirectToPage();
     }

@@ -158,8 +158,7 @@ public class UserTimelineModel : PageModel
         }
 
         Author author = await AuthorRepository.FindAuthorWithName(authorName);
-
-
+        
         var cheep = new Cheep
         {
             AuthorId = author.Id,
@@ -167,9 +166,12 @@ public class UserTimelineModel : PageModel
             TimeStamp = DateTime.UtcNow,
             Author = author
         };
-
-        await CheepRepository.SaveCheep(cheep, author);
-
+        
+        if (cheep.Text != null)
+        {
+            await CheepRepository.SaveCheep(cheep, author);
+        }
+        
         return RedirectToPage();
     }
 
@@ -320,3 +322,4 @@ public class UserTimelineModel : PageModel
         return await CheepRepository.DoesUserLikeCheep(cheep, author);
     }
 }
+

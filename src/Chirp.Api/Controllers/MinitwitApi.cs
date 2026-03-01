@@ -264,6 +264,12 @@ namespace Chirp.API.Controllers
                 return NotFound();
             }
 
+            // Validate content - disallow empty messages
+            if (string.IsNullOrWhiteSpace(payload?.Content))
+            {
+                return BadRequest(new ErrorResponse { Status = 400, ErrorMsg = "Message content cannot be empty." });
+            }
+
             var cheep = new Cheep
             {
                 AuthorId = author.Id,
