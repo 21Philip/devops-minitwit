@@ -5,16 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/monitoring/prometheus/Monitor.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Chirp.Web/Monitoring/CpuGaugeService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Chirp.Web/Monitoring/Minitwit-Metrics.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/monitoring/prometheus/prometheus.yml" beforeDir="false" afterPath="$PROJECT_DIR$/monitoring/prometheus/prometheus.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Api/Chirp.Api.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Api/Chirp.Api.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Api/Startup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Api/Startup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Chirp.Web.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Chirp.Web.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/monitoring/grafana/dashboards/dashboard.json" beforeDir="false" afterPath="$PROJECT_DIR$/monitoring/grafana/dashboards/dashboard.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,6 +72,7 @@
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Areas/Identity/Pages/_ViewStart.cshtml" root0="FORCE_HIGHLIGHTING" root1="SKIP_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/DbInitializer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Monitoring/CpuGaugeService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Monitoring/Minitwit-Metrics.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/Public.cshtml" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/Public.cshtml.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/SearchResult.cshtml" root0="FORCE_HIGHLIGHTING" root1="SKIP_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
@@ -172,7 +165,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772524623745</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Add Prometheus monitoring with CPU gauge and HTTP metrics&#10;&#10;Co-Authored By: Marcus Frandsen &lt;megf@itu.dk&gt;&#10;Co-Authored By: Benjamin Ormstrup &lt;beor@itu.dk&gt;&#10;Co-Authored By: GPT-5 mini">
+      <option name="closed" value="true" />
+      <created>1772534357088</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1772534357088</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -197,7 +198,8 @@
     <MESSAGE value="Add client-side validation for cheep submissions and prevent empty posts&#10;&#10;Here i altered both the public and private timeline. Made sure you can't post empty cheeps, and provided an error message when you try to do so.&#10;&#10;Also disallows empty cheeps to be posted through the API&#10;&#10;Co-Authored By: GPT-5 mini" />
     <MESSAGE value="Removed logic for showing error messages when posting empty cheeps that was not needed" />
     <MESSAGE value="Add server-side validation for username and email uniqueness during registration.&#10;&#10;Im not sure it works with the API yet, this will need to be tested." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add server-side validation for username and email uniqueness during registration.&#10;&#10;Im not sure it works with the API yet, this will need to be tested." />
+    <MESSAGE value="Add Prometheus monitoring with CPU gauge and HTTP metrics&#10;&#10;Co-Authored By: Marcus Frandsen &lt;megf@itu.dk&gt;&#10;Co-Authored By: Benjamin Ormstrup &lt;beor@itu.dk&gt;&#10;Co-Authored By: GPT-5 mini" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add Prometheus monitoring with CPU gauge and HTTP metrics&#10;&#10;Co-Authored By: Marcus Frandsen &lt;megf@itu.dk&gt;&#10;Co-Authored By: Benjamin Ormstrup &lt;beor@itu.dk&gt;&#10;Co-Authored By: GPT-5 mini" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
