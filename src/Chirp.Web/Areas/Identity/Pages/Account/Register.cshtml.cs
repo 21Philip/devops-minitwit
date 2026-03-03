@@ -81,9 +81,27 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
                 return Page();
             }
 
+            // Server-side uniqueness checks to avoid hitting DB unique constraint and to show friendly errors.
+            // Check username (Name) uniqueness
+            var existingByName = await _userManager.Users.FirstOrDefaultAsync(u => u.Name == Input.Username);
+            if (existingByName != null)
+            {
+                ModelState.AddModelError("Input.Username", $"Username '{Input.Username}' is already taken.");
+                return Page();
+            }
+
+            // Check email uniqueness
+            var existingByEmail = await _userManager.FindByEmailAsync(Input.Email);
+            if (existingByEmail != null)
+            {
+                ModelState.AddModelError("Input.Email", $"Email '{Input.Email}' is already taken.");
+                return Page();
+            }
+
             var user = CreateUser();
 
-            await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+            // Use the provided Username as the Identity username (not the email).
+            await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
             user.Name = Input.Username;
