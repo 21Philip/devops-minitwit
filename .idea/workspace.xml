@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-    </list>
+    <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -180,7 +178,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772535898157</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Add environment variables for Prometheus and Grafana in docker-compose">
+      <option name="closed" value="true" />
+      <created>1772537109803</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1772537109803</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -207,7 +213,8 @@
     <MESSAGE value="Add server-side validation for username and email uniqueness during registration.&#10;&#10;Im not sure it works with the API yet, this will need to be tested." />
     <MESSAGE value="Add Prometheus monitoring with CPU gauge and HTTP metrics&#10;&#10;Co-Authored By: Marcus Frandsen &lt;megf@itu.dk&gt;&#10;Co-Authored By: Benjamin Ormstrup &lt;beor@itu.dk&gt;&#10;Co-Authored By: GPT-5 mini" />
     <MESSAGE value="Update Grafana dashboard configuration and workspace settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update Grafana dashboard configuration and workspace settings" />
+    <MESSAGE value="Add environment variables for Prometheus and Grafana in docker-compose" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add environment variables for Prometheus and Grafana in docker-compose" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

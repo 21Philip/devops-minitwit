@@ -59,10 +59,10 @@ services:
       - internal
 
   prometheus:
+    image: cecilieelkjaer/prometheus_image:latest
     build:
       dockerfile: ./Dockerfile
       context: ./monitoring/prometheus
-    image: prometheus_image
     container_name: prometheus
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -76,10 +76,10 @@ services:
       - internal
 
   grafana:
+    image: cecilieelkjaer/grafana_image:latest
     build:
       dockerfile: ./Dockerfile
       context: ./monitoring/grafana
-    image: grafana_image
     container_name: grafana
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
