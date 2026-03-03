@@ -3,6 +3,8 @@ using Chirp.Infrastructure;
 using Chirp.Web;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
+using Chirp.Web.Monitoring;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,9 @@ builder.Services.AddDataProtection()
 
 builder.Services.AddRazorPages();
 
+// Register Prometheus metrics and hosted service
+builder.Services.AddHostedService<CpuGaugeService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -30,12 +35,34 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Expose Prometheus metrics at /metrics
+app.UseRouting();
+app.UseHttpMetrics(); // built-in middleware from prometheus-net to collect request metrics
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
+// Custom middleware to measure request duration and increment response counter
+app.Use(async (context, next) =>
+{
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    try
+    {
+        await next();
+    }
+    finally
+    {
+        sw.Stop();
+        // Record duration in milliseconds
+        Chirp.Web.Monitoring.Metrics.RequestDuration.Observe(sw.Elapsed.TotalMilliseconds);
+        Chirp.Web.Monitoring.Metrics.ResponseCounter.Inc();
+    }
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapMetrics(); // maps /metrics
 app.MapRazorPages();
 
 app.Run();

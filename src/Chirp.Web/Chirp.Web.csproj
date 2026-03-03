@@ -53,6 +53,7 @@
       <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.6" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
       <!-- <PackageReference Include="PasswordHasher.SHA256.ASP.NET.CORE.Identity" Version="1.0.1" /> -->
+      <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
       
     </ItemGroup>
 

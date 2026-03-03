@@ -29,6 +29,7 @@ using Chirp.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
+using Prometheus;
 
 namespace Org.OpenAPITools
 {
@@ -179,6 +180,7 @@ namespace Org.OpenAPITools
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
             app.UseStaticFiles();
+
             app.UseSwagger(c =>
                 {
                     c.RouteTemplate = "openapi/{documentName}/openapi.json";
@@ -194,11 +196,17 @@ namespace Org.OpenAPITools
                     // c.SwaggerEndpoint("/openapi-original.json", "Minitwit API Original");
                 });
             app.UseRouting();
+
+            // Add Prometheus HTTP metrics middleware
+            app.UseHttpMetrics();
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();
+                    // Expose metrics endpoint for Prometheus
+                    endpoints.MapMetrics();
                 });
         }
     }
