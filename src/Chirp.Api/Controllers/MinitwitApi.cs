@@ -303,27 +303,6 @@ namespace Chirp.API.Controllers
                 await _globalIntRepository.Put("latest", value);
             }
 
-            if (payload == null ||
-                string.IsNullOrWhiteSpace(payload.Username) ||
-                string.IsNullOrWhiteSpace(payload.Email) ||
-                string.IsNullOrWhiteSpace(payload.Pwd))
-            {
-                return BadRequest(new ErrorResponse { Status = 400, ErrorMsg = "Username, email and password are required." });
-            }
-            
-            // Basic uniqueness checks
-            var existingByName = await _userManager.FindByNameAsync(payload.Username);
-            if (existingByName != null)
-            {
-                return BadRequest(new ErrorResponse { Status = 400, ErrorMsg = $"Username '{payload.Username}' is already taken." });
-            }
-
-            var existingByEmail = await _userManager.FindByEmailAsync(payload.Email);
-            if (existingByEmail != null)
-            {
-                return BadRequest(new ErrorResponse { Status = 400, ErrorMsg = $"Email '{payload.Email}' is already taken." });
-            }
-            
             var user = new Author
             {
                 Email = payload.Email,

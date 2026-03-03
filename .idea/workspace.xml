@@ -7,7 +7,6 @@
     <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Chirp.Api/Controllers/MinitwitApi.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Api/Controllers/MinitwitApi.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Areas/Identity/Pages/Account/Register.cshtml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Areas/Identity/Pages/Account/Register.cshtml.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,7 +121,7 @@
       <workItem from="1770708319553" duration="1660000" />
       <workItem from="1771311844015" duration="3180000" />
       <workItem from="1771916572738" duration="3091000" />
-      <workItem from="1772521801932" duration="2519000" />
+      <workItem from="1772521801932" duration="3450000" />
     </task>
     <task id="LOCAL-00001" summary="Changed names in the LICENSE.md to the names of the members of our group">
       <option name="closed" value="true" />
@@ -148,7 +147,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771931598349</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Add server-side validation for username and email uniqueness during registration.&#10;&#10;Im not sure it works with the API yet, this will need to be tested.">
+      <option name="closed" value="true" />
+      <created>1772524623745</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1772524623745</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -172,7 +179,8 @@
     <MESSAGE value="Changed names in the LICENSE.md to the names of the members of our group" />
     <MESSAGE value="Add client-side validation for cheep submissions and prevent empty posts&#10;&#10;Here i altered both the public and private timeline. Made sure you can't post empty cheeps, and provided an error message when you try to do so.&#10;&#10;Also disallows empty cheeps to be posted through the API&#10;&#10;Co-Authored By: GPT-5 mini" />
     <MESSAGE value="Removed logic for showing error messages when posting empty cheeps that was not needed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed logic for showing error messages when posting empty cheeps that was not needed" />
+    <MESSAGE value="Add server-side validation for username and email uniqueness during registration.&#10;&#10;Im not sure it works with the API yet, this will need to be tested." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add server-side validation for username and email uniqueness during registration.&#10;&#10;Im not sure it works with the API yet, this will need to be tested." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
