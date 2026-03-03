@@ -59,11 +59,15 @@ services:
       - internal
 
   prometheus:
+    image: cecilieelkjaer/prometheus_image:latest
     build:
       dockerfile: ./Dockerfile
       context: ./monitoring/prometheus
-    image: prometheus_image
     container_name: prometheus
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ENV DOTNET_RUNNING_IN_CONTAINER="true"
+      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
@@ -72,11 +76,15 @@ services:
       - internal
 
   grafana:
+    image: cecilieelkjaer/grafana_image:latest
     build:
       dockerfile: ./Dockerfile
       context: ./monitoring/grafana
-    image: grafana_image
     container_name: grafana
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ENV DOTNET_RUNNING_IN_CONTAINER="true"
+      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     ports:
       - "3000:3000"
     networks:
