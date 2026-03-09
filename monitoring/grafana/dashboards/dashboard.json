@@ -100,7 +100,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.1.8",
+      "pluginVersion": "12.1.9",
       "targets": [
         {
           "datasource": {
@@ -191,7 +191,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.1.8",
+      "pluginVersion": "12.1.9",
       "targets": [
         {
           "datasource": {
@@ -226,5 +226,5 @@
   "timezone": "browser",
   "title": "Minitwit Example Dashboard",
   "uid": "fegau3n6gywaoa",
-  "version": 2
+  "version": 1
 }

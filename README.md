@@ -1,4 +1,5 @@
-# Minitwit
+docker --version
+docker info# Minitwit
 
 ## How to run locally
 Requires: docker
