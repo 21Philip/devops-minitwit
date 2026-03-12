@@ -1,6 +1,3 @@
-using System.Collections.Generic; // Ensure this is included for List<T>
-using System.Net.Http;
-using System.Threading.Tasks;
 using Chirp.Core; // Ensure this includes Author and CheepDBContext
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +26,6 @@ namespace Chirp.Infrastructure.Test
         }
 
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
         public async Task CanAccessHomePage()
         {
             // Act
@@ -47,7 +43,6 @@ namespace Chirp.Infrastructure.Test
         }
 
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
         public async Task FindTimelineByAuthor()
         {
             HttpResponseMessage response = await _client.GetAsync($"/Jacqualine Gilcoine");
@@ -60,7 +55,6 @@ namespace Chirp.Infrastructure.Test
         }
 
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
         public async Task CanCreateUserAndFindUser()
         {
             using var scope = _factory.Services.CreateScope();
@@ -103,7 +97,6 @@ namespace Chirp.Infrastructure.Test
         }
 
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
         public async Task UserCanSearchForAuthors()
         {
             string SearchWord = "jacq";
@@ -118,7 +111,6 @@ namespace Chirp.Infrastructure.Test
         }
 
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
         public async Task IfNoAuthorsAreFoundShowNoAuthors()
         {
             using var scope = _factory.Services.CreateScope();
@@ -143,7 +135,6 @@ namespace Chirp.Infrastructure.Test
         }
 
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
         public async Task IfOnFirstPageCantGoToPreviousPage()
         {
             HttpResponseMessage response = await _client.GetAsync($"/");
@@ -155,7 +146,7 @@ namespace Chirp.Infrastructure.Test
             Assert.DoesNotContain("Previous", content);
         }
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
+
         public async Task IfOnFirstPageCanGoToNextPage()
         {
             HttpResponseMessage response = await _client.GetAsync($"/");
@@ -167,7 +158,7 @@ namespace Chirp.Infrastructure.Test
             Assert.Contains("Next", content);
         }
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
+
         public async Task IfOnSecondPageCanGoToNextAndPreviousPage()
         {
             HttpResponseMessage response = await _client.GetAsync($"/?page=2");
@@ -182,7 +173,7 @@ namespace Chirp.Infrastructure.Test
 
         }
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
+
         public async Task IfOnLastPageCantGoToNextPage()
         {
 
@@ -196,7 +187,7 @@ namespace Chirp.Infrastructure.Test
 
         }
 
-        [Fact(Skip = "Temporarily disabled due to EF Sqlite version bug in test web host.")]
+
         public async Task WhenLoggedOutCannotFollowUsers()
         {
             HttpResponseMessage response = await _client.GetAsync($"/");

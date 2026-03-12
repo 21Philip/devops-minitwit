@@ -1,52 +1,49 @@
-using System.Data.Common;
-using Chirp.Core;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Testcontainers.PostgreSql;
+using Xunit;
 
 namespace Chirp.Infrastructure.Test;
 
-/* This class is aquired from
- https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-9.0
-*/
-public class CustomWebApplicationFactory
-    : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:16")
+        .WithDatabase("testdb")
+        .WithUsername("postgres")
+        .WithPassword("postgres")
+        .Build();
+
+    public async Task InitializeAsync()
+    {
+        await _postgres.StartAsync();
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        await _postgres.DisposeAsync();
+        await base.DisposeAsync();
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
-            var dbContextDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbContextOptions<CheepDBContext>));
+            var descriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
 
-            services.Remove(dbContextDescriptor);
+            if (descriptor != null)
+                services.Remove(descriptor);
 
-            var dbConnectionDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbConnection));
+            services.AddDbContext<CheepDBContext>(options =>
+                options.UseNpgsql(_postgres.GetConnectionString()));
 
-            services.Remove(dbConnectionDescriptor);
+            var sp = services.BuildServiceProvider();
 
-            // Create open SqliteConnection so EF won't automatically close it.
-            services.AddSingleton<DbConnection>(container =>
-            {
-                var connection = new SqliteConnection("DataSource=:memory:");
-                connection.Open();
-
-                return connection;
-            });
-
-            services.AddDbContext<CheepDBContext>((container, options) =>
-            {
-                var connection = container.GetRequiredService<DbConnection>();
-                options.UseSqlite(connection);
-            });
-
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
+            db.Database.EnsureCreated();
         });
 
         builder.UseEnvironment("Development");
