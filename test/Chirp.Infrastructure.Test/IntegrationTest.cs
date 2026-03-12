@@ -26,6 +26,7 @@ namespace Chirp.Infrastructure.Test
         }
 
 
+        [Fact]
         public async Task CanAccessHomePage()
         {
             // Act
@@ -42,7 +43,7 @@ namespace Chirp.Infrastructure.Test
             response.EnsureSuccessStatusCode();
         }
 
-
+        [Fact]
         public async Task FindTimelineByAuthor()
         {
             HttpResponseMessage response = await _client.GetAsync($"/Jacqualine Gilcoine");
@@ -52,9 +53,10 @@ namespace Chirp.Infrastructure.Test
             _output.WriteLine("content: {0}", content);
             Assert.Contains("Chirp!", content);
             Assert.Contains("Jacqualine", content);
+            Assert.False(true);
         }
 
-
+        [Fact]
         public async Task CanCreateUserAndFindUser()
         {
             using var scope = _factory.Services.CreateScope();
@@ -96,7 +98,7 @@ namespace Chirp.Infrastructure.Test
             Assert.Contains("Lars", content);
         }
 
-
+        [Fact]
         public async Task UserCanSearchForAuthors()
         {
             string SearchWord = "jacq";
@@ -110,7 +112,7 @@ namespace Chirp.Infrastructure.Test
             Assert.Contains("Jacq", content);
         }
 
-
+        [Fact]
         public async Task IfNoAuthorsAreFoundShowNoAuthors()
         {
             using var scope = _factory.Services.CreateScope();
@@ -134,7 +136,7 @@ namespace Chirp.Infrastructure.Test
             }
         }
 
-
+        [Fact]
         public async Task IfOnFirstPageCantGoToPreviousPage()
         {
             HttpResponseMessage response = await _client.GetAsync($"/");
@@ -146,7 +148,7 @@ namespace Chirp.Infrastructure.Test
             Assert.DoesNotContain("Previous", content);
         }
 
-
+        [Fact]
         public async Task IfOnFirstPageCanGoToNextPage()
         {
             HttpResponseMessage response = await _client.GetAsync($"/");
@@ -158,7 +160,7 @@ namespace Chirp.Infrastructure.Test
             Assert.Contains("Next", content);
         }
 
-
+        [Fact]
         public async Task IfOnSecondPageCanGoToNextAndPreviousPage()
         {
             HttpResponseMessage response = await _client.GetAsync($"/?page=2");
@@ -173,7 +175,7 @@ namespace Chirp.Infrastructure.Test
 
         }
 
-
+        [Fact]
         public async Task IfOnLastPageCantGoToNextPage()
         {
 
@@ -187,7 +189,7 @@ namespace Chirp.Infrastructure.Test
 
         }
 
-
+        [Fact]
         public async Task WhenLoggedOutCannotFollowUsers()
         {
             HttpResponseMessage response = await _client.GetAsync($"/");

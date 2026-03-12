@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ using Xunit;
 
 namespace Chirp.Infrastructure.Test;
 
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:16")
         .WithDatabase("testdb")
@@ -20,7 +21,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         await _postgres.StartAsync();
     }
 
-    public override async ValueTask DisposeAsync()
+    public new async Task DisposeAsync()
     {
         await _postgres.DisposeAsync();
         await base.DisposeAsync();
@@ -44,6 +45,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
             db.Database.EnsureCreated();
+
+            // Replace existing dataprotection with ephemeral one.
+            var dpDescriptors = services
+                .Where(d => d.ServiceType.FullName?.Contains("DataProtection") == true)
+                .ToList();
+                
+            foreach (var d in dpDescriptors)
+                services.Remove(d);
+
+            services.AddDataProtection().UseEphemeralDataProtectionProvider();
         });
 
         builder.UseEnvironment("Development");
