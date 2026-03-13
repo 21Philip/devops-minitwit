@@ -19,17 +19,10 @@ public class AuthorRepositoryTest
         _output = output;
     }
 
-    private async Task<TestDatabaseFactory> CreateDbAsync(Action<Mock<UserManager<Author>>>? mockOptions = null)
-    {
-        var db = new TestDatabaseFactory(mockOptions);
-        await db.InitializeAsync();
-        return db;
-    }
-
     [Fact]
     public async Task UnitTestGetAuthorFromName()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var testAuthor = new Author
         {
@@ -49,7 +42,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestFindAuthorWithName_ThrowsExceptionIfAuthorIsNull()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
@@ -62,7 +55,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestGetAuthorFromEmail()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var testAuthor = new Author
         {
@@ -82,7 +75,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestFindAuthorWithEmail_ThrowsExceptionIfAuthorIsNull()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
@@ -96,7 +89,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestAddedToFollowersAndFollowedAuthorsWhenFollowing()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         //arrange
         var testAuthor1 = new Author
@@ -131,7 +124,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestCannotFollowIfAlreadyFollowing()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         //arrange
         var testAuthor1 = new Author
@@ -160,7 +153,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestFollowUserAsync_ThrowsExceptionIfFollowerIsNull()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var testAuthor = new Author
         {
@@ -181,7 +174,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestFollowUserAsync_ThrowsExceptionIfFollowerNameIsNull()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var testAuthor = new Author
         {
@@ -202,7 +195,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestFollowUserAsync_ThrowsExceptionIfFollowedIsNull()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var testAuthor = new Author
         {
@@ -225,7 +218,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestFollowUserAsync_ThrowsExceptionIfFollowedNameIsNull()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var testAuthor = new Author
         {
@@ -253,7 +246,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestRemovedFromFollowersAndFollowedAuthorsWhenUnFollowing()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         //arrange
         var testAuthor1 = new Author
@@ -292,7 +285,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task WhenSearchingAuthorsCorrectAuthorsAreInList()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
         DBSeeder.Seed(db.DbContext);
 
         var testAuthor1 = new Author
@@ -314,7 +307,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task WhenSearchingAuthorsIsEmptyCollection()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
         DBSeeder.Seed(db.DbContext);
 
         List<AuthorDTO> authors = await db.AuthorRepository.SearchAuthorsAsync("12345567");
@@ -325,7 +318,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestListIsEmptyIfSearchWordIsEmpty()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
         DBSeeder.Seed(db.DbContext);
 
         List<AuthorDTO> authors = await db.AuthorRepository.SearchAuthorsAsync("");
@@ -336,7 +329,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task SearchAuthorsAsync_ReturnsAuthorsWithNamesStartingWithShortSearchWord()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var authors = new List<Author>
         {
@@ -366,7 +359,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task IfAuthorExistsReturnTrue()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         Author author = new Author()
         {
@@ -387,7 +380,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task IfAuthorDoesNotExistReturnFalse()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
         DBSeeder.Seed(db.DbContext);
 
         bool isAuthorFound = await db.AuthorRepository.FindIfAuthorExistsWithEmail("CountCommint@itu.dk");
@@ -400,7 +393,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestFindAuthorWithId()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
         DBSeeder.Seed(db.DbContext);
 
         Author author = new Author()
@@ -420,7 +413,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestFindAuthorWithId_ThrowsExceptionIfAuthorIsNull()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
@@ -433,7 +426,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestGetFollowing()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var testAuthor1 = new Author
         {
@@ -460,7 +453,7 @@ public class AuthorRepositoryTest
     [Fact]
     public async Task UnitTestGetFollowing_ThrowsExceptionIfFollowerIsNull()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
@@ -474,7 +467,7 @@ public class AuthorRepositoryTest
     [Fact(Skip = "Fails under EF InMemory due to Cheep ID tracking conflicts; GetLikedCheeps logic is covered elsewhere.")]
     public async Task UnitTestGetLikedCheeps()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
         DBSeeder.Seed(db.DbContext);
 
         string authorName1 = "Malcolm Janski";
@@ -488,26 +481,25 @@ public class AuthorRepositoryTest
             Text = "What do you think about cults?",
             AuthorId = author2.Id
         };
-        /*
-        await cheepRepository.SaveCheep(cheepToSave, author2);
+        
+        await db.CheepRepository.SaveCheep(cheepToSave, author2);
 
         // fetch the tracked instance from the context
-        var savedCheep = await dbContext.Cheeps
+        var savedCheep = await db.DbContext.Cheeps
             .FirstAsync(c => c.Text == cheepToSave.Text && c.AuthorId == author2.Id);
 
-        await cheepRepository.LikeCheep(savedCheep, author1);
-        await dbContext.SaveChangesAsync();
+        await db.CheepRepository.LikeCheep(savedCheep, author1);
+        await db.DbContext.SaveChangesAsync();
 
-        List<Cheep> likedCheeps = await authorRepository.GetLikedCheeps(author1.Id);
+        List<Cheep> likedCheeps = await db.AuthorRepository.GetLikedCheeps(author1.Id);
 
         Assert.Contains(likedCheeps, c => c.Text == cheepToSave.Text && c.AuthorId == author2.Id);
-        */
     }
 
     [Fact]
     public async Task UnitTestGetLikedCheepsRaisesExceptionBecauseUserIdDoesNotExist()
     {
-        await using var db = await CreateDbAsync();
+        await using var db = await TestDatabaseFactory.CreateAsync();
         DBSeeder.Seed(db.DbContext);
 
         //Act & Assert

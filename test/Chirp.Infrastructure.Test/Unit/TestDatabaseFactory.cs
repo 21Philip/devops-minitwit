@@ -13,9 +13,17 @@ public class TestDatabaseFactory : IAsyncDisposable
 {
     public CheepDBContext DbContext { get; private set; } = null!;
     public AuthorRepository AuthorRepository { get; private set; } = null!;
+    public CheepRepository CheepRepository { get; private set; } = null!;
     private Mock<UserManager<Author>> _userManagerMock;
 
-    public TestDatabaseFactory(Action<Mock<UserManager<Author>>>? mockOptions = null)
+    public static async Task<TestDatabaseFactory> CreateAsync(Action<Mock<UserManager<Author>>>? mockOptions = null)
+    {
+        var db = new TestDatabaseFactory(mockOptions);
+        await db.InitializeAsync();
+        return db;
+    }
+
+    private TestDatabaseFactory(Action<Mock<UserManager<Author>>>? mockOptions = null)
     {
         var store = new Mock<IUserStore<Author>>();
         _userManagerMock = new Mock<UserManager<Author>>(
@@ -47,6 +55,7 @@ public class TestDatabaseFactory : IAsyncDisposable
         await DbContext.Database.EnsureCreatedAsync();
 
         AuthorRepository = new AuthorRepository(DbContext, _userManagerMock.Object);
+        CheepRepository = new CheepRepository(DbContext);
     }
 
     public async ValueTask DisposeAsync()

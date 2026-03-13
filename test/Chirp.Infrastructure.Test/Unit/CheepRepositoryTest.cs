@@ -16,28 +16,16 @@ public class UnitTestCheepRepository
         _output = output;
     }
 
-    private CheepDBContext CreateContext()
-    {
-        var options = new DbContextOptionsBuilder<CheepDBContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        var context = new CheepDBContext(options);
-        context.Database.EnsureCreated();
-        return context;
-    }
-
     [Fact]
     public async Task UnitTestTestPageSize()
     {
         //Arrange
-        await using var dbContext = CreateContext();
-        DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
+        DBSeeder.Seed(db.DbContext);
 
         //Act
-        List<CheepDTO> cheeps = await cheepRepository.GetCheeps(1, 32);
-        List<CheepDTO> cheeps2 = await cheepRepository.GetCheeps(1, 12);
+        List<CheepDTO> cheeps = await db.CheepRepository.GetCheeps(1, 32);
+        List<CheepDTO> cheeps2 = await db.CheepRepository.GetCheeps(1, 12);
 
         _output.WriteLine("cheeps: {0}, cheeps2: {1}", cheeps.Count, cheeps2.Count);
 
@@ -50,12 +38,11 @@ public class UnitTestCheepRepository
     public async Task UnitTestTestNoCheepsOnEmptyPage()
     {
         //Arrange
-        await using var dbContext = CreateContext();
-        DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
+        DBSeeder.Seed(db.DbContext);
 
         //Act
-        List<CheepDTO> cheeps = await cheepRepository.GetCheeps(100000, 32);
+        List<CheepDTO> cheeps = await db.CheepRepository.GetCheeps(100000, 32);
 
         _output.WriteLine("cheeps: {0}", cheeps.Count);
 
@@ -68,8 +55,7 @@ public class UnitTestCheepRepository
     public async Task UnitTestGetCheepsFromAuthor()
     {
         //Arrange
-        await using var dbContext = CreateContext();
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         List<Cheep> cheeps = new List<Cheep>();
 
@@ -81,7 +67,7 @@ public class UnitTestCheepRepository
             Cheeps = new List<Cheep>(),
         };
 
-        dbContext.Authors.Add(testAuthor1);
+        db.DbContext.Authors.Add(testAuthor1);
 
         var testCheep = new Cheep
         {
@@ -91,18 +77,18 @@ public class UnitTestCheepRepository
         };
 
         testAuthor1.Cheeps.Add(testCheep);
-        await cheepRepository.SaveCheep(testCheep, testAuthor1);
-        await dbContext.SaveChangesAsync();
+        await db.CheepRepository.SaveCheep(testCheep, testAuthor1);
+        await db.DbContext.SaveChangesAsync();
 
         //Act
-        cheeps = await cheepRepository.GetCheepsByAuthor(testAuthor1.Id);
-        await dbContext.SaveChangesAsync();
+        cheeps = await db.CheepRepository.GetCheepsByAuthor(testAuthor1.Id);
+        await db.DbContext.SaveChangesAsync();
 
         //Assert
         foreach (Cheep cheep in cheeps)
         {
-            _output.WriteLine("cheep Author: {0} and cheeps written: {1}", cheep.Author.Name, cheeps.Count());
-            Assert.Equal(testAuthor1.Name, cheep.Author.Name);
+            _output.WriteLine("cheep Author: {0} and cheeps written: {1}", cheep.Author?.Name, cheeps.Count());
+            Assert.Equal(testAuthor1.Name, cheep.Author?.Name);
             Assert.Equal("Hello, my name is Nicola!", cheep.Text);
         }
         Assert.Single(cheeps);
@@ -112,13 +98,11 @@ public class UnitTestCheepRepository
     [Fact(Skip = "Fails under EF InMemory due to Cheep ID tracking conflicts; SaveCheep behavior is covered by other tests.")]
     public async Task UnitTestSavesCheepAndLoadsAuthorCheeps()
     {
-        await using var dbContext = CreateContext();
-        DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
-        var authorRepository = new AuthorRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
+        DBSeeder.Seed(db.DbContext);
 
-        string authorName = "Jacqualine Gilcoine";
-        Author author = await authorRepository.FindAuthorWithName(authorName);
+        string authorName = "test_name0";
+        Author author = await db.AuthorRepository.FindAuthorWithName(authorName);
 
         // create a brand new cheep with no pre-set key so EF can assign one
         var cheepToSave = new Cheep
@@ -127,9 +111,9 @@ public class UnitTestCheepRepository
             Text = "Hello, I am from France",
         };
 
-        await cheepRepository.SaveCheep(cheepToSave, author);
+        await db.CheepRepository.SaveCheep(cheepToSave, author);
 
-        var savedCheep = await dbContext.Cheeps
+        var savedCheep = await db.DbContext.Cheeps
             .Include(c => c.Author)
             .FirstAsync(c => c.Text == "Hello, I am from France" && c.AuthorId == author.Id);
 
@@ -140,7 +124,7 @@ public class UnitTestCheepRepository
         Assert.Equal(author.Id, savedCheep.AuthorId);
 
         // Author's cheeps collection should have been reloaded by SaveCheep
-        var updatedAuthor = await dbContext.Authors.Include(a => a.Cheeps).FirstAsync(a => a.Id == author.Id);
+        var updatedAuthor = await db.DbContext.Authors.Include(a => a.Cheeps).FirstAsync(a => a.Id == author.Id);
         Assert.NotNull(updatedAuthor.Cheeps);
         Assert.Contains(updatedAuthor.Cheeps, c => c.Text == "Hello, I am from France");
     }
@@ -150,19 +134,17 @@ public class UnitTestCheepRepository
     public async Task UnitTestGetCheepsShouldReturnCheepsWithAuthorName()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         var author = new Author { Name = "TestAuthor" };
         var cheep = new Cheep { Author = author, Text = "Hello World!", TimeStamp = DateTime.UtcNow };
-        dbContext.Authors.Add(author);
-        dbContext.Cheeps.Add(cheep);
-        await dbContext.SaveChangesAsync();
+        db.DbContext.Authors.Add(author);
+        db.DbContext.Cheeps.Add(cheep);
+        await db.DbContext.SaveChangesAsync();
 
         // Act
-        var cheeps = await cheepRepository.GetCheeps(1, 10);
+        var cheeps = await db.CheepRepository.GetCheeps(1, 10);
 
         // Assert
         var retrievedCheep = cheeps.First();
@@ -174,9 +156,7 @@ public class UnitTestCheepRepository
     public async Task UnitTestSaveCheepThrowsExceptionWhenAuthorsCheepsIsNull()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         var author = new Author
         {
@@ -184,8 +164,8 @@ public class UnitTestCheepRepository
             Cheeps = null // Set Cheeps to null to test this scenario
         };
 
-        dbContext.Authors.Add(author);
-        await dbContext.SaveChangesAsync();
+        db.DbContext.Authors.Add(author);
+        await db.DbContext.SaveChangesAsync();
 
         // Associate the Cheep with the Author
         var cheep = new Cheep
@@ -197,7 +177,7 @@ public class UnitTestCheepRepository
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await cheepRepository.SaveCheep(cheep, author)
+            await db.CheepRepository.SaveCheep(cheep, author)
         );
 
         Assert.Equal("Author's Cheeps collection is null.", exception.Message);
@@ -208,9 +188,7 @@ public class UnitTestCheepRepository
     public async Task UnitTestDoesUserLikeCheep()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         var author1 = new Author { Name = "TestAuthor1" };
@@ -219,27 +197,25 @@ public class UnitTestCheepRepository
 
         var author2 = new Author { Name = "TestAuthor2" };
 
-        dbContext.Authors.Add(author1);
-        dbContext.Authors.Add(author2);
-        dbContext.Cheeps.Add(cheep1);
-        dbContext.Cheeps.Add(cheep2);
+        db.DbContext.Authors.Add(author1);
+        db.DbContext.Authors.Add(author2);
+        db.DbContext.Cheeps.Add(cheep1);
+        db.DbContext.Cheeps.Add(cheep2);
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
-        await cheepRepository.LikeCheep(cheep1, author2);
+        await db.CheepRepository.LikeCheep(cheep1, author2);
 
-        Assert.True(await cheepRepository.DoesUserLikeCheep(cheep1, author2));
-        Assert.False(await cheepRepository.DoesUserLikeCheep(cheep2, author2));
+        Assert.True(await db.CheepRepository.DoesUserLikeCheep(cheep1, author2));
+        Assert.False(await db.CheepRepository.DoesUserLikeCheep(cheep2, author2));
     }
 
     [Fact]
     public async Task UnitTestDoesUserLikeCheepReturnFalseIfLikedCheepsIsNull()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         var author1 = new Author { Name = "TestAuthor1" };
@@ -247,26 +223,23 @@ public class UnitTestCheepRepository
 
         var author2 = new Author { Name = "TestAuthor2" };
 
-        dbContext.Authors.Add(author1);
-        dbContext.Authors.Add(author2);
-        dbContext.Cheeps.Add(cheep);
+        db.DbContext.Authors.Add(author1);
+        db.DbContext.Authors.Add(author2);
+        db.DbContext.Cheeps.Add(cheep);
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
         author2.LikedCheeps = null;
 
-        Assert.False(await cheepRepository.DoesUserLikeCheep(cheep, author2));
+        Assert.False(await db.CheepRepository.DoesUserLikeCheep(cheep, author2));
     }
 
     [Fact]
     public async Task UnitTestFindCheepShouldReturnCheep()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         string text = "Hello World!";
@@ -277,23 +250,20 @@ public class UnitTestCheepRepository
         var author = new Author { Name = name, Cheeps = new List<Cheep>(), Id = 1 };
         var cheep = new Cheep { Author = author, Text = text, TimeStamp = dateTimeTimeStamp };
 
-        dbContext.Authors.Add(author);
-        dbContext.Cheeps.Add(cheep);
+        db.DbContext.Authors.Add(author);
+        db.DbContext.Cheeps.Add(cheep);
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
-        Assert.Same(cheep, await cheepRepository.FindCheep(text, timeStamp, name));
+        Assert.Same(cheep, await db.CheepRepository.FindCheep(text, timeStamp, name));
     }
 
     [Fact]
     public async Task UnitTestFindCheepShouldReturnNull()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         string text1 = "Hello World!";
@@ -305,23 +275,20 @@ public class UnitTestCheepRepository
         var author = new Author { Name = name, Cheeps = new List<Cheep>(), Id = 1 };
         var cheep = new Cheep { Author = author, Text = text1, TimeStamp = dateTimeTimeStamp };
 
-        dbContext.Authors.Add(author);
-        dbContext.Cheeps.Add(cheep);
+        db.DbContext.Authors.Add(author);
+        db.DbContext.Cheeps.Add(cheep);
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
-        Assert.Null(await cheepRepository.FindCheep(text2, timeStamp, name));
+        Assert.Null(await db.CheepRepository.FindCheep(text2, timeStamp, name));
     }
 
     [Fact]
     public async Task UnitTestFindCheepShouldRaiseExceptionIfDateTimeFormatIsInvalid()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data and make a time stamp with a wrong format to raise an exception
         string text = "Hello World!";
@@ -329,12 +296,12 @@ public class UnitTestCheepRepository
         string name = "TestAuthor";
 
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(async () =>
         {
-            await cheepRepository.FindCheep(text, timeStamp, name);
+            await db.CheepRepository.FindCheep(text, timeStamp, name);
         });
     }
 
@@ -342,9 +309,7 @@ public class UnitTestCheepRepository
     public async Task UnitTestLikeCheepShouldAddCheepToLikedCheepsAndIncrementLikesCount()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         var author1 = new Author { Name = "TestAuthor1" };
@@ -354,14 +319,14 @@ public class UnitTestCheepRepository
         var author2 = new Author { Name = "TestAuthor2" };
         author2.LikedCheeps = new List<Cheep> { cheep };
 
-        dbContext.Authors.Add(author1);
-        dbContext.Authors.Add(author2);
-        dbContext.Cheeps.Add(cheep);
+        db.DbContext.Authors.Add(author1);
+        db.DbContext.Authors.Add(author2);
+        db.DbContext.Cheeps.Add(cheep);
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
-        await cheepRepository.LikeCheep(cheep, author2);
+        await db.CheepRepository.LikeCheep(cheep, author2);
 
         Assert.Contains(cheep, author2.LikedCheeps);
         Assert.Equal(1, cheep.Likes);
@@ -371,9 +336,7 @@ public class UnitTestCheepRepository
     public async Task UnitTestLikeCheepShouldNotAddCheepToLikedCheeps()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         var author1 = new Author { Name = "TestAuthor1" };
@@ -385,14 +348,14 @@ public class UnitTestCheepRepository
         //Make LikedCheeps null to make the LikeCheep method return null
         author2.LikedCheeps = null;
 
-        dbContext.Authors.Add(author1);
-        dbContext.Authors.Add(author2);
-        dbContext.Cheeps.Add(cheep);
+        db.DbContext.Authors.Add(author1);
+        db.DbContext.Authors.Add(author2);
+        db.DbContext.Cheeps.Add(cheep);
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
-        await cheepRepository.LikeCheep(cheep, author2);
+        await db.CheepRepository.LikeCheep(cheep, author2);
 
         Assert.Null(author2.LikedCheeps);
         Assert.Equal(0, cheep.Likes);
@@ -402,9 +365,7 @@ public class UnitTestCheepRepository
     public async Task UnitTestUnLikeCheepShouldRemoveCheepFromLikedCheepsAndDecrementLikesCount()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         var author1 = new Author { Name = "TestAuthor1" };
@@ -416,15 +377,15 @@ public class UnitTestCheepRepository
         //Make LikedCheeps null to make the LikeCheep method return null
         author2.LikedCheeps = new List<Cheep>();
 
-        dbContext.Authors.Add(author1);
-        dbContext.Authors.Add(author2);
-        dbContext.Cheeps.Add(cheep);
+        db.DbContext.Authors.Add(author1);
+        db.DbContext.Authors.Add(author2);
+        db.DbContext.Cheeps.Add(cheep);
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
-        await cheepRepository.LikeCheep(cheep, author2);
-        await cheepRepository.UnLikeCheep(cheep, author2);
+        await db.CheepRepository.LikeCheep(cheep, author2);
+        await db.CheepRepository.UnLikeCheep(cheep, author2);
 
         Assert.DoesNotContain(cheep, author2.LikedCheeps);
         Assert.Equal(0, cheep.Likes);
@@ -434,9 +395,7 @@ public class UnitTestCheepRepository
     public async Task UnitTestUnLikeCheepShouldNotDecrementLikesCount()
     {
         // Arrange
-        await using var dbContext = CreateContext();
-        //DbInitializer.SeedDatabase(dbContext);
-        var cheepRepository = new CheepRepository(dbContext);
+        await using var db = await TestDatabaseFactory.CreateAsync();
 
         // Seed test data
         var author1 = new Author { Name = "TestAuthor1" };
@@ -448,18 +407,18 @@ public class UnitTestCheepRepository
         //Make LikedCheeps null to make the LikeCheep method return null
         author2.LikedCheeps = new List<Cheep>();
 
-        dbContext.Authors.Add(author1);
-        dbContext.Authors.Add(author2);
-        dbContext.Cheeps.Add(cheep);
+        db.DbContext.Authors.Add(author1);
+        db.DbContext.Authors.Add(author2);
+        db.DbContext.Cheeps.Add(cheep);
 
-        await dbContext.SaveChangesAsync();
+        await db.DbContext.SaveChangesAsync();
 
         //Act & Assert
-        await cheepRepository.LikeCheep(cheep, author2);
+        await db.CheepRepository.LikeCheep(cheep, author2);
 
         author2.LikedCheeps = null;
 
-        await cheepRepository.UnLikeCheep(cheep, author2);
+        await db.CheepRepository.UnLikeCheep(cheep, author2);
 
         //Since LikedCheeps is null we can only check that Likes has not been decremented
         Assert.Null(author2.LikedCheeps);
