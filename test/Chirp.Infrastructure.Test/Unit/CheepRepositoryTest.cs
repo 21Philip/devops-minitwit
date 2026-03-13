@@ -21,7 +21,7 @@ public class UnitTestCheepRepository
     {
         //Arrange
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         //Act
         List<CheepDTO> cheeps = await db.CheepRepository.GetCheeps(1, 32);
@@ -39,7 +39,7 @@ public class UnitTestCheepRepository
     {
         //Arrange
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         //Act
         List<CheepDTO> cheeps = await db.CheepRepository.GetCheeps(100000, 32);
@@ -99,7 +99,7 @@ public class UnitTestCheepRepository
     public async Task UnitTestSavesCheepAndLoadsAuthorCheeps()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         string authorName = "test_name0";
         Author author = await db.AuthorRepository.FindAuthorWithName(authorName);

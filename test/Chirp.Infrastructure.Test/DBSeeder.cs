@@ -9,7 +9,7 @@ public class DBSeeder
 {
     public const int SEED_AMOUNT = 10;
 
-    public async static void Seed(CheepDBContext dbContext)
+    public async static Task Seed(CheepDBContext dbContext)
     {
         for (int i = 0; i < SEED_AMOUNT; i++)
         {

@@ -286,7 +286,7 @@ public class AuthorRepositoryTest
     public async Task WhenSearchingAuthorsCorrectAuthorsAreInList()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         var testAuthor1 = new Author
         {
@@ -308,7 +308,7 @@ public class AuthorRepositoryTest
     public async Task WhenSearchingAuthorsIsEmptyCollection()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         List<AuthorDTO> authors = await db.AuthorRepository.SearchAuthorsAsync("12345567");
 
@@ -319,7 +319,7 @@ public class AuthorRepositoryTest
     public async Task UnitTestListIsEmptyIfSearchWordIsEmpty()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         List<AuthorDTO> authors = await db.AuthorRepository.SearchAuthorsAsync("");
 
@@ -381,7 +381,7 @@ public class AuthorRepositoryTest
     public async Task IfAuthorDoesNotExistReturnFalse()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         bool isAuthorFound = await db.AuthorRepository.FindIfAuthorExistsWithEmail("CountCommint@itu.dk");
 
@@ -394,7 +394,7 @@ public class AuthorRepositoryTest
     public async Task UnitTestFindAuthorWithId()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         Author author = new Author()
         {
@@ -468,7 +468,7 @@ public class AuthorRepositoryTest
     public async Task UnitTestGetLikedCheeps()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         string authorName1 = "Malcolm Janski";
         Author author1 = await db.AuthorRepository.FindAuthorWithName(authorName1);
@@ -500,7 +500,7 @@ public class AuthorRepositoryTest
     public async Task UnitTestGetLikedCheepsRaisesExceptionBecauseUserIdDoesNotExist()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
-        DBSeeder.Seed(db.DbContext);
+        await DBSeeder.Seed(db.DbContext);
 
         //Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>

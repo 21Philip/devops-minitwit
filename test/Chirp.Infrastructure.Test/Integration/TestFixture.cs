@@ -28,7 +28,7 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
         using var scope = Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
 
-        DBSeeder.Seed(dbContext);
+        await DBSeeder.Seed(dbContext);
     }
 
     public new async Task DisposeAsync()
