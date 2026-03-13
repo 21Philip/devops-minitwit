@@ -1,6 +1,8 @@
 using System.Data.Common;
 using Chirp.Infrastructure;
+using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -9,38 +11,38 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Testcontainers.PostgreSql;
+using Xunit;
 
 namespace Chirp.Web.Playwright.Test;
 /* Custom test environment for tests in ASP.NET Core with Playwright.
 Defines a custom factory for the test server environment for the application
 Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0
  */
-public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>
+
+public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private IHost? _host;
-    private static readonly Queue<int> PortQueue = new Queue<int>(Enumerable.Range(5000, 20));  // Range af porte, f.eks. 5000-5999
+    private static readonly Queue<int> _portQueue = new Queue<int>(Enumerable.Range(5000, 20)); // Range af porte, f.eks. 5000-5999
+    private readonly PostgreSqlContainer _postgres;
 
-    // Hent den næste ledige port
     private static int GetNextAvailablePort()
     {
-        lock (PortQueue)
+        lock (_portQueue)
         {
-            if (PortQueue.Count > 0)
-            {
-                return PortQueue.Dequeue();  // Hent næste port
-            }
+            if (_portQueue.Count > 0) return _portQueue.Dequeue(); // Hent næste port
 
             // Hvis køen er tom, så kør en exception eller reinitialize køen
             throw new InvalidOperationException("No available ports left in the range.");
         }
     }
 
-    //Property for getting the server's base address
+    // Property for getting the server's base address
     public string ServerAddress
     {
         get
         {
-            if (_host is null)
+            if (_host is null) 
             {
                 // This forces WebApplicationFactory to bootstrap the server
                 using var client = CreateDefaultClient();
@@ -49,81 +51,80 @@ public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>
         }
     }
 
-    protected override IHost CreateHost(IHostBuilder builder)
+    public CustomTestWebApplicationFactory()
     {
-        //building the test host.
-        var testHost = builder.Build();
-        var port = GetNextAvailablePort(); // Choose a range of ports
+        _postgres = new PostgreSqlBuilder("postgres:17")
+            .WithDatabase("playwrightdb")
+            .WithUsername("postgres")
+            .WithPassword("postgres")
+            .Build();
+    }
 
-        // Set up the custom URL with the random port
-        var baseUrl = $"http://127.0.0.1:{port}";
+    public async Task InitializeAsync() => await _postgres.StartAsync();
 
-        //builder that configures the services needed for testing
+    public new async Task DisposeAsync()
+    {
+        await _postgres.DisposeAsync();
+        await base.DisposeAsync();
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Ensure the database has spun up
+        if (_postgres.State != TestcontainersStates.Running)
+            _postgres.StartAsync().GetAwaiter().GetResult();
+
         builder.ConfigureServices(services =>
         {
-            //removing the existing CheepDBContext to replace it with an in-memory test database
-            var dbContextDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbContextOptions<CheepDBContext>));
-            if (dbContextDescriptor != null)
-            {
-                services.Remove(dbContextDescriptor);
-            }
+            // Replace old dbcontext
+            var dbContext = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
+            if (dbContext != null) services.Remove(dbContext);
 
-            //removing any existing database connection
-            var dbConnectionDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbConnection));
-            if (dbConnectionDescriptor != null)
-            {
-                services.Remove(dbConnectionDescriptor);
-            }
+            var dbConnection = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
+            if (dbConnection != null) services.Remove(dbConnection);
 
-            // Create open SqliteConnection so EF won't automatically close it.
-            services.AddSingleton<DbConnection>(_ =>
-            {
-                var connection = new SqliteConnection("DataSource=:memory:");
-                connection.Open(); //keeps the connection open for the test
+            services.AddDbContext<CheepDBContext>(options =>
+                options.UseNpgsql(_postgres.GetConnectionString()));
 
-                return connection;
-            });
+            // Replace old auth
+            var authService = services.SingleOrDefault(d => d.ServiceType == typeof(IAuthenticationService));
+            if (authService != null) services.Remove(authService);
 
-            //Configures the CheepDBContext to use the SQLite in-memory database connection
-            services.AddDbContext<CheepDBContext>((container, options) =>
-            {
-                var connection = container.GetRequiredService<DbConnection>();
-                options.UseSqlite(connection);
-            });
-
-            //removing the existing authentication service to replace it with a test authentication handler
-            var authService = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(IAuthenticationService));
-            if (authService != null)
-            {
-                services.Remove(authService);
-            }
-
-            //configures the test authentication with a custom scheme in "TestAuthenticationHandler" for Playwright tests
             services.AddAuthentication(TestAuthenticationHandler.AuthenticationScheme);
+
+            // Replace old dataprotection
+            var dpDescriptors = services
+                .Where(d => d.ServiceType.FullName?.Contains("DataProtection") == true)
+                .ToList();
+            foreach (var d in dpDescriptors) services.Remove(d);
+            services.AddDataProtection().UseEphemeralDataProtectionProvider();
+
+            // Create tables
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
+            db.Database.EnsureCreated();
         });
 
         builder.UseEnvironment("Development");
-        //configuring the server to use Kestrel, the ASP.NET Core web server
-        builder.ConfigureWebHost(webHostBuilder => webHostBuilder.UseKestrel().UseUrls(baseUrl));
+    }
 
-        //building and starting the custom host for the test environment
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var testHost = builder.Build();
+        var port = GetNextAvailablePort();
+        var baseUrl = $"http://127.0.0.1:{port}";
+
+        builder.ConfigureWebHost(webHostBuilder =>
+            webHostBuilder.UseKestrel().UseUrls(baseUrl));
+
         _host = builder.Build();
         _host.Start();
 
-        //retrieving the server's address and set it as the base address for HTTP client options
         var server = _host.Services.GetRequiredService<IServer>();
-        var addresses = server.Features.Get<IServerAddressesFeature>() ?? throw new InvalidOperationException("No server addresses found.");
-        ClientOptions.BaseAddress = addresses.Addresses
-            .Select(x => new Uri(x))
-            .Last();
+        var addresses = server.Features.Get<IServerAddressesFeature>()
+            ?? throw new InvalidOperationException("No server addresses found.");
+        ClientOptions.BaseAddress = addresses.Addresses.Select(x => new Uri(x)).Last();
 
-        //starting the initial test host instance
         testHost.Start();
         return testHost;
     }

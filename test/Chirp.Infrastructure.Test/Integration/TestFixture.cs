@@ -16,7 +16,7 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
     public IntegrationTestFixture()
     {
         _postgres = new PostgreSqlBuilder("postgres:17")
-            .WithDatabase("testdb")
+            .WithDatabase("integrationdb")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
@@ -54,10 +54,6 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<ICheepRepository, CheepRepository>();
 
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
-            db.Database.EnsureCreated();
-
             // Replace existing data protection with ephemeral one.
             var dpDescriptors = services
                 .Where(d => d.ServiceType.FullName?.Contains("DataProtection") == true)
@@ -67,6 +63,10 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
                 services.Remove(d);
 
             services.AddDataProtection().UseEphemeralDataProtectionProvider();
+
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
+            db.Database.EnsureCreated();
         });
 
         builder.UseEnvironment("Development");
