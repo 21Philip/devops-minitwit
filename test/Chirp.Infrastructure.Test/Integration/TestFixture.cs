@@ -1,3 +1,4 @@
+using Chirp.Core;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -50,9 +51,10 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
             services.AddDbContext<CheepDBContext>(options =>
                 options.UseNpgsql(_postgres.GetConnectionString()));
 
-            var sp = services.BuildServiceProvider();
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<ICheepRepository, CheepRepository>();
 
-            using var scope = sp.CreateScope();
+            using var scope = services.BuildServiceProvider().CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
             db.Database.EnsureCreated();
 

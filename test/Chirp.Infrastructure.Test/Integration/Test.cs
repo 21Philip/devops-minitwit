@@ -10,26 +10,20 @@ namespace Chirp.Infrastructure.Test.Integration;
 
 public class IntegrationTests : IClassFixture<IntegrationTestFixture>
 {
+    private readonly IntegrationTestFixture _fixture;
     private readonly ITestOutputHelper _output;
     private readonly HttpClient _client;
-    private readonly AuthorRepository _authorRepository;
-    private readonly CheepRepository _cheepRepository;
 
     public IntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
     {
         _output = output;
+        _fixture = fixture;
 
         _client = fixture.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = true,
             HandleCookies = true
         });
-
-        using var scope = fixture.Services.CreateScope();
-        var services = scope.ServiceProvider;
-
-        _authorRepository = services.GetRequiredService<AuthorRepository>();
-        _cheepRepository = services.GetRequiredService<CheepRepository>();
     }
 
 
@@ -158,11 +152,17 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     [Fact]
     public async Task CanCreateUserAndFindUser()
     {
+        using var scope = _fixture.Services.CreateScope();
+        var services = scope.ServiceProvider;
+
+        var authorRepository = services.GetRequiredService<IAuthorRepository>();
+        var cheepRepository = services.GetRequiredService<ICheepRepository>();
+
         // Arrange
         string email = "Jacqualine.Gilcoine@gmail.com";
-        await _authorRepository.CreateAuthor(email, "Jacqualine Gilcoine", "123");
+        bool result = await authorRepository.CreateAuthor(email, "Jacqualine Gilcoine", "Test123_");
 
-        Author testAuthor = await _authorRepository.FindAuthorWithEmail(email);
+        Author testAuthor = await authorRepository.FindAuthorWithEmail(email);
         Cheep testCheep = new Cheep()
         {
             Text = "Lorem ipsum dolor sit amet",
@@ -171,7 +171,7 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
             AuthorId = testAuthor.Id
         };
 
-        await _cheepRepository.SaveCheep(testCheep, testAuthor);
+        await cheepRepository.SaveCheep(testCheep, testAuthor);
 
         // Act
         HttpResponseMessage response = await _client.GetAsync($"/{testAuthor.Name}");
@@ -188,7 +188,7 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     public async Task UserCanSearchForAuthors()
     {
         // Act
-        string searchWord = "jacq";
+        string searchWord = "Jacq";
 
         HttpResponseMessage response = await _client.GetAsync($"/SearchResults?searchWord={searchWord}");
         response.EnsureSuccessStatusCode();

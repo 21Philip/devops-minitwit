@@ -48,9 +48,9 @@ namespace Chirp.Infrastructure
         /// </returns>
         public async Task<List<CheepDTO>> GetCheeps(int pageNumber, int pageSize)
         {
-            var cheeps = _dbContext.Cheeps;
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
 
-            var cheepsQuery = await cheeps.OrderByDescending(cheep => cheep.TimeStamp)
+            var cheepsQuery = await _dbContext.Cheeps.OrderByDescending(cheep => cheep.TimeStamp)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(cheep => new CheepDTO
