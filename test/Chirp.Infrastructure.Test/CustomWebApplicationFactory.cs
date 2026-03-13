@@ -10,6 +10,7 @@ namespace Chirp.Infrastructure.Test;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    public const int SEED_AMOUNT = 100;
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17")
         .WithDatabase("testdb")
         .WithUsername("postgres")
@@ -19,6 +20,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     public async Task InitializeAsync()
     {
         await _postgres.StartAsync();
+        DBSeeder.Seed(this);
     }
 
     public new async Task DisposeAsync()
