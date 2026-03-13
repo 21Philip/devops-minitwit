@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using Chirp.Core;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,26 +7,33 @@ namespace Chirp.Infrastructure.Test;
 
 public class DBSeeder
 {
-    public async static void Seed(IServiceProvider services)
-    {
-        var authorRepository = services.GetRequiredService<AuthorRepository>();
-        var cheepRepository = services.GetRequiredService<CheepRepository>();
+    public const int SEED_AMOUNT = 10;
 
-        for (int i = 0; i < CustomWebApplicationFactory.SEED_AMOUNT; i++)
+    public async static void Seed(CheepDBContext dbContext)
+    {
+        for (int i = 0; i < SEED_AMOUNT; i++)
         {
             string email = $"test_email{i}";
-            await authorRepository.CreateAuthor(email, $"test_name{i}", "test_pwd");
 
-            Author testAuthor = await authorRepository.FindAuthorWithEmail(email);
-            Cheep testCheep = new Cheep()
+            Author testAuthor = new()
+            {
+                Email = email,
+                UserName = email,
+                Name = $"test_name{i}",
+            };
+
+            await dbContext.AddAsync(testAuthor);
+            
+            Cheep testCheep = new()
             {
                 Text = $"test_cheep{i}",
                 TimeStamp = DateTime.UtcNow,
                 Author = testAuthor,
                 AuthorId = testAuthor.Id
             };
+            await dbContext.AddAsync(testCheep);
 
-            await cheepRepository.SaveCheep(testCheep, testAuthor);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

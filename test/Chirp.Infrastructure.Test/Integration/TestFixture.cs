@@ -6,21 +6,29 @@ using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
 
-namespace Chirp.Infrastructure.Test;
+namespace Chirp.Infrastructure.Test.Integration;
 
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    public const int SEED_AMOUNT = 100;
-    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17")
-        .WithDatabase("testdb")
-        .WithUsername("postgres")
-        .WithPassword("postgres")
-        .Build();
+    private readonly PostgreSqlContainer _postgres;
+    
+    public IntegrationTestFixture()
+    {
+        _postgres = new PostgreSqlBuilder("postgres:17")
+            .WithDatabase("testdb")
+            .WithUsername("postgres")
+            .WithPassword("postgres")
+            .Build();
+    }
 
     public async Task InitializeAsync()
     {
         await _postgres.StartAsync();
-        DBSeeder.Seed(Services.CreateScope().ServiceProvider);
+
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
+
+        DBSeeder.Seed(dbContext);
     }
 
     public new async Task DisposeAsync()

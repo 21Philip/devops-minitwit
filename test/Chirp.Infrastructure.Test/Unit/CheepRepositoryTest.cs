@@ -5,7 +5,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Assert = Xunit.Assert;
 
-namespace Chirp.Infrastructure.Test;
+namespace Chirp.Infrastructure.Test.Unit;
 
 public class UnitTestCheepRepository
 {

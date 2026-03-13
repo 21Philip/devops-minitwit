@@ -4,29 +4,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 using Assert = Xunit.Assert;
+using Chirp.Infrastructure.Test;
 
-namespace Chirp.Infrastructure.Test;
+namespace Chirp.Infrastructure.Test.Integration;
 
-public class IntegrationTests : IClassFixture<CustomWebApplicationFactory>
+public class IntegrationTests : IClassFixture<IntegrationTestFixture>
 {
     private readonly ITestOutputHelper _output;
-    private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
     private readonly AuthorRepository _authorRepository;
     private readonly CheepRepository _cheepRepository;
 
-    public IntegrationTests(CustomWebApplicationFactory factory, ITestOutputHelper output)
+    public IntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
     {
-        _factory = factory;
         _output = output;
 
-        _client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        _client = fixture.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = true,
             HandleCookies = true
         });
 
-        using var scope = _factory.Services.CreateScope();
+        using var scope = fixture.Services.CreateScope();
         var services = scope.ServiceProvider;
 
         _authorRepository = services.GetRequiredService<AuthorRepository>();
@@ -76,7 +75,7 @@ public class IntegrationTests : IClassFixture<CustomWebApplicationFactory>
 
         // Assert
         _output.WriteLine("content: {0}", content);
-        for (int i = 0; i < CustomWebApplicationFactory.SEED_AMOUNT; i++)
+        for (int i = 0; i < DBSeeder.SEED_AMOUNT; i++)
         {
             Assert.DoesNotContain($"test_name{i}", content);
         }
@@ -124,7 +123,7 @@ public class IntegrationTests : IClassFixture<CustomWebApplicationFactory>
     {
         // Arrange (this is very fragile)
         int pageSize = 32;
-        int page = CustomWebApplicationFactory.SEED_AMOUNT / pageSize;
+        int page = DBSeeder.SEED_AMOUNT / pageSize;
 
         // Act
         HttpResponseMessage response = await _client.GetAsync($"/?page={page}");
