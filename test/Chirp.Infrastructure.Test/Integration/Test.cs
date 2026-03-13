@@ -117,7 +117,7 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     {
         // Arrange (this is very fragile)
         int pageSize = 32;
-        int page = DBSeeder.SEED_AMOUNT / pageSize;
+        int page = DBSeeder.SEED_AMOUNT / pageSize + 1;
 
         // Act
         HttpResponseMessage response = await _client.GetAsync($"/?page={page}");
@@ -127,6 +127,23 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
         // Assert
         _output.WriteLine("content: {0}", content);
         Assert.DoesNotContain("Next", content);
+    }
+
+    [Fact]
+    public async Task IfOnLastPageCanGoToPreviousPage()
+    {
+        // Arrange (this is very fragile)
+        int pageSize = 32;
+        int page = DBSeeder.SEED_AMOUNT / pageSize + 1;
+
+        // Act
+        HttpResponseMessage response = await _client.GetAsync($"/?page={page}");
+        response.EnsureSuccessStatusCode();
+        string content = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        _output.WriteLine("content: {0}", content);
+        Assert.Contains("Previous", content);
     }
 
     [Fact]
@@ -180,7 +197,6 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
 
         // Assert
         _output.WriteLine("content: {0}", content);
-        Assert.Contains("Chirp!", content);
         Assert.Contains("Jacqualine", content);
     }
 

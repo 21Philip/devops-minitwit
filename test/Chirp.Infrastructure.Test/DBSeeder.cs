@@ -7,7 +7,7 @@ namespace Chirp.Infrastructure.Test;
 
 public class DBSeeder
 {
-    public const int SEED_AMOUNT = 10;
+    public const int SEED_AMOUNT = 100;
 
     public async static Task Seed(CheepDBContext dbContext)
     {
