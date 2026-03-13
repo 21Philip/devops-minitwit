@@ -17,7 +17,7 @@ public class DBSeeder
         for (int i = 0; i < CustomWebApplicationFactory.SEED_AMOUNT; i++)
         {
             string email = $"test_email{i}";
-            await authorRepository.CreateAuthor(email, $"test_name", "test_pwd");
+            await authorRepository.CreateAuthor(email, $"test_name{i}", "test_pwd");
 
             Author testAuthor = await authorRepository.FindAuthorWithEmail(email);
             Cheep testCheep = new Cheep()
