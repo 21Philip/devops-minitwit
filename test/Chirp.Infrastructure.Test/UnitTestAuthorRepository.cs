@@ -428,7 +428,7 @@ public class UnitTestAuthorRepository
 
         await dbContext.Authors.AddAsync(author);
         await dbContext.SaveChangesAsync();
-        
+
         Author foundAuthor = await authorRepository.FindAuthorWithId(author.Id);
         Assert.Equal(author, foundAuthor);
 

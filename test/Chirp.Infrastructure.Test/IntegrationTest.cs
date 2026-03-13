@@ -124,7 +124,7 @@ public class IntegrationTests : IClassFixture<CustomWebApplicationFactory>
     {
         // Arrange (this is very fragile)
         int pageSize = 32;
-        int page = CustomWebApplicationFactory.SEED_AMOUNT/pageSize;
+        int page = CustomWebApplicationFactory.SEED_AMOUNT / pageSize;
 
         // Act
         HttpResponseMessage response = await _client.GetAsync($"/?page={page}");

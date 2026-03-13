@@ -326,7 +326,7 @@ namespace Chirp.API.Controllers
             {
                 return NotFound();
             }
-            
+
             if (await _authorRepository.DeleteAuthor(author))
             {
                 return NoContent();

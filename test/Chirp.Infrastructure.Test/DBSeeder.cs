@@ -23,7 +23,7 @@ public class DBSeeder
                 TimeStamp = DateTime.UtcNow,
                 Author = testAuthor,
                 AuthorId = testAuthor.Id
-            };  
+            };
 
             await cheepRepository.SaveCheep(testCheep, testAuthor);
         }
