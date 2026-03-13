@@ -20,7 +20,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     public async Task InitializeAsync()
     {
         await _postgres.StartAsync();
-        DBSeeder.Seed(this);
+        DBSeeder.Seed(Services.CreateScope().ServiceProvider);
     }
 
     public new async Task DisposeAsync()

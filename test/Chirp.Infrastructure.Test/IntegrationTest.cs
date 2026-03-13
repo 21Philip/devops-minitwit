@@ -179,9 +179,8 @@ public class IntegrationTests : IClassFixture<CustomWebApplicationFactory>
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
-        _output.WriteLine("content: {0}", content); // Log the content for debugging
-
         // Assert
+        _output.WriteLine("content: {0}", content);
         Assert.Contains("Chirp!", content);
         Assert.Contains("Jacqualine", content);
     }

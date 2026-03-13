@@ -6,11 +6,8 @@ namespace Chirp.Infrastructure.Test;
 
 public class DBSeeder
 {
-    public async static void Seed(CustomWebApplicationFactory factory)
+    public async static void Seed(IServiceProvider services)
     {
-        using var scope = factory.Services.CreateScope();
-        var services = scope.ServiceProvider;
-
         var authorRepository = services.GetRequiredService<AuthorRepository>();
         var cheepRepository = services.GetRequiredService<CheepRepository>();
 
