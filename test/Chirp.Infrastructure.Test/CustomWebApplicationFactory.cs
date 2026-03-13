@@ -10,7 +10,7 @@ namespace Chirp.Infrastructure.Test;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:16")
+    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17")
         .WithDatabase("testdb")
         .WithUsername("postgres")
         .WithPassword("postgres")
@@ -46,11 +46,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
             var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
             db.Database.EnsureCreated();
 
-            // Replace existing dataprotection with ephemeral one.
+            // Replace existing data protection with ephemeral one.
             var dpDescriptors = services
                 .Where(d => d.ServiceType.FullName?.Contains("DataProtection") == true)
                 .ToList();
-                
+
             foreach (var d in dpDescriptors)
                 services.Remove(d);
 

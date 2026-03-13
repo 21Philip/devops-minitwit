@@ -35,7 +35,6 @@ namespace Chirp.API.Controllers
         private readonly IAuthorRepository _authorRepository;
         private readonly ICheepRepository _cheepRepository;
         private readonly IGlobalIntRepository _globalIntRepository;
-        private readonly UserManager<Author> _userManager;
 
         /// <summary>
         /// Constructor for MinitwitApiController. Dependency Injection of IAuthorRepository and ICheepRepository is used to access the data layer.
@@ -43,13 +42,11 @@ namespace Chirp.API.Controllers
         public MinitwitApiController(
             IAuthorRepository authorRepository,
             ICheepRepository cheepRepository,
-            IGlobalIntRepository globalIntRepository,
-            UserManager<Author> userManager)
+            IGlobalIntRepository globalIntRepository)
         {
             _authorRepository = authorRepository;
             _cheepRepository = cheepRepository;
             _globalIntRepository = globalIntRepository;
-            _userManager = userManager;
         }
 
         /// <summary>
@@ -303,22 +300,12 @@ namespace Chirp.API.Controllers
                 await _globalIntRepository.Put("latest", value);
             }
 
-            var user = new Author
-            {
-                Email = payload.Email,
-                UserName = payload.Email,
-                Name = payload.Username,
-                Cheeps = [],
-            };
-
-            IdentityResult result = await _userManager.CreateAsync(user, payload.Pwd);
-
-            if (result.Succeeded)
+            if (await _authorRepository.CreateAuthor(payload.Email, payload.Username, payload.Pwd))
             {
                 return NoContent();
             }
 
-            return BadRequest(result.Errors);
+            return BadRequest();
         }
 
         /// <summary>
@@ -339,15 +326,13 @@ namespace Chirp.API.Controllers
             {
                 return NotFound();
             }
-
-            IdentityResult result = await _userManager.DeleteAsync(author);
             
-            if (result.Succeeded)
+            if (await _authorRepository.DeleteAuthor(author))
             {
                 return NoContent();
             }
 
-            return BadRequest(result.Errors);
+            return BadRequest();
         }
     }
 }

@@ -9,9 +9,11 @@ namespace Chirp.Infrastructure.Test
 {
     public class IntegrationTests : IClassFixture<CustomWebApplicationFactory>
     {
-        private readonly HttpClient _client;
         private readonly ITestOutputHelper _output;
         private readonly CustomWebApplicationFactory _factory;
+        private readonly HttpClient _client;
+        private readonly AuthorRepository _authorRepository;
+        private readonly CheepRepository _cheepRepository;
 
         public IntegrationTests(CustomWebApplicationFactory factory, ITestOutputHelper output)
         {
@@ -23,6 +25,12 @@ namespace Chirp.Infrastructure.Test
                 AllowAutoRedirect = true,
                 HandleCookies = true
             });
+
+            using var scope = _factory.Services.CreateScope();
+            var services = scope.ServiceProvider;
+
+            _authorRepository = services.GetRequiredService<AuthorRepository>();
+            _cheepRepository = services.GetRequiredService<CheepRepository>();
         }
 
 
@@ -46,10 +54,16 @@ namespace Chirp.Infrastructure.Test
         [Fact]
         public async Task FindTimelineByAuthor()
         {
+            // Arrange
+            await _authorRepository.CreateAuthor("Jacqualine.Gilcoine@gmail.com", "Jacqualine Gilcoine", "123");
+            await _cheepRepository.SaveCheep()
+
+            // Act
             HttpResponseMessage response = await _client.GetAsync($"/Jacqualine Gilcoine");
             response.EnsureSuccessStatusCode();
             string content = await response.Content.ReadAsStringAsync();
 
+            // Assert
             _output.WriteLine("content: {0}", content);
             Assert.Contains("Chirp!", content);
             Assert.Contains("Jacqualine", content);
