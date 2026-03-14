@@ -4,11 +4,11 @@ using Xunit;
 namespace Chirp.Web.Playwright.Test;
 
 [TestFixture, NonParallelizable]
-public class UiTests : PageTest, IClassFixture<CustomTestWebApplicationFactory>, IDisposable
+public class UiTests : PageTest, IClassFixture<PlaywrightFixture>, IDisposable
 {
     private IBrowserContext? _context;
     private IBrowser? _browser;
-    private CustomTestWebApplicationFactory _factory;
+    private PlaywrightFixture _fixture;
     private string _serverAddress;
     private IPlaywright _playwright;
     private IPage _page = null!;
@@ -16,8 +16,8 @@ public class UiTests : PageTest, IClassFixture<CustomTestWebApplicationFactory>,
     [SetUp]
     public async Task SetUp()
     {
-        _factory = new CustomTestWebApplicationFactory();
-        _serverAddress = _factory.ServerAddress;
+        _fixture = new PlaywrightFixture();
+        _serverAddress = _fixture.ServerAddress;
 
         await InitializeBrowserAndCreateBrowserContextAsync();
 

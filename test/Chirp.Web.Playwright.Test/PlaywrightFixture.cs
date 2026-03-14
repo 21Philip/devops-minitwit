@@ -20,7 +20,7 @@ Defines a custom factory for the test server environment for the application
 Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0
  */
 
-public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private IHost? _host;
     private static readonly Queue<int> _portQueue = new Queue<int>(Enumerable.Range(5000, 20)); // Range af porte, f.eks. 5000-5999
@@ -51,7 +51,7 @@ public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>, I
         }
     }
 
-    public CustomTestWebApplicationFactory()
+    public PlaywrightFixture()
     {
         _postgres = new PostgreSqlBuilder("postgres:17")
             .WithDatabase("playwrightdb")
