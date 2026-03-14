@@ -200,7 +200,7 @@ namespace Chirp.Infrastructure
 
             foreach (var cheep in cheeps)
             {
-                if (cheep.Text?.ToLower() == text.ToLower() && cheep.TimeStamp.ToString().ToLower() == parsedTimestamp.ToString().ToLower() && cheep.Author != null && cheep.Author.Name?.ToLower() == authorName.ToLower())
+                if (cheep.Text?.ToLower() == text.ToLower() /*&& cheep.TimeStamp.CompareTo(parsedTimestamp) == 0*/ && cheep.Author != null && cheep.Author.Name?.ToLower() == authorName.ToLower())
                 {
                     return cheep;
                 }

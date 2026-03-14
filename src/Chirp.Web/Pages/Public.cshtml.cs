@@ -240,7 +240,8 @@ public class PublicModel : PageModel
 
         if (cheep == null)
         {
-            throw new ArgumentException("Cheep could not be found.");
+            string message = $"Cheep could not be found. Text: {text}, TimeStamp: {timeStamp}, Author: {cheepAuthorName}";
+            throw new ArgumentException(message);
         }
 
         return await CheepRepository.DoesUserLikeCheep(cheep, author);

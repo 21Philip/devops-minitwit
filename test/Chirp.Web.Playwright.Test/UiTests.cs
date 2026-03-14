@@ -46,12 +46,12 @@ public class UiTests : PageTest, IClassFixture<CustomTestWebApplicationFactory>,
         await _page.WaitForURLAsync(new Regex("/Identity/Account/Register$"));
 
         //Username
-        var usernameInput = _page.GetByLabel("Username");
+        var usernameInput = _page.GetByLabel("Name");
         await usernameInput.ClickAsync();
         await Expect(usernameInput).ToBeFocusedAsync();
         await usernameInput.FillAsync("Cecilie");
         await Expect(usernameInput).ToHaveValueAsync("Cecilie");
-        await _page.GetByLabel("Username").PressAsync("Tab");
+        await _page.GetByLabel("Name").PressAsync("Tab");
 
         //Email
         var emailInput = _page.GetByPlaceholder("name@example.com");
@@ -87,9 +87,9 @@ public class UiTests : PageTest, IClassFixture<CustomTestWebApplicationFactory>,
         //first register user, because a new in memory database is created for each test. 
         await _page.GetByRole(AriaRole.Link, new() { NameString = "Register" }).ClickAsync();
         await _page.WaitForURLAsync(new Regex("/Identity/Account/Register$"));
-        await _page.GetByLabel("Username").ClickAsync();
-        await _page.GetByLabel("Username").FillAsync("Cecilie");
-        await _page.GetByLabel("Username").PressAsync("Tab");
+        await _page.GetByLabel("Name").ClickAsync();
+        await _page.GetByLabel("Name").FillAsync("Cecilie");
+        await _page.GetByLabel("Name").PressAsync("Tab");
         await _page.GetByPlaceholder("name@example.com").FillAsync("ceel@itu.dk");
         await _page.Locator("input[id='Input_Password']").ClickAsync();
         await _page.Locator("input[id='Input_Password']").FillAsync("Cecilie1234!");
@@ -463,9 +463,9 @@ public class UiTests : PageTest, IClassFixture<CustomTestWebApplicationFactory>,
         //first register user, because a new in memory database is created for each test.
         await _page.GetByRole(AriaRole.Link, new() { NameString = "Register" }).ClickAsync();
         await _page.WaitForURLAsync(new Regex("/Identity/Account/Register$"));
-        await _page.GetByLabel("Username").ClickAsync();
-        await _page.GetByLabel("Username").FillAsync("Cecilie");
-        await _page.GetByLabel("Username").PressAsync("Tab");
+        await _page.GetByLabel("Name").ClickAsync();
+        await _page.GetByLabel("Name").FillAsync("Cecilie");
+        await _page.GetByLabel("Name").PressAsync("Tab");
         await _page.GetByPlaceholder("name@example.com").FillAsync("ceel@itu.dk");
         await _page.Locator("input[id='Input_Password']").ClickAsync();
         await _page.Locator("input[id='Input_Password']").FillAsync("Cecilie1234!");
@@ -480,7 +480,7 @@ public class UiTests : PageTest, IClassFixture<CustomTestWebApplicationFactory>,
         _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
         _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Headless = true, //Set to false if you want to see the browser
+            Headless = false, //Set to false if you want to see the browser
         });
 
         _context = await _browser.NewContextAsync(new BrowserNewContextOptions());

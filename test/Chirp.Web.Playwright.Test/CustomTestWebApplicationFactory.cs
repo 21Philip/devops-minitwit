@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Npgsql;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -60,7 +60,10 @@ public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>, I
             .Build();
     }
 
-    public async Task InitializeAsync() => await _postgres.StartAsync();
+    public async Task InitializeAsync() 
+    {
+        await _postgres.StartAsync();
+    }
 
     public new async Task DisposeAsync()
     {
@@ -77,18 +80,23 @@ public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>, I
         builder.ConfigureServices(services =>
         {
             // Replace old dbcontext
-            var dbContext = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
-            if (dbContext != null) services.Remove(dbContext);
+            var ctxDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
+            if (ctxDescriptor != null) services.Remove(ctxDescriptor);
 
-            var dbConnection = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
-            if (dbConnection != null) services.Remove(dbConnection);
+            var connDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
+            if (connDescriptor != null) services.Remove(connDescriptor);
+
+            var connectionString = new NpgsqlConnectionStringBuilder(_postgres.GetConnectionString())
+            {
+                IncludeErrorDetail = true
+            }.ToString();
 
             services.AddDbContext<CheepDBContext>(options =>
-                options.UseNpgsql(_postgres.GetConnectionString()));
+                options.UseNpgsql(connectionString));
 
             // Replace old auth
-            var authService = services.SingleOrDefault(d => d.ServiceType == typeof(IAuthenticationService));
-            if (authService != null) services.Remove(authService);
+            var authDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAuthenticationService));
+            if (authDescriptor != null) services.Remove(authDescriptor);
 
             services.AddAuthentication(TestAuthenticationHandler.AuthenticationScheme);
 
@@ -103,6 +111,10 @@ public class CustomTestWebApplicationFactory : WebApplicationFactory<Program>, I
             using var scope = services.BuildServiceProvider().CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
             db.Database.EnsureCreated();
+
+            // Seed database
+            var dbContext = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
+            DBSeeder.Seed(dbContext);
         });
 
         builder.UseEnvironment("Development");
