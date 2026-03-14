@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,14 +40,21 @@ jobs:
       - name: Build project
         run: dotnet build --no-restore -c Release
       
-      - name: Tests (infrastructure only)
+      - name: Run Tests
+        env:
+          Authentication_Github_ClientId: ${{ secrets.GITHUBCLIENTID }}
+          Authentication_Github_ClientSecret: ${{ secrets.GITHUBCLIENTSECRET }}
+        run: |
+          dotnet test test/Chirp.Infrastructure.Test/Chirp.Infrastructure.Test.csproj --no-build -c Release --verbosity normal
+
+      - name: Playwright tests
         run: |
           export Authentication_Github_ClientId="${{ secrets.GITHUBCLIENTID }}"
           export Authentication_Github_ClientSecret="${{ secrets.GITHUBCLIENTSECRET }}"
           dotnet test test/Chirp.Infrastructure.Test/Chirp.Infrastructure.Test.csproj --no-build -c Release --verbosity normal
   
   release:
-    needs: build
+    needs: build_and_test
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
 
@@ -92,7 +99,7 @@ jobs:
             my_project_win.zip
 
   deploy:
-    needs: build
+    needs: build_and_test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
 

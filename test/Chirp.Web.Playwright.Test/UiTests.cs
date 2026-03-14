@@ -480,7 +480,7 @@ public class UiTests : PageTest, IClassFixture<CustomTestWebApplicationFactory>,
         _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
         _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Headless = false, //Set to false if you want to see the browser
+            Headless = true, // Set to false if you want to see the browser
         });
 
         _context = await _browser.NewContextAsync(new BrowserNewContextOptions());
