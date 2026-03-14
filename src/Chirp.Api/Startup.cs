@@ -137,7 +137,7 @@ namespace Org.OpenAPITools
             // Identity for creation of accounts through the API. The tests uses
             // weak passwords so we must override deafult settings to allow for
             // this
-            services.AddDefaultIdentity<Author>(options => 
+            services.AddDefaultIdentity<Author>(options =>
             {
                 options.Password.RequiredLength = 1;
                 options.Password.RequireNonAlphanumeric = false;

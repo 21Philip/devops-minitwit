@@ -47,8 +47,8 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [Display(Name = "Username")]
-            public string Username { get; set; }
+            [Display(Name = "Name")]
+            public string Name { get; set; }
 
             [Required]
             [EmailAddress]
@@ -81,15 +81,6 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
                 return Page();
             }
 
-            // Server-side uniqueness checks to avoid hitting DB unique constraint and to show friendly errors.
-            // Check username (Name) uniqueness
-            var existingByName = await _userManager.Users.FirstOrDefaultAsync(u => u.Name == Input.Username);
-            if (existingByName != null)
-            {
-                ModelState.AddModelError("Input.Username", $"Username '{Input.Username}' is already taken.");
-                return Page();
-            }
-
             // Check email uniqueness
             var existingByEmail = await _userManager.FindByEmailAsync(Input.Email);
             if (existingByEmail != null)
@@ -100,18 +91,18 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
             var user = CreateUser();
 
-            // Use the provided Username as the Identity username (not the email).
-            await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
+            // Due to backwards compatability issues: UserName == Email
+            await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
-            user.Name = Input.Username;
+            user.Name = Input.Name;
             user.Cheeps = new List<Cheep>();
 
             var result = await _userManager.CreateAsync(user, Input.Password);
 
             if (result.Succeeded)
             {
-                var claim = new Claim("Name", Input.Username);
+                var claim = new Claim("Name", Input.Name);
                 await _userManager.AddClaimAsync(user, claim);
                 _logger.LogInformation("User created a new account with password.");
 
