@@ -14,15 +14,15 @@ namespace Chirp.Web.Pages
     {
         private readonly IAuthorRepository authorRepository;
 
-        [BindProperty(SupportsGet = true)]
-        public string? SearchWord { get; set; }
-
-        public List<AuthorDTO> AuthorDTOs { get; set; } = new List<AuthorDTO>();
-
         public SearchResultsModel(IAuthorRepository authorRepository)
         {
             this.authorRepository = authorRepository;
         }
+
+        [BindProperty(SupportsGet = true)]
+        public string? SearchWord { get; set; }
+
+        public List<AuthorDTO> AuthorDTOs { get; set; } = new List<AuthorDTO>();
 
         /// <summary>
         /// Handles the GET request to search authors based on the search input.

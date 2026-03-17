@@ -53,13 +53,6 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
         [TempData]
         public string ErrorMessage { get; set; }
 
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-        }
-
         // This will redirect users to the login page
         public IActionResult OnGet() => this.RedirectToPage("./Login");
 
@@ -219,6 +212,13 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
             }
 
             return (IUserEmailStore<Author>)this.userStore;
+        }
+
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
         }
     }
 }

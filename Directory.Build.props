@@ -10,9 +10,7 @@
   <PropertyGroup>
     <!-- Treat StyleCop violations as errors to fail the build -->
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-
-    <!-- Point all projects to a shared ruleset/config -->
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)stylecop.ruleset</CodeAnalysisRuleSet>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

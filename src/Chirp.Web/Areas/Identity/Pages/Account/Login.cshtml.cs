@@ -31,17 +31,6 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
         [TempData]
         public string ErrorMessage { get; set; }
 
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-
-            [Required]
-            [DataType(DataType.Password)]
-            public string Password { get; set; }
-        }
-
         public void OnGet(string returnUrl = null)
         {
             this.ReturnUrl = returnUrl ?? this.Url.Content("~/");
@@ -73,6 +62,17 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
             this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return this.Page();
+        }
+
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+
+            [Required]
+            [DataType(DataType.Password)]
+            public string Password { get; set; }
         }
     }
 }

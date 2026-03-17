@@ -41,9 +41,9 @@ namespace Chirp.Infrastructure
         /// the old value is replace by the new.
         /// </summary>
         ///
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns><param name="key">The key of the pair./param>.
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns><param name="key">The key of the pair.</param>.
         /// <param name="value">The value of the pair.</param>
-        /// <returns>An integer if key was found, otherwise null</returns>
+        /// <returns>An integer if key was found, otherwise null.</returns>
         public async Task Put(string key, int value)
         {
             var existing = await this.dbContext.GlobalIntegers.FirstOrDefaultAsync(i => i.Key == key);

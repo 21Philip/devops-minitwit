@@ -42,29 +42,6 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public class InputModel
-        {
-            [Display(Name = "NewUserName")]
-            public string NewUserName { get; set; }
-
-            [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
-        }
-
-        private async Task LoadAsync(Author user)
-        {
-            this.Email = await this.userManager.GetEmailAsync(user); // Retrieve email
-            var phoneNumber = await this.userManager.GetPhoneNumberAsync(user);
-            this.Username = user.Name; // Set current username
-
-            this.Input = new InputModel
-            {
-                NewUserName = this.Username, // Pre-fill with the current username
-                PhoneNumber = phoneNumber,
-            };
-        }
-
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await this.userManager.GetUserAsync(this.User);
@@ -175,6 +152,29 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
             await this.signInManager.RefreshSignInAsync(user);
             this.StatusMessage = "Your profile has been updated";
             return this.RedirectToPage();
+        }
+
+        private async Task LoadAsync(Author user)
+        {
+            this.Email = await this.userManager.GetEmailAsync(user); // Retrieve email
+            var phoneNumber = await this.userManager.GetPhoneNumberAsync(user);
+            this.Username = user.Name; // Set current username
+
+            this.Input = new InputModel
+            {
+                NewUserName = this.Username, // Pre-fill with the current username
+                PhoneNumber = phoneNumber,
+            };
+        }
+
+        public class InputModel
+        {
+            [Display(Name = "NewUserName")]
+            public string NewUserName { get; set; }
+
+            [Phone]
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
         }
     }
 }

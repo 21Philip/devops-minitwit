@@ -12,15 +12,22 @@ namespace Chirp.Web.Pages;
 
 public class PublicModel : PageModel
 {
-    public readonly IAuthorRepository AuthorRepository;
-    public readonly ICheepRepository CheepRepository;
-    public readonly SignInManager<Author> SignInManager;
+    private readonly IAuthorRepository authorRepository;
+    private readonly ICheepRepository cheepRepository;
+    private readonly SignInManager<Author> signInManager;
 
-    public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
+    public PublicModel(ICheepRepository cheepRepository, IAuthorRepository authorRepository, SignInManager<Author> signInManager)
+    {
+        this.cheepRepository = cheepRepository;
+        this.authorRepository = authorRepository;
+        this.signInManager = signInManager;
+    }
 
-    public int PageSize = 32;
+    public int PageSize { get; } = 32;
 
     public int PageNumber { get; set; }
+
+    public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
 
     [BindProperty]
     [StringLength(160, ErrorMessage = "Cheep cannot be more than 160 characters.")]
@@ -32,13 +39,6 @@ public class PublicModel : PageModel
 
     public List<Author> FollowedAuthors { get; set; } = new List<Author>();
 
-    public PublicModel(ICheepRepository cheepRepository, IAuthorRepository authorRepository, SignInManager<Author> signInManager)
-    {
-        this.CheepRepository = cheepRepository;
-        this.AuthorRepository = authorRepository;
-        this.SignInManager = signInManager;
-    }
-
     /// <summary>
     /// Handles GET requests to display the public timeline and user-specific data if authenticated.
     /// </summary>
@@ -49,11 +49,11 @@ public class PublicModel : PageModel
     public async Task<ActionResult> OnGet()
     {
         // check if logged-in user exists in database, otherwise log out and redirect to public timeline
-        if (this.SignInManager.IsSignedIn(this.User)
+        if (this.signInManager.IsSignedIn(this.User)
             && !string.IsNullOrEmpty(this.User.Identity?.Name)
-            && await this.AuthorRepository.FindIfAuthorExistsWithEmail(this.User.Identity.Name) == false)
+            && await this.authorRepository.FindIfAuthorExistsWithEmail(this.User.Identity.Name) == false)
         {
-            await this.SignInManager.SignOutAsync();
+            await this.signInManager.SignOutAsync();
             var baseUrl = $"{this.Request.Scheme}://{this.Request.Host}";
             return this.Redirect($"{baseUrl}/");
         }
@@ -62,15 +62,15 @@ public class PublicModel : PageModel
         var pageQuery = this.Request.Query["page"];
         this.PageNumber = int.TryParse(pageQuery, out int page) ? page : 1;
 
-        this.Cheeps = await this.CheepRepository.GetCheeps(this.PageNumber, this.PageSize);
+        this.Cheeps = await this.cheepRepository.GetCheeps(this.PageNumber, this.PageSize);
 
         if (this.User.Identity?.IsAuthenticated == true)
         {
             var authorEmail = this.User.FindFirst(ClaimTypes.Name)?.Value;
             if (!string.IsNullOrEmpty(authorEmail))
             {
-                var loggedInAuthor = await this.AuthorRepository.FindAuthorWithEmail(authorEmail);
-                this.FollowedAuthors = await this.AuthorRepository.GetFollowing(loggedInAuthor.Id);
+                var loggedInAuthor = await this.authorRepository.FindAuthorWithEmail(authorEmail);
+                this.FollowedAuthors = await this.authorRepository.GetFollowing(loggedInAuthor.Id);
             }
         }
 
@@ -90,7 +90,7 @@ public class PublicModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
-        var author = await this.AuthorRepository.FindAuthorWithEmail(authorName);
+        var author = await this.authorRepository.FindAuthorWithEmail(authorName);
         var cheep = new Cheep
         {
             AuthorId = author.Id,
@@ -101,7 +101,7 @@ public class PublicModel : PageModel
 
         if (cheep.Text != null)
         {
-            await this.CheepRepository.SaveCheep(cheep, author);
+            await this.cheepRepository.SaveCheep(cheep, author);
         }
 
         return this.RedirectToPage();
@@ -122,15 +122,15 @@ public class PublicModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
-        var author = await this.AuthorRepository.FindAuthorWithEmail(authorName);
+        var author = await this.authorRepository.FindAuthorWithEmail(authorName);
 
         // Finds the author that the logged in author wants to follow
-        var followAuthor = await this.AuthorRepository.FindAuthorWithName(followAuthorName);
+        var followAuthor = await this.authorRepository.FindAuthorWithName(followAuthorName);
 
-        await this.AuthorRepository.FollowUserAsync(author.Id, followAuthor.Id);
+        await this.authorRepository.FollowUserAsync(author.Id, followAuthor.Id);
 
         // updates the current author's list of followed authors
-        this.FollowedAuthors = await this.AuthorRepository.GetFollowing(author.Id);
+        this.FollowedAuthors = await this.authorRepository.GetFollowing(author.Id);
 
         return this.RedirectToPage();
     }
@@ -150,15 +150,15 @@ public class PublicModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
-        var author = await this.AuthorRepository.FindAuthorWithEmail(authorName);
+        var author = await this.authorRepository.FindAuthorWithEmail(authorName);
 
         // Finds the author that the logged in author wants to follow
-        var followAuthor = await this.AuthorRepository.FindAuthorWithName(followAuthorName);
+        var followAuthor = await this.authorRepository.FindAuthorWithName(followAuthorName);
 
-        await this.AuthorRepository.UnFollowUserAsync(author.Id, followAuthor.Id);
+        await this.authorRepository.UnFollowUserAsync(author.Id, followAuthor.Id);
 
         // updates the current author's list of followed authors
-        this.FollowedAuthors = await this.AuthorRepository.GetFollowing(author.Id);
+        this.FollowedAuthors = await this.authorRepository.GetFollowing(author.Id);
 
         return this.RedirectToPage();
     }
@@ -180,8 +180,8 @@ public class PublicModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
-        var author = await this.AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await this.CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
+        var author = await this.authorRepository.FindAuthorWithName(authorName);
+        var cheep = await this.cheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
 
         if (cheep == null)
         {
@@ -189,9 +189,9 @@ public class PublicModel : PageModel
         }
 
         // Adds the cheep to the author's list of liked cheeps
-        await this.CheepRepository.LikeCheep(cheep, author);
+        await this.cheepRepository.LikeCheep(cheep, author);
 
-        this.LikedCheeps = await this.AuthorRepository.GetLikedCheeps(author.Id);
+        this.LikedCheeps = await this.authorRepository.GetLikedCheeps(author.Id);
 
         return this.RedirectToPage();
     }
@@ -213,17 +213,17 @@ public class PublicModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
-        var author = await this.AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await this.CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
+        var author = await this.authorRepository.FindAuthorWithName(authorName);
+        var cheep = await this.cheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
 
         if (cheep == null)
         {
             throw new ArgumentException("Cheep could not be found.");
         }
 
-        await this.CheepRepository.UnLikeCheep(cheep, author);
+        await this.cheepRepository.UnLikeCheep(cheep, author);
 
-        this.LikedCheeps = await this.AuthorRepository.GetLikedCheeps(author.Id);
+        this.LikedCheeps = await this.authorRepository.GetLikedCheeps(author.Id);
 
         return this.RedirectToPage();
     }
@@ -244,8 +244,8 @@ public class PublicModel : PageModel
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
-        var author = await this.AuthorRepository.FindAuthorWithName(authorName);
-        var cheep = await this.CheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
+        var author = await this.authorRepository.FindAuthorWithName(authorName);
+        var cheep = await this.cheepRepository.FindCheep(text, timeStamp, cheepAuthorName);
 
         if (cheep == null)
         {
@@ -253,6 +253,6 @@ public class PublicModel : PageModel
             throw new ArgumentException(message);
         }
 
-        return await this.CheepRepository.DoesUserLikeCheep(cheep, author);
+        return await this.cheepRepository.DoesUserLikeCheep(cheep, author);
     }
 }
