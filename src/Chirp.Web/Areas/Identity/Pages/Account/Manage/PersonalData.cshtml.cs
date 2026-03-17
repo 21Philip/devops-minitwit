@@ -18,14 +18,10 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
     public class PersonalDataModel : PageModel
     {
         private readonly UserManager<Author> userManager;
-        private readonly ILogger<PersonalDataModel> logger;
 
-        public PersonalDataModel(
-            UserManager<Author> userManager,
-            ILogger<PersonalDataModel> logger)
+        public PersonalDataModel(UserManager<Author> userManager)
         {
             this.userManager = userManager;
-            this.logger = logger;
         }
 
         public async Task<IActionResult> OnGet()

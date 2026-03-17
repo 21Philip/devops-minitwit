@@ -51,7 +51,7 @@ public class PublicModel : PageModel
         // check if logged-in user exists in database, otherwise log out and redirect to public timeline
         if (this.signInManager.IsSignedIn(this.User)
             && !string.IsNullOrEmpty(this.User.Identity?.Name)
-            && await this.authorRepository.FindIfAuthorExistsWithEmail(this.User.Identity.Name) == false)
+            && !await this.authorRepository.FindIfAuthorExistsWithEmail(this.User.Identity.Name))
         {
             await this.signInManager.SignOutAsync();
             var baseUrl = $"{this.Request.Scheme}://{this.Request.Host}";

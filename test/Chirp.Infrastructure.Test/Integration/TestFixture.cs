@@ -1,6 +1,6 @@
 // Copyright (c) devops-gruppe-connie. All rights reserved.
 
-using Chirp.Core;
+using Chirp.Web;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

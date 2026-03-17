@@ -5,7 +5,10 @@ using Chirp.Infrastructure;
 using Chirp.Web.Monitoring;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using Prometheus;
+
+namespace Chirp.Web;
 
 public class Program
 {

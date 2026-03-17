@@ -20,16 +20,13 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
     public class DownloadPersonalDataModel : PageModel
     {
         private readonly UserManager<Author> userManager;
-        private readonly ILogger<DownloadPersonalDataModel> logger;
         private readonly IAuthorRepository authorRepository;
 
         public DownloadPersonalDataModel(
             UserManager<Author> userManager,
-            ILogger<DownloadPersonalDataModel> logger,
             IAuthorRepository authorRepository)
         {
             this.userManager = userManager;
-            this.logger = logger;
             this.authorRepository = authorRepository;
         }
 

@@ -25,22 +25,19 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
         private readonly UserManager<Author> userManager;
         private readonly IUserStore<Author> userStore;
         private readonly IUserEmailStore<Author> emailStore;
-        private readonly IEmailSender emailSender;
         private readonly ILogger<ExternalLoginModel> logger;
 
         public ExternalLoginModel(
             SignInManager<Author> signInManager,
             UserManager<Author> userManager,
             IUserStore<Author> userStore,
-            ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            ILogger<ExternalLoginModel> logger)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.userStore = userStore;
             this.emailStore = this.GetEmailStore();
             this.logger = logger;
-            this.emailSender = emailSender;
         }
 
         [BindProperty]

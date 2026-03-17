@@ -19,20 +19,17 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<Author> userManager;
         private readonly SignInManager<Author> signInManager;
-        private readonly ILogger<DeletePersonalDataModel> logger;
         private readonly CheepDBContext context;
         private readonly IAuthorRepository authorRepository;
 
         public DeletePersonalDataModel(
             UserManager<Author> userManager,
             SignInManager<Author> signInManager,
-            ILogger<DeletePersonalDataModel> logger,
             CheepDBContext context,
             IAuthorRepository authorRepository)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
-            this.logger = logger;
             this.context = context;
             this.authorRepository = authorRepository;
         }
@@ -71,13 +68,12 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
             }
 
             this.RequirePassword = await this.userManager.HasPasswordAsync(user);
-            if (this.RequirePassword)
+            bool validPassword = await this.userManager.CheckPasswordAsync(user, this.Input.Password);
+
+            if (this.RequirePassword && !validPassword)
             {
-                if (!await this.userManager.CheckPasswordAsync(user, this.Input.Password))
-                {
-                    this.ModelState.AddModelError(string.Empty, "Incorrect password.");
-                    return this.Page();
-                }
+                this.ModelState.AddModelError(string.Empty, "Incorrect password.");
+                return this.Page();
             }
 
             var authorName = this.User.FindFirst("Name")?.Value ?? "User";

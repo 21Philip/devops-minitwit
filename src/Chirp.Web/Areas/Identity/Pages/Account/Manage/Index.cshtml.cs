@@ -21,15 +21,11 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<Author> userManager;
         private readonly SignInManager<Author> signInManager;
-        private readonly CheepDBContext context;
-        private readonly ICheepRepository cheepRepository;
 
-        public IndexModel(UserManager<Author> userManager, SignInManager<Author> signInManager, CheepDBContext context, ICheepRepository cheepRepository)
+        public IndexModel(UserManager<Author> userManager, SignInManager<Author> signInManager)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
-            this.context = context;
-            this.cheepRepository = cheepRepository;
         }
 
         public string Email { get; set; }

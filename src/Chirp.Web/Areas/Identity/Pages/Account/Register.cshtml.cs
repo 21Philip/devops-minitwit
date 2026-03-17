@@ -2,18 +2,12 @@
 
 #nullable disable
 
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using Chirp.Core;
-using Chirp.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Chirp.Web.Areas.Identity.Pages.Account
 {
@@ -24,21 +18,18 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
         private readonly IUserStore<Author> userStore;
         private readonly IUserEmailStore<Author> emailStore;
         private readonly ILogger<RegisterModel> logger;
-        private readonly ICheepRepository cheepRepository;
 
         public RegisterModel(
             UserManager<Author> userManager,
             IUserStore<Author> userStore,
             SignInManager<Author> signInManager,
-            ILogger<RegisterModel> logger,
-            ICheepRepository cheepRepository)
+            ILogger<RegisterModel> logger)
         {
             this.userManager = userManager;
             this.userStore = userStore;
             this.emailStore = this.GetEmailStore();
             this.signInManager = signInManager;
             this.logger = logger;
-            this.cheepRepository = cheepRepository;
         }
 
         [BindProperty]

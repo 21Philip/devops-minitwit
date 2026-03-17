@@ -20,16 +20,13 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
     public class EmailModel : PageModel
     {
         private readonly UserManager<Author> userManager;
-        private readonly SignInManager<Author> signInManager;
         private readonly IEmailSender emailSender;
 
         public EmailModel(
             UserManager<Author> userManager,
-            SignInManager<Author> signInManager,
             IEmailSender emailSender)
         {
             this.userManager = userManager;
-            this.signInManager = signInManager;
             this.emailSender = emailSender;
         }
 
