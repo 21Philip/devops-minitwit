@@ -87,7 +87,9 @@ namespace Chirp.API.Controllers
 
             return this.Ok(new FollowsResponse
             {
-                Follows =[.. names],
+#pragma warning disable SA1010, SA1003
+                Follows = [.. names],
+#pragma warning restore SA1010, SA1003
             });
         }
 

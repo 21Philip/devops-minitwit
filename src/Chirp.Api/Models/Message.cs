@@ -52,6 +52,20 @@ namespace Org.OpenAPITools.Models
         [DataMember(Name = "user", EmitDefaultValue = false)]
         public string? User { get; set; }
 
+#pragma warning disable 1591
+
+        public static bool operator ==(Message left, Message right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(Message left, Message right)
+        {
+            return !Equals(left, right);
+        }
+
+#pragma warning restore 1591
+
         /// <summary>
         /// Returns the string presentation of the object.
         /// </summary>
@@ -157,19 +171,5 @@ namespace Org.OpenAPITools.Models
                 return hashCode;
             }
         }
-
-#pragma warning disable 1591
-
-        public static bool operator ==(Message left, Message right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(Message left, Message right)
-        {
-            return !Equals(left, right);
-        }
-
-#pragma warning restore 1591
     }
 }

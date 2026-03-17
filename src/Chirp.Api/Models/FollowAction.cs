@@ -44,6 +44,20 @@ namespace Org.OpenAPITools.Models
         [DataMember(Name = "unfollow", EmitDefaultValue = false)]
         public string? Unfollow { get; set; }
 
+#pragma warning disable 1591
+
+        public static bool operator ==(FollowAction left, FollowAction right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(FollowAction left, FollowAction right)
+        {
+            return !Equals(left, right);
+        }
+
+#pragma warning restore 1591
+
         /// <summary>
         /// Returns the string presentation of the object.
         /// </summary>
@@ -139,19 +153,5 @@ namespace Org.OpenAPITools.Models
                 return hashCode;
             }
         }
-
-#pragma warning disable 1591
-
-        public static bool operator ==(FollowAction left, FollowAction right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(FollowAction left, FollowAction right)
-        {
-            return !Equals(left, right);
-        }
-
-#pragma warning restore 1591
     }
 }

@@ -20,7 +20,6 @@ namespace Org.OpenAPITools.Formatters
     /// <inheritdoc />
     public class InputFormatterStream : InputFormatter
     {
-        /// <inheritdoc />
         public InputFormatterStream()
         {
             this.SupportedMediaTypes.Add("application/octet-stream");

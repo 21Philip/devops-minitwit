@@ -36,6 +36,20 @@ namespace Org.OpenAPITools.Models
         [DataMember(Name = "follows", EmitDefaultValue = false)]
         public List<string> Follows { get; set; }
 
+#pragma warning disable 1591
+
+        public static bool operator ==(FollowsResponse left, FollowsResponse right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(FollowsResponse left, FollowsResponse right)
+        {
+            return !Equals(left, right);
+        }
+
+#pragma warning restore 1591
+
         /// <summary>
         /// Returns the string presentation of the object.
         /// </summary>
@@ -122,19 +136,5 @@ namespace Org.OpenAPITools.Models
                 return hashCode;
             }
         }
-
-#pragma warning disable 1591
-
-        public static bool operator ==(FollowsResponse left, FollowsResponse right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(FollowsResponse left, FollowsResponse right)
-        {
-            return !Equals(left, right);
-        }
-
-#pragma warning restore 1591
     }
 }
