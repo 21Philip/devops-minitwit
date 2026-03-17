@@ -57,6 +57,8 @@ services:
         condition: service_healthy
     networks:
       - internal
+    labels:
+      logging: "promtail"
 
   prometheus:
     image: cecilieelkjaer/prometheus_image:latest
@@ -74,6 +76,35 @@ services:
       - "9090:9090"
     networks:
       - internal
+    labels:
+      logging: "promtail"
+  
+  loki:
+    image: grafana/loki:3.6.7
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - internal
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.6.0
+    container_name: promtail
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - internal
+    depends_on:
+      - loki
+    restart: unless-stopped
 
   grafana:
     image: cecilieelkjaer/grafana_image:latest
@@ -90,12 +121,16 @@ services:
     networks:
       - internal
     volumes:
-      - grafana-storage:/var/lib/grafana      
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - loki
+    restart: unless-stopped    
 
 volumes:
   grafana-storage: {}
   postgres_data:
   dataprotection_keys:
+  loki-data:
 
 networks:
   internal:
