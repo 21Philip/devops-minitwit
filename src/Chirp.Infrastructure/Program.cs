@@ -1,3 +1,3 @@
-// See https://aka.ms/new-console-template for more information
+// Copyright (c) devops-gruppe-connie. All rights reserved.
 
 Console.WriteLine("Hello, World!");

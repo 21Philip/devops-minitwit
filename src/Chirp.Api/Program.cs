@@ -1,15 +1,17 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 namespace Org.OpenAPITools
 {
     /// <summary>
-    /// Program
+    /// Program.
     /// </summary>
     public class Program
     {
         /// <summary>
-        /// Main
+        /// Main.
         /// </summary>
         /// <param name="args"></param>
         public static void Main(string[] args)
@@ -21,7 +23,7 @@ namespace Org.OpenAPITools
         /// Create the host builder.
         /// </summary>
         /// <param name="args"></param>
-        /// <returns>IHostBuilder</returns>
+        /// <returns>IHostBuilder.</returns>
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>

@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Chirp.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -51,7 +53,7 @@ namespace Chirp.Infrastructure
             // Configure many-to-many relationship between Cheeps and Authors who like them.
             modelBuilder.Entity<Cheep>()
                 .HasMany(c => c.LikedByAuthors) // Cheep has many Authors who liked it
-                .WithMany(a => a.LikedCheeps)  // Author can like many Cheeps
+                .WithMany(a => a.LikedCheeps) // Author can like many Cheeps
                 .UsingEntity(j => j.ToTable("AuthorLikedCheeps"));  // Join table
 
             // Configure many-to-many relationship for following authors.

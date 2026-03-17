@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable

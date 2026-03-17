@@ -1,0 +1,16 @@
+{
+    "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+    "settings": {
+        "documentationRules": {
+            "companyName": "devops-gruppe-connie",
+            "xmlHeader": false,
+            "documentInterfaces": false,
+            "documentPrivateElements": false,
+            "documentPrivateFields": false,
+            "documentExposedElements": false
+        },
+        "orderingRules": {
+            "usingDirectivesPlacement": "outsideNamespace"
+        }
+    }
+}

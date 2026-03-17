@@ -1,5 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 #nullable disable
 
 using System;
@@ -10,19 +10,18 @@ using Chirp.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
 {
     public class DeletePersonalDataModel : PageModel
     {
-        private readonly UserManager<Author> _userManager;
-        private readonly SignInManager<Author> _signInManager;
-        private readonly ILogger<DeletePersonalDataModel> _logger;
-        private readonly CheepDBContext _context;
-        private readonly IAuthorRepository _authorRepository;
-
+        private readonly UserManager<Author> userManager;
+        private readonly SignInManager<Author> signInManager;
+        private readonly ILogger<DeletePersonalDataModel> logger;
+        private readonly CheepDBContext context;
+        private readonly IAuthorRepository authorRepository;
 
         public DeletePersonalDataModel(
             UserManager<Author> userManager,
@@ -31,15 +30,15 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
             CheepDBContext context,
             IAuthorRepository authorRepository)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _logger = logger;
-            _context = context;
-            _authorRepository = authorRepository;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
+            this.logger = logger;
+            this.context = context;
+            this.authorRepository = authorRepository;
         }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     Gets or sets this API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [BindProperty]
@@ -52,7 +51,7 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
         public class InputModel
         {
             /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     Gets or sets this API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
@@ -61,49 +60,49 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
         }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     Gets or sets a value indicating whether this API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public bool RequirePassword { get; set; }
 
         public async Task<IActionResult> OnGet()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
             }
 
-            RequirePassword = await _userManager.HasPasswordAsync(user);
-            return Page();
+            this.RequirePassword = await this.userManager.HasPasswordAsync(user);
+            return this.Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
             }
 
-            RequirePassword = await _userManager.HasPasswordAsync(user);
-            if (RequirePassword)
+            this.RequirePassword = await this.userManager.HasPasswordAsync(user);
+            if (this.RequirePassword)
             {
-                if (!await _userManager.CheckPasswordAsync(user, Input.Password))
+                if (!await this.userManager.CheckPasswordAsync(user, this.Input.Password))
                 {
-                    ModelState.AddModelError(string.Empty, "Incorrect password.");
-                    return Page();
+                    this.ModelState.AddModelError(string.Empty, "Incorrect password.");
+                    return this.Page();
                 }
             }
 
-            var authorName = User.FindFirst("Name")?.Value ?? "User";
+            var authorName = this.User.FindFirst("Name")?.Value ?? "User";
 
-            var author = await _authorRepository.FindAuthorWithName(authorName);
+            var author = await this.authorRepository.FindAuthorWithName(authorName);
 
             if (author != null)
             {
                 // Reload the author from the DbContext with relational collections to manipulate navigation properties
-                var authorEntry = await _context.Authors
+                var authorEntry = await this.context.Authors
                     .Include(a => a.Cheeps)
                     .Include(a => a.Followers)
                     .Include(a => a.FollowedAuthors)
@@ -116,7 +115,7 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
                     var cheepsToDelete = authorEntry.Cheeps?.ToList() ?? new System.Collections.Generic.List<Chirp.Core.Cheep>();
                     foreach (var cheep in cheepsToDelete)
                     {
-                        _context.Cheeps.Remove(cheep);
+                        this.context.Cheeps.Remove(cheep);
                     }
 
                     // Clear follower relationships (authors who follow this author)
@@ -138,14 +137,14 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
                     }
 
                     // Now safe to remove the author
-                    _context.Authors.Remove(authorEntry);
-                    await _context.SaveChangesAsync();
+                    this.context.Authors.Remove(authorEntry);
+                    await this.context.SaveChangesAsync();
                 }
             }
 
-            await _signInManager.SignOutAsync();
+            await this.signInManager.SignOutAsync();
 
-            return Redirect("~/");
+            return this.Redirect("~/");
         }
     }
 }

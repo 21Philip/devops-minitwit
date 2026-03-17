@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using System.Reflection.Metadata;
 using Chirp.Core;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -7,15 +9,15 @@ namespace Chirp.Infrastructure.Test;
 
 public class DBSeeder
 {
-    public const int SEED_AMOUNT = 100;
+    public const int SEEDAMOUNT = 100;
 
-    public async static Task Seed(CheepDBContext dbContext)
+    public static async Task Seed(CheepDBContext dbContext)
     {
-        for (int i = 0; i < SEED_AMOUNT; i++)
+        for (int i = 0; i < SEEDAMOUNT; i++)
         {
             string email = $"test_email{i}";
 
-            Author testAuthor = new()
+            Author testAuthor = new ()
             {
                 Email = email,
                 UserName = email,
@@ -23,13 +25,13 @@ public class DBSeeder
             };
 
             await dbContext.AddAsync(testAuthor);
-            
-            Cheep testCheep = new()
+
+            Cheep testCheep = new ()
             {
                 Text = $"test_cheep{i}",
                 TimeStamp = DateTime.UtcNow,
                 Author = testAuthor,
-                AuthorId = testAuthor.Id
+                AuthorId = testAuthor.Id,
             };
             await dbContext.AddAsync(testCheep);
 

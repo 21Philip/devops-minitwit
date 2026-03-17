@@ -1,5 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 #nullable disable
 
 using System;
@@ -19,38 +19,36 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
 {
     public class DownloadPersonalDataModel : PageModel
     {
-        private readonly UserManager<Author> _userManager;
-        private readonly ILogger<DownloadPersonalDataModel> _logger;
-        private readonly IAuthorRepository _authorRepository;
-
+        private readonly UserManager<Author> userManager;
+        private readonly ILogger<DownloadPersonalDataModel> logger;
+        private readonly IAuthorRepository authorRepository;
 
         public DownloadPersonalDataModel(
             UserManager<Author> userManager,
             ILogger<DownloadPersonalDataModel> logger,
             IAuthorRepository authorRepository)
         {
-            _userManager = userManager;
-            _logger = logger;
-            _authorRepository = authorRepository;
-
+            this.userManager = userManager;
+            this.logger = logger;
+            this.authorRepository = authorRepository;
         }
 
         public IActionResult OnGet()
         {
-            return NotFound();
+            return this.NotFound();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
             }
 
-            var authorName = User.FindFirst("Name")?.Value ?? "User";
-            var author = await _authorRepository.FindAuthorWithName(authorName);
-            var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+            var authorName = this.User.FindFirst("Name")?.Value ?? "User";
+            var author = await this.authorRepository.FindAuthorWithName(authorName);
+            var baseUrl = $"{this.HttpContext.Request.Scheme}://{this.HttpContext.Request.Host}";
             var followedAuthorsLinks = author.FollowedAuthors?.Select(author =>
                 $"{baseUrl}/{Uri.EscapeDataString(author.Name)}").ToList() ?? new List<string>();
 
@@ -60,18 +58,17 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
                 Email = author.Email,
                 Phonenumber = author.PhoneNumber,
                 FollowedAuthors = followedAuthorsLinks,
-                Cheeps = author.Cheeps
+                Cheeps = author.Cheeps,
             };
 
             var options = new JsonSerializerOptions
             {
-                WriteIndented = true // Enables pretty printing
+                WriteIndented = true, // Enables pretty printing
             };
 
             var jsonData = JsonSerializer.Serialize(data, options);
             var bytes = Encoding.UTF8.GetBytes(jsonData);
-            return File(bytes, "application/json", "PersonalData.json");
-
+            return this.File(bytes, "application/json", "PersonalData.json");
         }
     }
 }

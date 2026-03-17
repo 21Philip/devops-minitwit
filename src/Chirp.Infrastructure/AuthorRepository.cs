@@ -1,36 +1,50 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Chirp.Core;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chirp.Infrastructure
 {
     public interface IAuthorRepository
     {
         Task<Author> FindAuthorWithName(string userName);
+
         Task<Author?> FindAuthorWithNameNullable(string userName);
+
         Task<Author> FindAuthorWithEmail(string email);
+
         Task<bool> IsFollowingAsync(int followerId, int followedId);
+
         Task<List<Author>> GetFollowing(int followerId);
+
         Task<bool> FindIfAuthorExistsWithEmail(string email);
+
         Task FollowUserAsync(int followerId, int followedId);
+
         Task UnFollowUserAsync(int followerId, int followedId);
+
         Task<List<Cheep>> GetLikedCheeps(int userId);
+
         Task<List<AuthorDTO>> SearchAuthorsAsync(string searchWord);
+
         Task<bool> CreateAuthor(string email, string name, string password);
+
         Task<bool> DeleteAuthor(Author author);
     }
+
     /// <summary>
     /// Repository for author-related operations.
     /// </summary>
     public class AuthorRepository : IAuthorRepository
     {
-        private readonly CheepDBContext _dbContext;
-        private readonly UserManager<Author> _userManager;
+        private readonly CheepDBContext dbContext;
+        private readonly UserManager<Author> userManager;
 
         public AuthorRepository(CheepDBContext dbContext, UserManager<Author> userManager)
         {
-            _dbContext = dbContext;
-            _userManager = userManager;
+            this.dbContext = dbContext;
+            this.userManager = userManager;
         }
 
         /// <summary>
@@ -41,7 +55,7 @@ namespace Chirp.Infrastructure
         /// <exception cref="InvalidOperationException">Thrown if no author with the specified name exists.</exception>
         public async Task<Author> FindAuthorWithName(string userName)
         {
-            var author = await _dbContext.Authors
+            var author = await this.dbContext.Authors
                 .Include(a => a.FollowedAuthors!)
                 .ThenInclude(fa => fa.Cheeps)
                 .Include(a => a.Cheeps)
@@ -58,13 +72,13 @@ namespace Chirp.Infrastructure
         }
 
         /// <summary>
-        /// Retrieves and author (without relationsships) by their username. May return null
+        /// Retrieves and author (without relationsships) by their username. May return null.
         /// </summary>
         /// <param name="userName">The username of the author to retrieve.</param>
         /// <returns>An <see cref="Author"/> object if exists; otherwise <c>null</c>.</returns>
         public async Task<Author?> FindAuthorWithNameNullable(string userName)
         {
-            var author = await _dbContext.Authors.FirstOrDefaultAsync(author => author.Name == userName);
+            var author = await this.dbContext.Authors.FirstOrDefaultAsync(author => author.Name == userName);
             return author;
         }
 
@@ -76,7 +90,7 @@ namespace Chirp.Infrastructure
         /// <exception cref="InvalidOperationException">Thrown if no author with the given email exists.</exception>
         public async Task<Author> FindAuthorWithEmail(string email)
         {
-            var author = await _dbContext.Authors.FirstOrDefaultAsync(author => author.Email == email);
+            var author = await this.dbContext.Authors.FirstOrDefaultAsync(author => author.Email == email);
             if (author == null)
             {
                 throw new InvalidOperationException($"Author with email {email} not found.");
@@ -92,7 +106,7 @@ namespace Chirp.Infrastructure
         /// <returns><c>true</c> if an author exists with the specified email; otherwise, <c>false</c>.</returns>
         public async Task<bool> FindIfAuthorExistsWithEmail(string email)
         {
-            var author = await _dbContext.Authors.FirstOrDefaultAsync(author => author.Email == email);
+            var author = await this.dbContext.Authors.FirstOrDefaultAsync(author => author.Email == email);
             if (author == null)
             {
                 return false;
@@ -101,10 +115,9 @@ namespace Chirp.Infrastructure
             return true;
         }
 
-
         public async Task<Author> FindAuthorWithId(int authorId)
         {
-            var author = await _dbContext.Authors.FirstOrDefaultAsync(author => author.Id == authorId);
+            var author = await this.dbContext.Authors.FirstOrDefaultAsync(author => author.Id == authorId);
             if (author == null)
             {
                 throw new InvalidOperationException($"Author with ID {authorId} was not found.");
@@ -124,12 +137,14 @@ namespace Chirp.Infrastructure
         /// <remarks>
         /// This method verifies the relationship using <see cref="IsFollowingAsync"/>.
         /// </remarks>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task FollowUserAsync(int followerId, int followedId)
         {
-            //logged in user
-            var follower = await _dbContext.Authors.SingleOrDefaultAsync(a => a.Id == followerId);
-            //the user that the logged in user wants to follow
-            var followed = await _dbContext.Authors.SingleOrDefaultAsync(a => a.Id == followedId);
+            // logged in user
+            var follower = await this.dbContext.Authors.SingleOrDefaultAsync(a => a.Id == followerId);
+
+            // the user that the logged in user wants to follow
+            var followed = await this.dbContext.Authors.SingleOrDefaultAsync(a => a.Id == followedId);
 
             if (follower == null || follower.Name == null)
             {
@@ -141,11 +156,11 @@ namespace Chirp.Infrastructure
                 throw new InvalidOperationException("Followed author or followed author's name is null.");
             }
 
-            if (!await IsFollowingAsync(followerId, followedId))
+            if (!await this.IsFollowingAsync(followerId, followedId))
             {
                 follower.FollowedAuthors?.Add(followed);
                 followed.Followers?.Add(follower);
-                await _dbContext.SaveChangesAsync();
+                await this.dbContext.SaveChangesAsync();
             }
         }
 
@@ -157,16 +172,17 @@ namespace Chirp.Infrastructure
         /// <remarks>
         /// This method loads the <c>FollowedAuthors</c> list to be able to remove the relationship.
         /// </remarks>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task UnFollowUserAsync(int followerId, int followedId)
         {
             // The logged in Author
-            var follower = await _dbContext.Authors
+            var follower = await this.dbContext.Authors
                 .Include(a => a.FollowedAuthors)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(a => a.Id == followerId);
 
             // The author whom the logged in author is unfollowing
-            var followed = await _dbContext.Authors
+            var followed = await this.dbContext.Authors
                 .SingleOrDefaultAsync(a => a.Id == followedId);
 
             if (follower != null && followed != null)
@@ -174,7 +190,7 @@ namespace Chirp.Infrastructure
                 if (follower.FollowedAuthors?.Contains(followed) == true)
                 {
                     follower.FollowedAuthors.Remove(followed);
-                    await _dbContext.SaveChangesAsync();
+                    await this.dbContext.SaveChangesAsync();
                 }
             }
         }
@@ -187,7 +203,7 @@ namespace Chirp.Infrastructure
         /// <returns><c>true</c> if the follower-followed relationship exists; otherwise, <c>false</c>.</returns>
         public async Task<bool> IsFollowingAsync(int followerId, int followedId)
         {
-            var loggedInUser = await _dbContext.Authors.Include(a => a.FollowedAuthors)
+            var loggedInUser = await this.dbContext.Authors.Include(a => a.FollowedAuthors)
                 .Include(a => a.FollowedAuthors)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(a => a.Id == followerId);
@@ -203,7 +219,7 @@ namespace Chirp.Infrastructure
         /// <exception cref="InvalidOperationException">Thrown if the user or their following list is null.</exception>
         public async Task<List<Author>> GetFollowing(int followerId)
         {
-            var follower = await _dbContext.Authors.Include(a => a.FollowedAuthors)
+            var follower = await this.dbContext.Authors.Include(a => a.FollowedAuthors)
                 .Include(a => a.FollowedAuthors)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(a => a.Id == followerId);
@@ -211,6 +227,7 @@ namespace Chirp.Infrastructure
             {
                 throw new InvalidOperationException("Follower or followed authors is null.");
             }
+
             return follower.FollowedAuthors;
         }
 
@@ -222,16 +239,18 @@ namespace Chirp.Infrastructure
         /// <exception cref="InvalidOperationException">Thrown if the user or their liked Cheeps list is null.</exception>
         public async Task<List<Cheep>> GetLikedCheeps(int userId)
         {
-            var user = await _dbContext.Authors
+            var user = await this.dbContext.Authors
                 .Include(a => a.LikedCheeps)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(a => a.Id == userId);
+
             // user.LikedCheeps cannot be null here because the query ensures it's at least an empty list
             // we added the check so the compiler doesn't give us a warning in the return statement
             if (user == null || user.LikedCheeps == null)
             {
                 throw new InvalidOperationException("User liked cheeps is null.");
             }
+
             return user.LikedCheeps;
         }
 
@@ -250,21 +269,21 @@ namespace Chirp.Infrastructure
             if (searchWord.Length > 2)
             {
                 // Perform a case-insensitive search for authors whose name contains the search word
-                return await _dbContext.Authors
+                return await this.dbContext.Authors
                     .Where(a => EF.Functions.Like(a.Name, $"%{searchWord}%"))
                     .Select(a => new AuthorDTO
                     {
-                        Name = a.Name // Map Author entity to AuthorDTO
+                        Name = a.Name, // Map Author entity to AuthorDTO
                     })
                     .ToListAsync();
             }
             else
             {
-                return await _dbContext.Authors
+                return await this.dbContext.Authors
                     .Where(a => EF.Functions.Like(a.Name, $"{searchWord}%"))
                     .Select(a => new AuthorDTO
                     {
-                        Name = a.Name // Map Author entity to AuthorDTO
+                        Name = a.Name, // Map Author entity to AuthorDTO
                     })
                     .ToListAsync();
             }
@@ -273,10 +292,10 @@ namespace Chirp.Infrastructure
         /// <summary>
         /// Creates a new author/user in the database.
         /// </summary>
-        /// <param name="email">The email of the new author/user</param>
-        /// <param name="name">The name of the new author/user</param>
-        /// <param name="password">The password of the new author/user</param>
-        /// <returns>True if the operation succeeded</returns>
+        /// <param name="email">The email of the new author/user.</param>
+        /// <param name="name">The name of the new author/user.</param>
+        /// <param name="password">The password of the new author/user.</param>
+        /// <returns>True if the operation succeeded.</returns>
         public async Task<bool> CreateAuthor(string email, string name, string password)
         {
             var user = new Author
@@ -284,21 +303,23 @@ namespace Chirp.Infrastructure
                 Email = email,
                 UserName = email,
                 Name = name,
-                Cheeps = [],
+#pragma warning disable SA1010, SA1003
+                Cheeps = [], // SA1010, SA1003 conflict on collection expression syntax
+#pragma warning restore SA1010, SA1003
             };
 
-            IdentityResult result = await _userManager.CreateAsync(user, password);
+            IdentityResult result = await this.userManager.CreateAsync(user, password);
             return result.Succeeded;
         }
 
         /// <summary>
         /// Deletes an author/user from the database.
         /// </summary>
-        /// <param name="author">The author to delete</param>
-        /// <returns>True if the operation succeeded</returns>
+        /// <param name="author">The author to delete.</param>
+        /// <returns>True if the operation succeeded.</returns>
         public async Task<bool> DeleteAuthor(Author author)
         {
-            IdentityResult result = await _userManager.DeleteAsync(author);
+            IdentityResult result = await this.userManager.DeleteAsync(author);
             return result.Succeeded;
         }
     }

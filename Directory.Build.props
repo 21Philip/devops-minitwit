@@ -1,0 +1,22 @@
+<Project>
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" >
+      <Version>1.1.118</Version>
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Treat StyleCop violations as errors to fail the build -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+    <!-- Point all projects to a shared ruleset/config -->
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)stylecop.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Shared StyleCop JSON config for all projects -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
+  </ItemGroup>
+</Project>

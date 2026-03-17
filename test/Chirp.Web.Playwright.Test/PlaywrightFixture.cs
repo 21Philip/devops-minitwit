@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using System.Data.Common;
 using Chirp.Infrastructure;
 using DotNet.Testcontainers.Containers;
@@ -22,15 +24,18 @@ Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-
 
 public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private IHost? _host;
-    private static readonly Queue<int> _portQueue = new Queue<int>(Enumerable.Range(5000, 20)); // Range af porte, f.eks. 5000-5999
-    private readonly PostgreSqlContainer _postgres;
+    private IHost? host;
+    private static readonly Queue<int> PortQueue = new Queue<int>(Enumerable.Range(5000, 20)); // Range af porte, f.eks. 5000-5999
+    private readonly PostgreSqlContainer postgres;
 
     private static int GetNextAvailablePort()
     {
-        lock (_portQueue)
+        lock (PortQueue)
         {
-            if (_portQueue.Count > 0) return _portQueue.Dequeue(); // Hent næste port
+            if (PortQueue.Count > 0)
+            {
+                return PortQueue.Dequeue(); // Hent næste port
+            }
 
             // Hvis køen er tom, så kør en exception eller reinitialize køen
             throw new InvalidOperationException("No available ports left in the range.");
@@ -42,53 +47,65 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
     {
         get
         {
-            if (_host is null) 
+            if (this.host is null)
             {
                 // This forces WebApplicationFactory to bootstrap the server
-                using var client = CreateDefaultClient();
+                using var client = this.CreateDefaultClient();
             }
-            return ClientOptions.BaseAddress.ToString();
+
+            return this.ClientOptions.BaseAddress.ToString();
         }
     }
 
     public PlaywrightFixture()
     {
-        _postgres = new PostgreSqlBuilder("postgres:17")
+        this.postgres = new PostgreSqlBuilder("postgres:17")
             .WithDatabase("playwrightdb")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
     }
 
-    public async Task InitializeAsync() 
+    /// <inheritdoc/>
+    public async Task InitializeAsync()
     {
-        await _postgres.StartAsync();
+        await this.postgres.StartAsync();
     }
 
+    /// <inheritdoc/>
     public new async Task DisposeAsync()
     {
-        await _postgres.DisposeAsync();
+        await this.postgres.DisposeAsync();
         await base.DisposeAsync();
     }
 
+    /// <inheritdoc/>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Ensure the database has spun up
-        if (_postgres.State != TestcontainersStates.Running)
-            _postgres.StartAsync().GetAwaiter().GetResult();
+        if (this.postgres.State != TestcontainersStates.Running)
+        {
+            this.postgres.StartAsync().GetAwaiter().GetResult();
+        }
 
         builder.ConfigureServices(services =>
         {
             // Replace old dbcontext
             var ctxDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
-            if (ctxDescriptor != null) services.Remove(ctxDescriptor);
+            if (ctxDescriptor != null)
+            {
+                services.Remove(ctxDescriptor);
+            }
 
             var connDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
-            if (connDescriptor != null) services.Remove(connDescriptor);
-
-            var connectionString = new NpgsqlConnectionStringBuilder(_postgres.GetConnectionString())
+            if (connDescriptor != null)
             {
-                IncludeErrorDetail = true
+                services.Remove(connDescriptor);
+            }
+
+            var connectionString = new NpgsqlConnectionStringBuilder(this.postgres.GetConnectionString())
+            {
+                IncludeErrorDetail = true,
             }.ToString();
 
             services.AddDbContext<CheepDBContext>(options =>
@@ -96,7 +113,10 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 
             // Replace old auth
             var authDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAuthenticationService));
-            if (authDescriptor != null) services.Remove(authDescriptor);
+            if (authDescriptor != null)
+            {
+                services.Remove(authDescriptor);
+            }
 
             services.AddAuthentication(TestAuthenticationHandler.AuthenticationScheme);
 
@@ -104,7 +124,11 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
             var dpDescriptors = services
                 .Where(d => d.ServiceType.FullName?.Contains("DataProtection") == true)
                 .ToList();
-            foreach (var d in dpDescriptors) services.Remove(d);
+            foreach (var d in dpDescriptors)
+            {
+                services.Remove(d);
+            }
+
             services.AddDataProtection().UseEphemeralDataProtectionProvider();
 
             // Create tables
@@ -120,6 +144,7 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseEnvironment("Development");
     }
 
+    /// <inheritdoc/>
     protected override IHost CreateHost(IHostBuilder builder)
     {
         var testHost = builder.Build();
@@ -129,22 +154,23 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
         builder.ConfigureWebHost(webHostBuilder =>
             webHostBuilder.UseKestrel().UseUrls(baseUrl));
 
-        _host = builder.Build();
-        _host.Start();
+        this.host = builder.Build();
+        this.host.Start();
 
-        var server = _host.Services.GetRequiredService<IServer>();
+        var server = this.host.Services.GetRequiredService<IServer>();
         var addresses = server.Features.Get<IServerAddressesFeature>()
             ?? throw new InvalidOperationException("No server addresses found.");
-        ClientOptions.BaseAddress = addresses.Addresses.Select(x => new Uri(x)).Last();
+        this.ClientOptions.BaseAddress = addresses.Addresses.Select(x => new Uri(x)).Last();
 
         testHost.Start();
         return testHost;
     }
 
+    /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
-        _host?.StopAsync().Wait();
+        this.host?.StopAsync().Wait();
         Thread.Sleep(2000);
-        _host?.Dispose();
+        this.host?.Dispose();
     }
 }

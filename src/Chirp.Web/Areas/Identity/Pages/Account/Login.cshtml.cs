@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 #nullable disable
 
 using System.ComponentModel.DataAnnotations;
@@ -12,13 +14,13 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly SignInManager<Author> _signInManager;
-        private readonly ILogger<LoginModel> _logger;
+        private readonly SignInManager<Author> signInManager;
+        private readonly ILogger<LoginModel> logger;
 
         public LoginModel(SignInManager<Author> signInManager, ILogger<LoginModel> logger)
         {
-            _signInManager = signInManager;
-            _logger = logger;
+            this.signInManager = signInManager;
+            this.logger = logger;
         }
 
         [BindProperty]
@@ -42,34 +44,35 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
         public void OnGet(string returnUrl = null)
         {
-            ReturnUrl = returnUrl ?? Url.Content("~/");
+            this.ReturnUrl = returnUrl ?? this.Url.Content("~/");
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= this.Url.Content("~/");
 
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return Page();
+                return this.Page();
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                Input.Email, Input.Password, isPersistent: true, lockoutOnFailure: false);
+            var result = await this.signInManager.PasswordSignInAsync(
+                this.Input.Email, this.Input.Password, isPersistent: true, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User logged in.");
-                return LocalRedirect(returnUrl);
-            }
-            if (result.IsLockedOut)
-            {
-                _logger.LogWarning("User account locked out.");
-                return RedirectToPage("./Lockout");
+                this.logger.LogInformation("User logged in.");
+                return this.LocalRedirect(returnUrl);
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            return Page();
+            if (result.IsLockedOut)
+            {
+                this.logger.LogWarning("User account locked out.");
+                return this.RedirectToPage("./Lockout");
+            }
+
+            this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return this.Page();
         }
     }
 }

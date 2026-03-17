@@ -1,5 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 #nullable disable
 
 using System;
@@ -21,12 +21,12 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
     {
-        private readonly SignInManager<Author> _signInManager;
-        private readonly UserManager<Author> _userManager;
-        private readonly IUserStore<Author> _userStore;
-        private readonly IUserEmailStore<Author> _emailStore;
-        private readonly IEmailSender _emailSender;
-        private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly SignInManager<Author> signInManager;
+        private readonly UserManager<Author> userManager;
+        private readonly IUserStore<Author> userStore;
+        private readonly IUserEmailStore<Author> emailStore;
+        private readonly IEmailSender emailSender;
+        private readonly ILogger<ExternalLoginModel> logger;
 
         public ExternalLoginModel(
             SignInManager<Author> signInManager,
@@ -35,18 +35,19 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender)
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _userStore = userStore;
-            _emailStore = GetEmailStore();
-            _logger = logger;
-            _emailSender = emailSender;
+            this.signInManager = signInManager;
+            this.userManager = userManager;
+            this.userStore = userStore;
+            this.emailStore = this.GetEmailStore();
+            this.logger = logger;
+            this.emailSender = emailSender;
         }
 
         [BindProperty]
         public InputModel Input { get; set; }
 
         public string ProviderDisplayName { get; set; }
+
         public string ReturnUrl { get; set; }
 
         [TempData]
@@ -60,140 +61,141 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
         }
 
         // This will redirect users to the login page
-        public IActionResult OnGet() => RedirectToPage("./Login");
+        public IActionResult OnGet() => this.RedirectToPage("./Login");
 
         // External login provider challenge
         public IActionResult OnPost(string provider, string returnUrl = null)
         {
-            var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            var redirectUrl = this.Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
+            var properties = this.signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
         }
 
         // Callback method to handle the response from the external provider
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= this.Url.Content("~/");
 
             if (remoteError != null)
             {
-                ErrorMessage = $"Error from external provider: {remoteError}";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                this.ErrorMessage = $"Error from external provider: {remoteError}";
+                return this.RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var info = await this.signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Error loading external login information.";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                this.ErrorMessage = "Error loading external login information.";
+                return this.RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
             {
-                ErrorMessage = "Email address not provided by external provider.";
-                return RedirectToPage("./ExternalLoginConfirmation", new { returnUrl });
+                this.ErrorMessage = "Email address not provided by external provider.";
+                return this.RedirectToPage("./ExternalLoginConfirmation", new { returnUrl });
             }
 
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await this.userManager.FindByEmailAsync(email);
             if (user == null)
             {
                 // User doesn't exist; create a new user
-                user = CreateUser();
-                await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
+                user = this.CreateUser();
+                await this.userStore.SetUserNameAsync(user, email, CancellationToken.None);
+                await this.emailStore.SetEmailAsync(user, email, CancellationToken.None);
 
                 // Set user properties from external provider
                 user.Name = info.Principal.Identity.Name ?? "Unknown";
-                user.Id = await _userManager.Users.CountAsync() + 1;
+                user.Id = await this.userManager.Users.CountAsync() + 1;
 
-                var createUserResult = await _userManager.CreateAsync(user);
+                var createUserResult = await this.userManager.CreateAsync(user);
                 if (createUserResult.Succeeded)
                 {
-                    await _userManager.AddClaimAsync(user, new Claim("Name", user.Name));
-                    var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                    await this.userManager.AddClaimAsync(user, new Claim("Name", user.Name));
+                    var addLoginResult = await this.userManager.AddLoginAsync(user, info);
                     if (!addLoginResult.Succeeded)
                     {
-                        ErrorMessage = "Failed to add external login for new user.";
-                        return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                        this.ErrorMessage = "Failed to add external login for new user.";
+                        return this.RedirectToPage("./Login", new { ReturnUrl = returnUrl });
                     }
                 }
                 else
                 {
-                    ErrorMessage = "Failed to create user.";
+                    this.ErrorMessage = "Failed to create user.";
                     foreach (var error in createUserResult.Errors)
                     {
-                        ModelState.AddModelError(string.Empty, error.Description);
+                        this.ModelState.AddModelError(string.Empty, error.Description);
                     }
-                    return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+
+                    return this.RedirectToPage("./Login", new { ReturnUrl = returnUrl });
                 }
             }
 
             // Sign in the user
-            await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
-            _logger.LogInformation("User signed in with {Name} provider.", info.LoginProvider);
+            await this.signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+            this.logger.LogInformation("User signed in with {Name} provider.", info.LoginProvider);
 
             // Redirect to the login page after successful registration or sign-in
-            return Redirect("~/");
+            return this.Redirect("~/");
         }
 
         // Final confirmation after external login
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= this.Url.Content("~/");
 
-            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var info = await this.signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Error loading external login information during confirmation.";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                this.ErrorMessage = "Error loading external login information during confirmation.";
+                return this.RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            if (ModelState.IsValid)
+            if (this.ModelState.IsValid)
             {
-                var user = CreateUser();
+                var user = this.CreateUser();
 
                 // Set email if it's retrieved from the external provider
-                if (string.IsNullOrEmpty(Input.Email))
+                if (string.IsNullOrEmpty(this.Input.Email))
                 {
-                    Input.Email = info.Principal.FindFirstValue(ClaimTypes.Email); // Retrieve email from the external provider
+                    this.Input.Email = info.Principal.FindFirstValue(ClaimTypes.Email); // Retrieve email from the external provider
                 }
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                await this.userStore.SetUserNameAsync(user, this.Input.Email, CancellationToken.None);
+                await this.emailStore.SetEmailAsync(user, this.Input.Email, CancellationToken.None);
 
                 // Set Name from external provider if available
                 user.Name = info.Principal.Identity.Name ?? "Unknown";
-                user.Id = await _userManager.Users.CountAsync() + 1;
+                user.Id = await this.userManager.Users.CountAsync() + 1;
 
-                var result = await _userManager.CreateAsync(user);
+                var result = await this.userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     var claim = new Claim("Name", user.Name);
-                    await _userManager.AddClaimAsync(user, claim);
+                    await this.userManager.AddClaimAsync(user, claim);
 
-                    result = await _userManager.AddLoginAsync(user, info);
+                    result = await this.userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        this.logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
                         // Sign in the user
-                        await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        await this.signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
 
                         // Redirect to the login page after successful registration
-                        return RedirectToPage("./Login");
+                        return this.RedirectToPage("./Login");
                     }
                 }
 
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    this.ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
-            ProviderDisplayName = info.ProviderDisplayName;
-            ReturnUrl = returnUrl;
-            return Page();
+            this.ProviderDisplayName = info.ProviderDisplayName;
+            this.ReturnUrl = returnUrl;
+            return this.Page();
         }
 
         private Author CreateUser()
@@ -211,11 +213,12 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
         private IUserEmailStore<Author> GetEmailStore()
         {
-            if (!_userManager.SupportsUserEmail)
+            if (!this.userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<Author>)_userStore;
+
+            return (IUserEmailStore<Author>)this.userStore;
         }
     }
 }

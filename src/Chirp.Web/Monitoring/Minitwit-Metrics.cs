@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Prometheus;
 
 namespace Chirp.Web.Monitoring
@@ -32,4 +34,3 @@ namespace Chirp.Web.Monitoring
         }
     }
 }
-

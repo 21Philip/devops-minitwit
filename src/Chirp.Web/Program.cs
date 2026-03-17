@@ -1,11 +1,12 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Chirp.Core;
 using Chirp.Infrastructure;
 using Chirp.Web;
+using Chirp.Web.Monitoring;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
-using Chirp.Web.Monitoring;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
+
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -53,6 +55,7 @@ app.Use(async (context, next) =>
     finally
     {
         sw.Stop();
+
         // Record duration in milliseconds
         Chirp.Web.Monitoring.Metrics.RequestDuration.Observe(sw.Elapsed.TotalMilliseconds);
         Chirp.Web.Monitoring.Metrics.ResponseCounter.Inc();
@@ -67,5 +70,7 @@ app.MapRazorPages();
 
 app.Run();
 
-//This makes the program public, then the test class can access it
-public partial class Program { }
+// This makes the program public, then the test class can access it
+public partial class Program
+{
+}

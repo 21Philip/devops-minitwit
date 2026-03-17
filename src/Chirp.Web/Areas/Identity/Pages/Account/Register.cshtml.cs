@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 #nullable disable
 
 using System.Collections.Generic;
@@ -17,12 +19,12 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<Author> _signInManager;
-        private readonly UserManager<Author> _userManager;
-        private readonly IUserStore<Author> _userStore;
-        private readonly IUserEmailStore<Author> _emailStore;
-        private readonly ILogger<RegisterModel> _logger;
-        private readonly ICheepRepository _cheepRepository;
+        private readonly SignInManager<Author> signInManager;
+        private readonly UserManager<Author> userManager;
+        private readonly IUserStore<Author> userStore;
+        private readonly IUserEmailStore<Author> emailStore;
+        private readonly ILogger<RegisterModel> logger;
+        private readonly ICheepRepository cheepRepository;
 
         public RegisterModel(
             UserManager<Author> userManager,
@@ -31,12 +33,12 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
             ILogger<RegisterModel> logger,
             ICheepRepository cheepRepository)
         {
-            _userManager = userManager;
-            _userStore = userStore;
-            _emailStore = GetEmailStore();
-            _signInManager = signInManager;
-            _logger = logger;
-            _cheepRepository = cheepRepository;
+            this.userManager = userManager;
+            this.userStore = userStore;
+            this.emailStore = this.GetEmailStore();
+            this.signInManager = signInManager;
+            this.logger = logger;
+            this.cheepRepository = cheepRepository;
         }
 
         [BindProperty]
@@ -69,53 +71,53 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
         public void OnGet(string returnUrl = null)
         {
-            ReturnUrl = returnUrl ?? Url.Content("~/");
+            this.ReturnUrl = returnUrl ?? this.Url.Content("~/");
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= this.Url.Content("~/");
 
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return Page();
+                return this.Page();
             }
 
             // Check email uniqueness
-            var existingByEmail = await _userManager.FindByEmailAsync(Input.Email);
+            var existingByEmail = await this.userManager.FindByEmailAsync(this.Input.Email);
             if (existingByEmail != null)
             {
-                ModelState.AddModelError("Input.Email", $"Email '{Input.Email}' is already taken.");
-                return Page();
+                this.ModelState.AddModelError("Input.Email", $"Email '{this.Input.Email}' is already taken.");
+                return this.Page();
             }
 
-            var user = CreateUser();
+            var user = this.CreateUser();
 
             // Due to backwards compatability issues: UserName == Email
-            await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-            await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+            await this.userStore.SetUserNameAsync(user, this.Input.Email, CancellationToken.None);
+            await this.emailStore.SetEmailAsync(user, this.Input.Email, CancellationToken.None);
 
-            user.Name = Input.Name;
+            user.Name = this.Input.Name;
             user.Cheeps = new List<Cheep>();
 
-            var result = await _userManager.CreateAsync(user, Input.Password);
+            var result = await this.userManager.CreateAsync(user, this.Input.Password);
 
             if (result.Succeeded)
             {
-                var claim = new Claim("Name", Input.Name);
-                await _userManager.AddClaimAsync(user, claim);
-                _logger.LogInformation("User created a new account with password.");
+                var claim = new Claim("Name", this.Input.Name);
+                await this.userManager.AddClaimAsync(user, claim);
+                this.logger.LogInformation("User created a new account with password.");
 
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return LocalRedirect(returnUrl);
+                await this.signInManager.SignInAsync(user, isPersistent: false);
+                return this.LocalRedirect(returnUrl);
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                this.ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            return Page();
+            return this.Page();
         }
 
         private Author CreateUser()
@@ -133,11 +135,12 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 
         private IUserEmailStore<Author> GetEmailStore()
         {
-            if (!_userManager.SupportsUserEmail)
+            if (!this.userManager.SupportsUserEmail)
             {
                 throw new System.NotSupportedException("The UI requires a user store with email support.");
             }
-            return (IUserEmailStore<Author>)_userStore;
+
+            return (IUserEmailStore<Author>)this.userStore;
         }
     }
 }
