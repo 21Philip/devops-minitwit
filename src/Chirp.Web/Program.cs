@@ -9,6 +9,11 @@ using Chirp.Web.Monitoring;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Console logging and minimum level
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<CheepDBContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
@@ -27,19 +32,28 @@ builder.Services.AddHostedService<CpuGaugeService>();
 
 var app = builder.Build();
 
+// Simple request logging middleware so each HTTP request/response is logged to stdout
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+app.Use(async (context, next) =>
+{
+    logger.LogInformation("HTTP {Method} {Path} - starting", context.Request.Method, context.Request.Path);
+    await next();
+    logger.LogInformation("HTTP {Method} {Path} responded {StatusCode}", context.Request.Method, context.Request.Path, context.Response.StatusCode);
+});
+
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    app.UseHttpsRedirection(); // only enable HTTPS redirection outside Development
 }
 
 // Expose Prometheus metrics at /metrics
 app.UseRouting();
 app.UseHttpMetrics(); // built-in middleware from prometheus-net to collect request metrics
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 // Custom middleware to measure request duration and increment response counter

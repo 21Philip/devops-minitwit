@@ -177,7 +177,6 @@ namespace Org.OpenAPITools
                 db.Database.EnsureCreated();
             }
 
-            app.UseHttpsRedirection();
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
