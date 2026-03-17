@@ -8,9 +8,12 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <!-- Treat StyleCop violations as errors to fail the build -->
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <!-- Treat StyleCop violations as errors to fail the build -->
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
