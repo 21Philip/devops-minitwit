@@ -30,6 +30,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Prometheus;
+using Microsoft.Extensions.Logging;
 
 namespace Org.OpenAPITools
 {
@@ -198,6 +199,27 @@ namespace Org.OpenAPITools
 
             // Add Prometheus HTTP metrics middleware
             app.UseHttpMetrics();
+
+            app.Use(async (context, next) =>
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<Startup>>();
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+
+                try
+                {
+                    await next();
+                }
+                finally
+                {
+                    sw.Stop();
+                    logger.LogInformation(
+                        "API HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs} ms",
+                        context.Request.Method,
+                        context.Request.Path,
+                        context.Response.StatusCode,
+                        sw.Elapsed.TotalMilliseconds);
+                }
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();

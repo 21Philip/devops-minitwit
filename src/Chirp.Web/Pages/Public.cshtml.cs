@@ -5,6 +5,7 @@ using Chirp.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 
 namespace Chirp.Web.Pages;
 
@@ -13,6 +14,7 @@ public class PublicModel : PageModel
     public readonly IAuthorRepository AuthorRepository;
     public readonly ICheepRepository CheepRepository;
     public readonly SignInManager<Author> SignInManager;
+    private readonly ILogger<PublicModel> _logger;
     public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
     public int PageSize = 32;
     public int PageNumber { get; set; }
@@ -23,11 +25,16 @@ public class PublicModel : PageModel
     public List<Cheep> LikedCheeps { get; set; } = new List<Cheep>();
     public List<Author> FollowedAuthors { get; set; } = new List<Author>();
 
-    public PublicModel(ICheepRepository cheepRepository, IAuthorRepository authorRepository, SignInManager<Author> signInManager)
+    public PublicModel(
+        ICheepRepository cheepRepository,
+        IAuthorRepository authorRepository,
+        SignInManager<Author> signInManager,
+        ILogger<PublicModel> logger)
     {
         CheepRepository = cheepRepository;
         AuthorRepository = authorRepository;
         SignInManager = signInManager;
+        _logger = logger;
     }
 
     /// <summary>
@@ -39,11 +46,18 @@ public class PublicModel : PageModel
     /// </remarks>
     public async Task<ActionResult> OnGet()
     {
+        _logger.LogInformation(
+            "Loading public timeline for authenticated={IsAuthenticated}",
+            User.Identity?.IsAuthenticated == true);
+
         //check if logged-in user exists in database, otherwise log out and redirect to public timeline
         if (SignInManager.IsSignedIn(User)
             && !string.IsNullOrEmpty(User.Identity?.Name)
             && await AuthorRepository.FindIfAuthorExistsWithEmail(User.Identity.Name) == false)
         {
+            _logger.LogWarning(
+                "Signing out user with missing account for email {Email}",
+                User.Identity?.Name);
             await SignInManager.SignOutAsync();
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
             return Redirect($"{baseUrl}/");
@@ -62,8 +76,21 @@ public class PublicModel : PageModel
             {
                 var loggedInAuthor = await AuthorRepository.FindAuthorWithEmail(authorEmail);
                 FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.Id);
+                _logger.LogInformation(
+                    "Loaded public timeline for user {AuthorName} on page {PageNumber} with {CheepCount} cheeps",
+                    loggedInAuthor.Name,
+                    PageNumber,
+                    Cheeps.Count);
             }
         }
+        else
+        {
+            _logger.LogInformation(
+                "Loaded anonymous public timeline on page {PageNumber} with {CheepCount} cheeps",
+                PageNumber,
+                Cheeps.Count);
+        }
+
         return Page();
     }
 
@@ -77,6 +104,7 @@ public class PublicModel : PageModel
         var authorName = User.FindFirst(ClaimTypes.Name)?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected cheep creation because no authenticated author email was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -92,6 +120,10 @@ public class PublicModel : PageModel
         if (cheep.Text != null)
         {
             await CheepRepository.SaveCheep(cheep, author);
+            _logger.LogInformation(
+                "User {AuthorName} posted cheep on public timeline with length {CheepLength}",
+                author.Name,
+                cheep.Text.Length);
         }
 
         return RedirectToPage();
@@ -109,6 +141,7 @@ public class PublicModel : PageModel
         var authorName = User.FindFirst(ClaimTypes.Name)?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected follow action because no authenticated author email was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -118,6 +151,10 @@ public class PublicModel : PageModel
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
 
         await AuthorRepository.FollowUserAsync(author.Id, followAuthor.Id);
+        _logger.LogInformation(
+            "User {AuthorName} followed {FollowAuthorName} from public timeline",
+            author.Name,
+            followAuthor.Name);
 
         //updates the current author's list of followed authors
         FollowedAuthors = await AuthorRepository.GetFollowing(author.Id);
@@ -137,6 +174,7 @@ public class PublicModel : PageModel
         var authorName = User.FindFirst(ClaimTypes.Name)?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected unfollow action because no authenticated author email was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -146,6 +184,10 @@ public class PublicModel : PageModel
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
 
         await AuthorRepository.UnFollowUserAsync(author.Id, followAuthor.Id);
+        _logger.LogInformation(
+            "User {AuthorName} unfollowed {FollowAuthorName} from public timeline",
+            author.Name,
+            followAuthor.Name);
 
         //updates the current author's list of followed authors
         FollowedAuthors = await AuthorRepository.GetFollowing(author.Id);
@@ -167,6 +209,7 @@ public class PublicModel : PageModel
         var authorName = User.FindFirst("Name")?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected like action because no authenticated author name was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -180,6 +223,11 @@ public class PublicModel : PageModel
 
         // Adds the cheep to the author's list of liked cheeps
         await CheepRepository.LikeCheep(cheep, author);
+        _logger.LogInformation(
+            "User {AuthorName} liked cheep by {CheepAuthorName} at {CheepTimestamp}",
+            author.Name,
+            cheepAuthorName,
+            timeStamp);
 
         LikedCheeps = await AuthorRepository.GetLikedCheeps(author.Id);
 
@@ -200,6 +248,7 @@ public class PublicModel : PageModel
         var authorName = User.FindFirst("Name")?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected unlike action because no authenticated author name was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -212,6 +261,11 @@ public class PublicModel : PageModel
         }
 
         await CheepRepository.UnLikeCheep(cheep, author);
+        _logger.LogInformation(
+            "User {AuthorName} removed like from cheep by {CheepAuthorName} at {CheepTimestamp}",
+            author.Name,
+            cheepAuthorName,
+            timeStamp);
 
         LikedCheeps = await AuthorRepository.GetLikedCheeps(author.Id);
 
@@ -247,4 +301,3 @@ public class PublicModel : PageModel
         return await CheepRepository.DoesUserLikeCheep(cheep, author);
     }
 }
-

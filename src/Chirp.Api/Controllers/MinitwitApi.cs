@@ -22,6 +22,7 @@ using Chirp.Core;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace Chirp.API.Controllers
 {
@@ -35,6 +36,7 @@ namespace Chirp.API.Controllers
         private readonly IAuthorRepository _authorRepository;
         private readonly ICheepRepository _cheepRepository;
         private readonly IGlobalIntRepository _globalIntRepository;
+        private readonly ILogger<MinitwitApiController> _logger;
 
         /// <summary>
         /// Constructor for MinitwitApiController. Dependency Injection of IAuthorRepository and ICheepRepository is used to access the data layer.
@@ -42,11 +44,13 @@ namespace Chirp.API.Controllers
         public MinitwitApiController(
             IAuthorRepository authorRepository,
             ICheepRepository cheepRepository,
-            IGlobalIntRepository globalIntRepository)
+            IGlobalIntRepository globalIntRepository,
+            ILogger<MinitwitApiController> logger)
         {
             _authorRepository = authorRepository;
             _cheepRepository = cheepRepository;
             _globalIntRepository = globalIntRepository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -67,6 +71,8 @@ namespace Chirp.API.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual async Task<IActionResult> GetFollow([FromRoute(Name = "username")][Required] string username, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
+            _logger.LogInformation("Fetching follows for user {Username} with limit {Limit}", username, no ?? int.MaxValue);
+
             if (latest is int value)
             {
                 await _globalIntRepository.Put("latest", value);
@@ -125,6 +131,8 @@ namespace Chirp.API.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual async Task<IActionResult> GetMessages([FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
+            _logger.LogInformation("Fetching public API messages with limit {Limit}", no ?? int.MaxValue);
+
             if (latest is int value)
             {
                 await _globalIntRepository.Put("latest", value);
@@ -157,6 +165,8 @@ namespace Chirp.API.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual async Task<IActionResult> GetMessagesPerUser([FromRoute(Name = "username")][Required] string username, [FromQuery(Name = "latest")] int? latest, [FromQuery(Name = "no")] int? no)
         {
+            _logger.LogInformation("Fetching API messages for user {Username} with limit {Limit}", username, no ?? int.MaxValue);
+
             if (latest is int value)
             {
                 await _globalIntRepository.Put("latest", value);
@@ -195,6 +205,12 @@ namespace Chirp.API.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual async Task<IActionResult> PostFollow([FromRoute(Name = "username")][Required] string username, [FromBody] FollowAction payload, [FromQuery(Name = "latest")] int? latest)
         {
+            _logger.LogInformation(
+                "Processing API follow action for user {Username} follow={Follow} unfollow={Unfollow}",
+                username,
+                payload?.Follow,
+                payload?.Unfollow);
+
             if (latest is int value)
             {
                 await _globalIntRepository.Put("latest", value);
@@ -215,6 +231,7 @@ namespace Chirp.API.Controllers
                 }
 
                 await _authorRepository.FollowUserAsync(follower.Id, followee.Id);
+                _logger.LogInformation("API user {Username} followed {FolloweeName}", username, followeeName);
                 return NoContent();
             }
 
@@ -227,6 +244,7 @@ namespace Chirp.API.Controllers
                 }
 
                 await _authorRepository.UnFollowUserAsync(follower.Id, unfollowee.Id);
+                _logger.LogInformation("API user {Username} unfollowed {UnfolloweeName}", username, unfolloweeName);
                 return NoContent();
             }
 
@@ -250,6 +268,11 @@ namespace Chirp.API.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(ErrorResponse), description: "Unauthorized - Must include correct Authorization header")]
         public virtual async Task<IActionResult> PostMessagesPerUser([FromRoute(Name = "username")][Required] string username, [FromBody] PostMessage payload, [FromQuery(Name = "latest")] int? latest)
         {
+            _logger.LogInformation(
+                "Processing API cheep creation for user {Username} with content length {ContentLength}",
+                username,
+                payload?.Content?.Length ?? 0);
+
             if (latest is int value)
             {
                 await _globalIntRepository.Put("latest", value);
@@ -276,6 +299,7 @@ namespace Chirp.API.Controllers
             };
 
             await _cheepRepository.SaveCheep(cheep, author);
+            _logger.LogInformation("API user {Username} created cheep successfully", username);
             return NoContent();
         }
 
@@ -295,6 +319,8 @@ namespace Chirp.API.Controllers
         [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Bad Request | Possible reasons:  - missing username  - invalid email  - password missing  - username already taken")]
         public virtual async Task<IActionResult> PostRegister([FromBody] RegisterRequest payload, [FromQuery(Name = "latest")] int? latest)
         {
+            _logger.LogInformation("Processing API registration for username {Username}", payload?.Username);
+
             if (latest is int value)
             {
                 await _globalIntRepository.Put("latest", value);
@@ -302,9 +328,11 @@ namespace Chirp.API.Controllers
 
             if (await _authorRepository.CreateAuthor(payload.Email, payload.Username, payload.Pwd))
             {
+                _logger.LogInformation("API registration succeeded for username {Username}", payload.Username);
                 return NoContent();
             }
 
+            _logger.LogWarning("API registration failed for username {Username}", payload?.Username);
             return BadRequest();
         }
 
@@ -321,6 +349,8 @@ namespace Chirp.API.Controllers
         [ValidateModelState]
         public virtual async Task<IActionResult> Delete([FromRoute(Name = "username")][Required] string username)
         {
+            _logger.LogInformation("Processing API delete request for user {Username}", username);
+
             Author? author = await _authorRepository.FindAuthorWithNameNullable(username);
             if (author is null)
             {
@@ -329,9 +359,11 @@ namespace Chirp.API.Controllers
 
             if (await _authorRepository.DeleteAuthor(author))
             {
+                _logger.LogInformation("API delete succeeded for user {Username}", username);
                 return NoContent();
             }
 
+            _logger.LogWarning("API delete failed for user {Username}", username);
             return BadRequest();
         }
     }

@@ -4,6 +4,7 @@ using Chirp.Core;
 using Chirp.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 namespace Chirp.Web.Pages;
 
 /// <summary>
@@ -14,6 +15,7 @@ public class UserTimelineModel : PageModel
 {
     public readonly IAuthorRepository AuthorRepository;
     public readonly ICheepRepository CheepRepository;
+    private readonly ILogger<UserTimelineModel> _logger;
     public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
     public int PageSize = 32;
     public int PageNumber { get; set; } = 1;
@@ -23,10 +25,14 @@ public class UserTimelineModel : PageModel
     public List<Author> FollowedAuthors { get; set; } = new List<Author>();
     public List<Cheep> LikedCheeps { get; set; } = new List<Cheep>();
 
-    public UserTimelineModel(ICheepRepository cheepRepository, IAuthorRepository authorRepository)
+    public UserTimelineModel(
+        ICheepRepository cheepRepository,
+        IAuthorRepository authorRepository,
+        ILogger<UserTimelineModel> logger)
     {
         CheepRepository = cheepRepository;
         AuthorRepository = authorRepository;
+        _logger = logger;
     }
 
     /// <summary>
@@ -41,6 +47,11 @@ public class UserTimelineModel : PageModel
         var authorName = User.FindFirst("Name")?.Value ?? "User";
         //Gets the author name from the URL.
         var pageUser = HttpContext.GetRouteValue("author")?.ToString() ?? "DefaultUser";
+
+        _logger.LogInformation(
+            "Loading timeline view for route author {PageUser} by viewer {AuthorName}",
+            pageUser,
+            authorName);
 
 
         // This checks if the logged in user's USERNAME equals to the value from the UserTimeline URL
@@ -139,6 +150,10 @@ public class UserTimelineModel : PageModel
                 var loggedInAuthor = await AuthorRepository.FindAuthorWithEmail(authorEmail);
                 FollowedAuthors = await AuthorRepository.GetFollowing(loggedInAuthor.Id);
             }
+            _logger.LogInformation(
+                "Loaded user timeline for route author {PageUser} with {CheepCount} cheeps",
+                pageUser,
+                Cheeps.Count);
             return Page();
         }
     }
@@ -154,6 +169,7 @@ public class UserTimelineModel : PageModel
 
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected timeline cheep creation because no authenticated author name was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -170,6 +186,10 @@ public class UserTimelineModel : PageModel
         if (cheep.Text != null)
         {
             await CheepRepository.SaveCheep(cheep, author);
+            _logger.LogInformation(
+                "User {AuthorName} posted cheep from timeline with length {CheepLength}",
+                author.Name,
+                cheep.Text.Length);
         }
 
         return RedirectToPage();
@@ -187,6 +207,7 @@ public class UserTimelineModel : PageModel
         var authorName = User.FindFirst(ClaimTypes.Name)?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected timeline follow action because no authenticated author email was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -196,6 +217,10 @@ public class UserTimelineModel : PageModel
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
 
         await AuthorRepository.FollowUserAsync(author.Id, followAuthor.Id);
+        _logger.LogInformation(
+            "User {AuthorName} followed {FollowAuthorName} from timeline",
+            author.Name,
+            followAuthor.Name);
 
         //updates the current author's list of followed authors
         FollowedAuthors = await AuthorRepository.GetFollowing(author.Id);
@@ -215,6 +240,7 @@ public class UserTimelineModel : PageModel
         var authorName = User.FindFirst("Name")?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected timeline unfollow action because no authenticated author name was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
         var author = await AuthorRepository.FindAuthorWithName(authorName);
@@ -223,6 +249,10 @@ public class UserTimelineModel : PageModel
         var followAuthor = await AuthorRepository.FindAuthorWithName(followAuthorName);
 
         await AuthorRepository.UnFollowUserAsync(author.Id, followAuthor.Id);
+        _logger.LogInformation(
+            "User {AuthorName} unfollowed {FollowAuthorName} from timeline",
+            author.Name,
+            followAuthor.Name);
 
         //updates the current author's list of followed authors
         FollowedAuthors = await AuthorRepository.GetFollowing(author.Id);
@@ -244,6 +274,7 @@ public class UserTimelineModel : PageModel
         var authorName = User.FindFirst("Name")?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected timeline like action because no authenticated author name was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -257,6 +288,11 @@ public class UserTimelineModel : PageModel
 
         // Adds the cheep to the author's list of liked cheeps
         await CheepRepository.LikeCheep(cheep, author);
+        _logger.LogInformation(
+            "User {AuthorName} liked timeline cheep by {CheepAuthorName} at {CheepTimestamp}",
+            author.Name,
+            cheepAuthorName,
+            timeStamp);
 
         LikedCheeps = await AuthorRepository.GetLikedCheeps(author.Id);
 
@@ -277,6 +313,7 @@ public class UserTimelineModel : PageModel
         var authorName = User.FindFirst("Name")?.Value;
         if (string.IsNullOrEmpty(authorName))
         {
+            _logger.LogWarning("Rejected timeline unlike action because no authenticated author name was present");
             throw new ArgumentException("Author name cannot be null or empty.");
         }
 
@@ -289,6 +326,11 @@ public class UserTimelineModel : PageModel
         }
 
         await CheepRepository.UnLikeCheep(cheep, author);
+        _logger.LogInformation(
+            "User {AuthorName} removed like from timeline cheep by {CheepAuthorName} at {CheepTimestamp}",
+            author.Name,
+            cheepAuthorName,
+            timeStamp);
 
         LikedCheeps = await AuthorRepository.GetLikedCheeps(author.Id);
 
@@ -322,4 +364,3 @@ public class UserTimelineModel : PageModel
         return await CheepRepository.DoesUserLikeCheep(cheep, author);
     }
 }
-
