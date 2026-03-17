@@ -464,6 +464,15 @@ public class UiTests : PageTest, IClassFixture<PlaywrightFixture>, IDisposable
         await this.Expect(likeCount0).ToHaveTextAsync("0");
     }
 
+    // dispose browser and context after each test
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.context?.DisposeAsync().GetAwaiter().GetResult();
+        this.browser?.DisposeAsync().GetAwaiter().GetResult();
+    }
+
     private async Task SetUpRegisterAndLogin()
     {
         this.page = await this.context!.NewPageAsync();
@@ -493,14 +502,5 @@ public class UiTests : PageTest, IClassFixture<PlaywrightFixture>, IDisposable
         });
 
         this.context = await this.browser.NewContextAsync(new BrowserNewContextOptions());
-    }
-
-    // dispose browser and context after each test
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        this.context?.DisposeAsync().GetAwaiter().GetResult();
-        this.browser?.DisposeAsync().GetAwaiter().GetResult();
     }
 }

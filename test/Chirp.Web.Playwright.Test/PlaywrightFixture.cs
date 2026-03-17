@@ -24,22 +24,17 @@ Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-
 
 public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private IHost? host;
     private static readonly Queue<int> PortQueue = new Queue<int>(Enumerable.Range(5000, 20)); // Range af porte, f.eks. 5000-5999
     private readonly PostgreSqlContainer postgres;
+    private IHost? host;
 
-    private static int GetNextAvailablePort()
+    public PlaywrightFixture()
     {
-        lock (PortQueue)
-        {
-            if (PortQueue.Count > 0)
-            {
-                return PortQueue.Dequeue(); // Hent næste port
-            }
-
-            // Hvis køen er tom, så kør en exception eller reinitialize køen
-            throw new InvalidOperationException("No available ports left in the range.");
-        }
+        this.postgres = new PostgreSqlBuilder("postgres:17")
+            .WithDatabase("playwrightdb")
+            .WithUsername("postgres")
+            .WithPassword("postgres")
+            .Build();
     }
 
     // Property for getting the server's base address
@@ -55,15 +50,6 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 
             return this.ClientOptions.BaseAddress.ToString();
         }
-    }
-
-    public PlaywrightFixture()
-    {
-        this.postgres = new PostgreSqlBuilder("postgres:17")
-            .WithDatabase("playwrightdb")
-            .WithUsername("postgres")
-            .WithPassword("postgres")
-            .Build();
     }
 
     /// <inheritdoc/>
@@ -172,5 +158,19 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
         this.host?.StopAsync().Wait();
         Thread.Sleep(2000);
         this.host?.Dispose();
+    }
+
+    private static int GetNextAvailablePort()
+    {
+        lock (PortQueue)
+        {
+            if (PortQueue.Count > 0)
+            {
+                return PortQueue.Dequeue(); // Hent næste port
+            }
+
+            // Hvis køen er tom, så kør en exception eller reinitialize køen
+            throw new InvalidOperationException("No available ports left in the range.");
+        }
     }
 }

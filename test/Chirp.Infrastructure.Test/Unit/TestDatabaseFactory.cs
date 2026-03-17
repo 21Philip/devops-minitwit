@@ -13,20 +13,7 @@ namespace Chirp.Infrastructure.Test.Unit;
 
 public class TestDatabaseFactory : IAsyncDisposable
 {
-    public CheepDBContext DbContext { get; private set; } = null!;
-
-    public AuthorRepository AuthorRepository { get; private set; } = null!;
-
-    public CheepRepository CheepRepository { get; private set; } = null!;
-
     private Mock<UserManager<Author>> userManagerMock;
-
-    public static async Task<TestDatabaseFactory> CreateAsync(Action<Mock<UserManager<Author>>>? mockOptions = null)
-    {
-        var db = new TestDatabaseFactory(mockOptions);
-        await db.InitializeAsync();
-        return db;
-    }
 
     private TestDatabaseFactory(Action<Mock<UserManager<Author>>>? mockOptions = null)
     {
@@ -46,6 +33,19 @@ public class TestDatabaseFactory : IAsyncDisposable
         {
             mockOptions.Invoke(this.userManagerMock);
         }
+    }
+
+    public CheepDBContext DbContext { get; private set; } = null!;
+
+    public AuthorRepository AuthorRepository { get; private set; } = null!;
+
+    public CheepRepository CheepRepository { get; private set; } = null!;
+
+    public static async Task<TestDatabaseFactory> CreateAsync(Action<Mock<UserManager<Author>>>? mockOptions = null)
+    {
+        var db = new TestDatabaseFactory(mockOptions);
+        await db.InitializeAsync();
+        return db;
     }
 
     public async Task InitializeAsync()

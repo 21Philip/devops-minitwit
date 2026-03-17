@@ -6,11 +6,6 @@ using Org.BouncyCastle.Pqc.Crypto.Lms;
 
 public static class DBSeeder
 {
-    private static DateTime Utc(string s)
-    {
-        return DateTime.SpecifyKind(DateTime.Parse(s), DateTimeKind.Utc);
-    }
-
     public static void Seed(CheepDBContext dbContext)
     {
         dbContext.Database.EnsureDeleted();
@@ -700,5 +695,10 @@ public static class DBSeeder
         dbContext.Authors.AddRange(authors);
         dbContext.Cheeps.AddRange(cheeps);
         dbContext.SaveChanges();
+    }
+
+    private static DateTime Utc(string s)
+    {
+        return DateTime.SpecifyKind(DateTime.Parse(s), DateTimeKind.Utc);
     }
 }
