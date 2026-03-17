@@ -15,11 +15,11 @@ namespace Chirp.Infrastructure
 
     public class GlobalIntRepository : IGlobalIntRepository
     {
-        public readonly CheepDBContext DbContext;
+        private readonly CheepDBContext dbContext;
 
         public GlobalIntRepository(CheepDBContext dbContext)
         {
-            this.DbContext = dbContext;
+            this.dbContext = dbContext;
             SQLitePCL.Batteries.Init();
         }
 
@@ -30,7 +30,7 @@ namespace Chirp.Infrastructure
         /// <returns>An integer if key was found, otherwise null.</returns>
         public async Task<int?> Get(string key)
         {
-            return await this.DbContext.GlobalIntegers
+            return await this.dbContext.GlobalIntegers
                 .Where(g => g.Key == key)
                 .Select(g => (int?)g.Value)
                 .FirstOrDefaultAsync();
@@ -46,7 +46,7 @@ namespace Chirp.Infrastructure
         /// <returns>An integer if key was found, otherwise null</returns>
         public async Task Put(string key, int value)
         {
-            var existing = await this.DbContext.GlobalIntegers.FirstOrDefaultAsync(i => i.Key == key);
+            var existing = await this.dbContext.GlobalIntegers.FirstOrDefaultAsync(i => i.Key == key);
             if (existing != null)
             {
                 existing.Value = value;
@@ -54,10 +54,10 @@ namespace Chirp.Infrastructure
             else
             {
                 var entity = new GlobalInteger { Key = key, Value = value };
-                await this.DbContext.GlobalIntegers.AddAsync(entity);
+                await this.dbContext.GlobalIntegers.AddAsync(entity);
             }
 
-            await this.DbContext.SaveChangesAsync();
+            await this.dbContext.SaveChangesAsync();
         }
     }
 }

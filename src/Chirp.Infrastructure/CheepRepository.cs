@@ -30,18 +30,18 @@ namespace Chirp.Infrastructure
     /// </summary>
     public class CheepRepository : ICheepRepository
     {
-        public readonly CheepDBContext DbContext;
+        private readonly CheepDBContext dbContext;
 
         public CheepRepository(CheepDBContext dbContext)
         {
-            this.DbContext = dbContext;
+            this.dbContext = dbContext;
             SQLitePCL.Batteries.Init();
         }
 
         /// <inheritdoc/>
         public async Task<List<Cheep>> GetCheepsByAuthor(int authorId)
         {
-            return await this.DbContext.Cheeps
+            return await this.dbContext.Cheeps
                 .Where(c => c.AuthorId == authorId) // Use the updated property name here
                 .OrderByDescending(c => c.TimeStamp)
                 .ToListAsync();
@@ -60,7 +60,7 @@ namespace Chirp.Infrastructure
         {
             pageNumber = pageNumber < 1 ? 1 : pageNumber;
 
-            var cheepsQuery = await this.DbContext.Cheeps.OrderByDescending(cheep => cheep.TimeStamp)
+            var cheepsQuery = await this.dbContext.Cheeps.OrderByDescending(cheep => cheep.TimeStamp)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(cheep => new CheepDTO
@@ -99,7 +99,7 @@ namespace Chirp.Infrastructure
 
             if (cheep.CheepId != 0)
             {
-                var trackedEntry = this.DbContext.ChangeTracker.Entries<Cheep>()
+                var trackedEntry = this.dbContext.ChangeTracker.Entries<Cheep>()
                     .FirstOrDefault(e => e.Entity.CheepId == cheep.CheepId);
 
                 if (trackedEntry != null)
@@ -114,13 +114,13 @@ namespace Chirp.Infrastructure
                 }
             }
 
-            if (this.DbContext.Entry(cheepToTrack).State == EntityState.Detached)
+            if (this.dbContext.Entry(cheepToTrack).State == EntityState.Detached)
             {
-                await this.DbContext.Cheeps.AddAsync(cheepToTrack);
+                await this.dbContext.Cheeps.AddAsync(cheepToTrack);
             }
 
-            await this.DbContext.SaveChangesAsync();
-            await this.DbContext.Entry(author).Collection(a => a.Cheeps!).LoadAsync();
+            await this.dbContext.SaveChangesAsync();
+            await this.dbContext.Entry(author).Collection(a => a.Cheeps!).LoadAsync();
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace Chirp.Infrastructure
                 cheep.Likes += 1;
             }
 
-            await this.DbContext.SaveChangesAsync();
+            await this.dbContext.SaveChangesAsync();
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Chirp.Infrastructure
                 cheep.Likes -= 1;
             }
 
-            await this.DbContext.SaveChangesAsync();
+            await this.dbContext.SaveChangesAsync();
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace Chirp.Infrastructure
                 throw new ArgumentException("Invalid timestamp format.");
             }
 
-            var cheeps = await this.DbContext.Cheeps
+            var cheeps = await this.dbContext.Cheeps
                 .Include(c => c.Author)
                 .ToListAsync();
 

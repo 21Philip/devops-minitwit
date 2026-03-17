@@ -11,8 +11,8 @@ namespace Chirp.Core
     public class GlobalInteger
     {
         [Key]
-        public required string Key { get; set; }
+        required public string Key { get; set; }
 
-        public required int Value { get; set; }
+        required public int Value { get; set; }
     }
 }
