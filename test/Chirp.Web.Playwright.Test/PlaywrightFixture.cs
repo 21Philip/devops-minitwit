@@ -6,13 +6,11 @@ using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Npgsql;
+using Respawn;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -24,9 +22,11 @@ Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-
 
 public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private static readonly Queue<int> PortQueue = new Queue<int>(Enumerable.Range(5000, 20)); // Range af porte, f.eks. 5000-5999
     private readonly PostgreSqlContainer postgres;
-    private IHost? host;
+
+    private Respawner respawner = null!;
+
+    private string connectionString = null!;
 
     public PlaywrightFixture()
     {
@@ -37,25 +37,14 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
             .Build();
     }
 
-    // Property for getting the server's base address
-    public string ServerAddress
-    {
-        get
-        {
-            if (this.host is null)
-            {
-                // This forces WebApplicationFactory to bootstrap the server
-                using var client = this.CreateDefaultClient();
-            }
-
-            return this.ClientOptions.BaseAddress.ToString();
-        }
-    }
-
     /// <inheritdoc/>
     public async Task InitializeAsync()
     {
         await this.postgres.StartAsync();
+        this.connectionString = new NpgsqlConnectionStringBuilder(this.postgres.GetConnectionString())
+        {
+            IncludeErrorDetail = true,
+        }.ToString();
     }
 
     /// <inheritdoc/>
@@ -63,6 +52,17 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
     {
         await this.postgres.DisposeAsync();
         await base.DisposeAsync();
+    }
+
+    /// <summary>
+    /// Resets the database/empties all tables.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+    public async Task ResetDatabaseAsync()
+    {
+        var connection = new NpgsqlConnection(this.connectionString);
+        await connection.OpenAsync();
+        await this.respawner.ResetAsync(connection);
     }
 
     /// <inheritdoc/>
@@ -74,7 +74,7 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
             this.postgres.StartAsync().GetAwaiter().GetResult();
         }
 
-        builder.ConfigureServices(services =>
+        builder.ConfigureServices(async services =>
         {
             // Replace old dbcontext
             var ctxDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
@@ -89,13 +89,8 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
                 services.Remove(connDescriptor);
             }
 
-            var connectionString = new NpgsqlConnectionStringBuilder(this.postgres.GetConnectionString())
-            {
-                IncludeErrorDetail = true,
-            }.ToString();
-
             services.AddDbContext<CheepDBContext>(options =>
-                options.UseNpgsql(connectionString));
+                options.UseNpgsql(this.connectionString));
 
             // Replace old auth
             var authDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAuthenticationService));
@@ -125,52 +120,16 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
             // Seed database
             var dbContext = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
             DBSeeder.Seed(dbContext);
-        });
 
-        builder.UseEnvironment("Development");
-    }
+            // Setup Respawn
+            var connection = new NpgsqlConnection(this.connectionString);
+            await connection.OpenAsync();
 
-    /// <inheritdoc/>
-    protected override IHost CreateHost(IHostBuilder builder)
-    {
-        var testHost = builder.Build();
-        var port = GetNextAvailablePort();
-        var baseUrl = $"http://127.0.0.1:{port}";
-
-        builder.ConfigureWebHost(webHostBuilder =>
-            webHostBuilder.UseKestrel().UseUrls(baseUrl));
-
-        this.host = builder.Build();
-        this.host.Start();
-
-        var server = this.host.Services.GetRequiredService<IServer>();
-        var addresses = server.Features.Get<IServerAddressesFeature>()
-            ?? throw new InvalidOperationException("No server addresses found.");
-        this.ClientOptions.BaseAddress = addresses.Addresses.Select(x => new Uri(x)).Last();
-
-        testHost.Start();
-        return testHost;
-    }
-
-    /// <inheritdoc/>
-    protected override void Dispose(bool disposing)
-    {
-        this.host?.StopAsync().Wait();
-        Thread.Sleep(2000);
-        this.host?.Dispose();
-    }
-
-    private static int GetNextAvailablePort()
-    {
-        lock (PortQueue)
-        {
-            if (PortQueue.Count > 0)
+            this.respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
             {
-                return PortQueue.Dequeue(); // Hent næste port
-            }
-
-            // Hvis køen er tom, så kør en exception eller reinitialize køen
-            throw new InvalidOperationException("No available ports left in the range.");
-        }
+                DbAdapter = DbAdapter.Postgres,
+                SchemasToInclude = new[] { "public" },
+            });
+        });
     }
 }
