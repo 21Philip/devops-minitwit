@@ -25,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -32,7 +33,6 @@ using Org.OpenAPITools.Filters;
 using Org.OpenAPITools.Formatters;
 using Org.OpenAPITools.OpenApi;
 using Prometheus;
-using Microsoft.Extensions.Logging;
 
 namespace Org.OpenAPITools
 {

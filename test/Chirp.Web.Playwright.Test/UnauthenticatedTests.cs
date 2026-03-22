@@ -5,6 +5,8 @@ using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using Xunit;
 
+namespace Chirp.Web.Playwright.Test;
+
 public class UnauthenticatedTests : PageTest, IClassFixture<PlaywrightFixture>, IAsyncLifetime
 {
     private readonly PlaywrightFixture fixture;
