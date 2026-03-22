@@ -126,16 +126,17 @@ jobs:
       - name: Push images
         run: docker compose push
 
-      - name: Update docker-compose.yml on server
-        run: |
-          echo "${{ secrets.SSH_KEY }}" > ssh_key
-          chmod 600 ssh_key
-          scp -i ssh_key -o StrictHostKeyChecking=no \
-          docker-compose.yml \
-            -r loki \
-            -r alloy \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/app/
-          rm ssh_key
+      - name: Sync compose and config to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: |
+            docker-compose.yml
+            loki
+            alloy
+          target: /app/
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
