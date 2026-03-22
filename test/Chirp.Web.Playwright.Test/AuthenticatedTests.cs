@@ -14,7 +14,7 @@ public class AuthenticatedTests : PageTest, IClassFixture<PlaywrightFixture>, IA
     public AuthenticatedTests(PlaywrightFixture fixture)
     {
         this.fixture = fixture;
-        this.baseURL = fixture.Server.BaseAddress.ToString();
+        this.baseURL = fixture.BaseURL;
     }
 
     public override async Task InitializeAsync()

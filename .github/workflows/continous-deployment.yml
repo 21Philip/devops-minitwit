@@ -41,7 +41,7 @@ jobs:
   test-playwright:
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright/dotnet:v1.49.0-noble
+      image: mcr.microsoft.com/playwright/dotnet:v1.50.0-noble
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4

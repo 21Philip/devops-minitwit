@@ -1,14 +1,18 @@
 // Copyright (c) devops-gruppe-connie. All rights reserved.
 
 using System.Data.Common;
+using System.Net;
 using Chirp.Infrastructure;
 using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Npgsql;
 using Respawn;
 using Testcontainers.PostgreSql;
@@ -23,10 +27,9 @@ Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-
 public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer postgres;
-
-    private Respawner respawner = null!;
-
-    private string connectionString = null!;
+    private Respawner? respawner;
+    private string? connectionString;
+    private IHost? host;
 
     public PlaywrightFixture()
     {
@@ -37,6 +40,8 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
             .Build();
     }
 
+    public string BaseURL { get; private set; } = null!;
+
     /// <inheritdoc/>
     public async Task InitializeAsync()
     {
@@ -45,24 +50,34 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
         {
             IncludeErrorDetail = true,
         }.ToString();
+
+        // Force URL/address assignment
+        this.CreateClient();
     }
 
     /// <inheritdoc/>
     public new async Task DisposeAsync()
     {
         await this.postgres.DisposeAsync();
+        this.host!.Dispose();
         await base.DisposeAsync();
     }
 
     /// <summary>
-    /// Resets the database/empties all tables.
+    /// Resets the database to the inital seeding.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public async Task ResetDatabaseAsync()
     {
+        // Empty
         var connection = new NpgsqlConnection(this.connectionString);
         await connection.OpenAsync();
-        await this.respawner.ResetAsync(connection);
+        await this.respawner!.ResetAsync(connection);
+
+        // Re-seed
+        using var scope = this.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
+        DBSeeder.Seed(dbContext);
     }
 
     /// <inheritdoc/>
@@ -131,5 +146,24 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
                 SchemasToInclude = new[] { "public" },
             });
         });
+    }
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        // Create a separate "real" host that listens on a real TCP port
+        var testHost = builder.Build();
+
+        builder.ConfigureWebHost(webHostBuilder =>
+            webHostBuilder.UseKestrel(options => options.Listen(IPAddress.Loopback, 0))); // Port 0 = random available port
+
+        this.host = builder.Build();
+        this.host.Start();
+
+        // Grab the actual port Kestrel bound to
+        var server = this.host.Services.GetRequiredService<IServer>();
+        var addressFeature = server.Features.Get<IServerAddressesFeature>();
+        this.BaseURL = $"{addressFeature!.Addresses.First()}/";
+
+        return testHost;
     }
 }

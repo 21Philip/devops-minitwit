@@ -13,7 +13,7 @@ public class UnauthenticatedTests : PageTest, IClassFixture<PlaywrightFixture>, 
     public UnauthenticatedTests(PlaywrightFixture fixture)
     {
         this.fixture = fixture;
-        this.baseURL = fixture.Server.BaseAddress.ToString();
+        this.baseURL = fixture.BaseURL;
     }
 
     public override async Task InitializeAsync()
