@@ -1,3 +1,3 @@
 FROM grafana/alloy:latest
 
-COPY . /etc/alloy
+COPY ./config.alloy /etc/alloy

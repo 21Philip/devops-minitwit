@@ -1,3 +1,3 @@
 FROM grafana/loki:3.6.7
 
-COPY . /etc/loki/
+COPY ./loki-config.yml /etc/loki/
