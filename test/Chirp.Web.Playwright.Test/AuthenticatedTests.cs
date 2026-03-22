@@ -2,6 +2,7 @@
 
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
+using Org.BouncyCastle.Asn1.Cms;
 using Xunit;
 
 namespace Chirp.Web.Playwright.Test;
@@ -20,6 +21,9 @@ public class AuthenticatedTests : PageTest, IClassFixture<PlaywrightFixture>, IA
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
+        await this.fixture.ResetDatabaseAsync();
+
+        this.Context.SetDefaultTimeout(PlaywrightFixture.TIMEOUTMS);
         await this.Page.GotoAsync(this.baseURL);
 
         // first register user, because a new in memory database is created for each test.
@@ -39,7 +43,6 @@ public class AuthenticatedTests : PageTest, IClassFixture<PlaywrightFixture>, IA
 
     public override async Task DisposeAsync()
     {
-        await this.fixture.ResetDatabaseAsync();
         await base.DisposeAsync();
     }
 

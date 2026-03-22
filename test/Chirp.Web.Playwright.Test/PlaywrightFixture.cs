@@ -1,5 +1,9 @@
 // Copyright (c) devops-gruppe-connie. All rights reserved.
 
+/* Custom test environment for tests in ASP.NET Core with Playwright.
+Defines a custom factory for the test server environment for the application
+Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0 */
+
 using System.Data.Common;
 using System.Net;
 using Chirp.Infrastructure;
@@ -19,13 +23,10 @@ using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Chirp.Web.Playwright.Test;
-/* Custom test environment for tests in ASP.NET Core with Playwright.
-Defines a custom factory for the test server environment for the application
-Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0
- */
 
 public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    public const float TIMEOUTMS = 30000;
     private readonly PostgreSqlContainer postgres;
     private Respawner? respawner;
     private string? connectionString;
@@ -53,6 +54,16 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 
         // Force URL/address assignment
         this.CreateClient();
+
+        // Setup Respawn
+        var connection = new NpgsqlConnection(this.connectionString);
+        await connection.OpenAsync();
+
+        this.respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
+        {
+            DbAdapter = DbAdapter.Postgres,
+            SchemasToInclude = new[] { "public" },
+        });
     }
 
     /// <inheritdoc/>
@@ -89,7 +100,7 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
             this.postgres.StartAsync().GetAwaiter().GetResult();
         }
 
-        builder.ConfigureServices(async services =>
+        builder.ConfigureServices(services =>
         {
             // Replace old dbcontext
             var ctxDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
@@ -135,17 +146,9 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
             // Seed database
             var dbContext = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
             DBSeeder.Seed(dbContext);
-
-            // Setup Respawn
-            var connection = new NpgsqlConnection(this.connectionString);
-            await connection.OpenAsync();
-
-            this.respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
-            {
-                DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = new[] { "public" },
-            });
         });
+
+        builder.UseEnvironment("Development");
     }
 
     protected override IHost CreateHost(IHostBuilder builder)

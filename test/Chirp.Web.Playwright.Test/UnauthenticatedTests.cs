@@ -19,12 +19,14 @@ public class UnauthenticatedTests : PageTest, IClassFixture<PlaywrightFixture>, 
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
+        await this.fixture.ResetDatabaseAsync();
+
+        this.Context.SetDefaultTimeout(PlaywrightFixture.TIMEOUTMS);
         await this.Page.GotoAsync(this.baseURL);
     }
 
     public override async Task DisposeAsync()
     {
-        await this.fixture.ResetDatabaseAsync();
         await base.DisposeAsync();
     }
 

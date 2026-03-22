@@ -30,17 +30,18 @@ namespace Chirp.Web.Monitoring
                     // Simple CPU usage estimate using Process.TotalProcessorTime over 1s
                     var cpuPercent = await GetCpuUsageForProcessAsync(1000, stoppingToken).ConfigureAwait(false);
                     Metrics.CpuGauge.Set(cpuPercent);
+
+                    await Task.Delay(5000, stoppingToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
                     // shutting down
+                    break;
                 }
                 catch (System.Exception ex)
                 {
                     this.logger.LogWarning(ex, "Failed to update CPU gauge");
                 }
-
-                await Task.Delay(5000, stoppingToken).ConfigureAwait(false);
             }
 
             this.logger.LogInformation("CpuGaugeService stopping.");
