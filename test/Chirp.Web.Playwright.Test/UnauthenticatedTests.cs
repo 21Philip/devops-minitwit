@@ -1,6 +1,5 @@
 // Copyright (c) devops-gruppe-connie. All rights reserved.
 
-using Chirp.Web.Playwright.Test;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using Xunit;
