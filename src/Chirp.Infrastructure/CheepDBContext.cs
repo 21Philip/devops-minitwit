@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Chirp.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -11,12 +13,6 @@ namespace Chirp.Infrastructure
     /// </summary>
     public class CheepDBContext : IdentityDbContext<Author, IdentityRole<int>, int>
     {
-        public DbSet<Cheep> Cheeps { get; set; }
-
-        public DbSet<Author> Authors { get; set; }
-
-        public DbSet<GlobalInteger> GlobalIntegers { get; set; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CheepDBContext"/> class with specified options.
         /// </summary>
@@ -25,6 +21,12 @@ namespace Chirp.Infrastructure
             : base(dbContextOptions)
         {
         }
+
+        public DbSet<Cheep> Cheeps { get; set; }
+
+        public DbSet<Author> Authors { get; set; }
+
+        public DbSet<GlobalInteger> GlobalIntegers { get; set; }
 
         /// <summary>
         /// Configures relationships, indexes, and constraints for the Chirp database model.
@@ -51,7 +53,7 @@ namespace Chirp.Infrastructure
             // Configure many-to-many relationship between Cheeps and Authors who like them.
             modelBuilder.Entity<Cheep>()
                 .HasMany(c => c.LikedByAuthors) // Cheep has many Authors who liked it
-                .WithMany(a => a.LikedCheeps)  // Author can like many Cheeps
+                .WithMany(a => a.LikedCheeps) // Author can like many Cheeps
                 .UsingEntity(j => j.ToTable("AuthorLikedCheeps"));  // Join table
 
             // Configure many-to-many relationship for following authors.

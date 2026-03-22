@@ -1,4 +1,6 @@
-using Chirp.Core;
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
+using Chirp.Web;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -11,33 +13,36 @@ namespace Chirp.Infrastructure.Test.Integration;
 
 public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _postgres;
-    
+    private readonly PostgreSqlContainer postgres;
+
     public IntegrationTestFixture()
     {
-        _postgres = new PostgreSqlBuilder("postgres:17")
+        this.postgres = new PostgreSqlBuilder("postgres:17")
             .WithDatabase("integrationdb")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
     }
 
+    /// <inheritdoc/>
     public async Task InitializeAsync()
     {
-        await _postgres.StartAsync();
+        await this.postgres.StartAsync();
 
-        using var scope = Services.CreateScope();
+        using var scope = this.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
 
         await DBSeeder.Seed(dbContext);
     }
 
+    /// <inheritdoc/>
     public new async Task DisposeAsync()
     {
-        await _postgres.DisposeAsync();
+        await this.postgres.DisposeAsync();
         await base.DisposeAsync();
     }
 
+    /// <inheritdoc/>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
@@ -46,10 +51,12 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
                 d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
 
             if (descriptor != null)
+            {
                 services.Remove(descriptor);
+            }
 
             services.AddDbContext<CheepDBContext>(options =>
-                options.UseNpgsql(_postgres.GetConnectionString()));
+                options.UseNpgsql(this.postgres.GetConnectionString()));
 
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<ICheepRepository, CheepRepository>();
@@ -60,7 +67,9 @@ public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLife
                 .ToList();
 
             foreach (var d in dpDescriptors)
+            {
                 services.Remove(d);
+            }
 
             services.AddDataProtection().UseEphemeralDataProtectionProvider();
 

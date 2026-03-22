@@ -1,4 +1,11 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
+/* Custom test environment for tests in ASP.NET Core with Playwright.
+Defines a custom factory for the test server environment for the application
+Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0 */
+
 using System.Data.Common;
+using System.Net;
 using Chirp.Infrastructure;
 using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Authentication;
@@ -11,92 +18,112 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
+using Respawn;
 using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Chirp.Web.Playwright.Test;
-/* Custom test environment for tests in ASP.NET Core with Playwright.
-Defines a custom factory for the test server environment for the application
-Referenced from: https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0
- */
 
 public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private IHost? _host;
-    private static readonly Queue<int> _portQueue = new Queue<int>(Enumerable.Range(5000, 20)); // Range af porte, f.eks. 5000-5999
-    private readonly PostgreSqlContainer _postgres;
-
-    private static int GetNextAvailablePort()
-    {
-        lock (_portQueue)
-        {
-            if (_portQueue.Count > 0) return _portQueue.Dequeue(); // Hent næste port
-
-            // Hvis køen er tom, så kør en exception eller reinitialize køen
-            throw new InvalidOperationException("No available ports left in the range.");
-        }
-    }
-
-    // Property for getting the server's base address
-    public string ServerAddress
-    {
-        get
-        {
-            if (_host is null) 
-            {
-                // This forces WebApplicationFactory to bootstrap the server
-                using var client = CreateDefaultClient();
-            }
-            return ClientOptions.BaseAddress.ToString();
-        }
-    }
+    public const float TIMEOUTMS = 30000;
+    private readonly PostgreSqlContainer postgres;
+    private Respawner? respawner;
+    private string? connectionString;
+    private IHost? host;
 
     public PlaywrightFixture()
     {
-        _postgres = new PostgreSqlBuilder("postgres:17")
+        this.postgres = new PostgreSqlBuilder("postgres:17")
             .WithDatabase("playwrightdb")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
     }
 
-    public async Task InitializeAsync() 
+    public string BaseURL { get; private set; } = null!;
+
+    /// <inheritdoc/>
+    public async Task InitializeAsync()
     {
-        await _postgres.StartAsync();
+        await this.postgres.StartAsync();
+        this.connectionString = new NpgsqlConnectionStringBuilder(this.postgres.GetConnectionString())
+        {
+            IncludeErrorDetail = true,
+        }.ToString();
+
+        // Force URL/address assignment
+        this.CreateClient();
+
+        // Setup Respawn
+        var connection = new NpgsqlConnection(this.connectionString);
+        await connection.OpenAsync();
+
+        this.respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
+        {
+            DbAdapter = DbAdapter.Postgres,
+            SchemasToInclude = new[] { "public" },
+        });
     }
 
+    /// <inheritdoc/>
     public new async Task DisposeAsync()
     {
-        await _postgres.DisposeAsync();
+        await this.postgres.DisposeAsync();
+        this.host!.Dispose();
         await base.DisposeAsync();
     }
 
+    /// <summary>
+    /// Resets the database to the inital seeding.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+    public async Task ResetDatabaseAsync()
+    {
+        // Empty
+        var connection = new NpgsqlConnection(this.connectionString);
+        await connection.OpenAsync();
+        await this.respawner!.ResetAsync(connection);
+
+        // Re-seed
+        using var scope = this.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
+        DBSeeder.Seed(dbContext);
+    }
+
+    /// <inheritdoc/>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Ensure the database has spun up
-        if (_postgres.State != TestcontainersStates.Running)
-            _postgres.StartAsync().GetAwaiter().GetResult();
+        if (this.postgres.State != TestcontainersStates.Running)
+        {
+            this.postgres.StartAsync().GetAwaiter().GetResult();
+        }
 
         builder.ConfigureServices(services =>
         {
             // Replace old dbcontext
             var ctxDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<CheepDBContext>));
-            if (ctxDescriptor != null) services.Remove(ctxDescriptor);
+            if (ctxDescriptor != null)
+            {
+                services.Remove(ctxDescriptor);
+            }
 
             var connDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
-            if (connDescriptor != null) services.Remove(connDescriptor);
-
-            var connectionString = new NpgsqlConnectionStringBuilder(_postgres.GetConnectionString())
+            if (connDescriptor != null)
             {
-                IncludeErrorDetail = true
-            }.ToString();
+                services.Remove(connDescriptor);
+            }
 
             services.AddDbContext<CheepDBContext>(options =>
-                options.UseNpgsql(connectionString));
+                options.UseNpgsql(this.connectionString));
 
             // Replace old auth
             var authDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAuthenticationService));
-            if (authDescriptor != null) services.Remove(authDescriptor);
+            if (authDescriptor != null)
+            {
+                services.Remove(authDescriptor);
+            }
 
             services.AddAuthentication(TestAuthenticationHandler.AuthenticationScheme);
 
@@ -104,7 +131,11 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
             var dpDescriptors = services
                 .Where(d => d.ServiceType.FullName?.Contains("DataProtection") == true)
                 .ToList();
-            foreach (var d in dpDescriptors) services.Remove(d);
+            foreach (var d in dpDescriptors)
+            {
+                services.Remove(d);
+            }
+
             services.AddDataProtection().UseEphemeralDataProtectionProvider();
 
             // Create tables
@@ -122,29 +153,20 @@ public class PlaywrightFixture : WebApplicationFactory<Program>, IAsyncLifetime
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
+        // Create a separate "real" host that listens on a real TCP port
         var testHost = builder.Build();
-        var port = GetNextAvailablePort();
-        var baseUrl = $"http://127.0.0.1:{port}";
 
         builder.ConfigureWebHost(webHostBuilder =>
-            webHostBuilder.UseKestrel().UseUrls(baseUrl));
+            webHostBuilder.UseKestrel(options => options.Listen(IPAddress.Loopback, 0))); // Port 0 = random available port
 
-        _host = builder.Build();
-        _host.Start();
+        this.host = builder.Build();
+        this.host.Start();
 
-        var server = _host.Services.GetRequiredService<IServer>();
-        var addresses = server.Features.Get<IServerAddressesFeature>()
-            ?? throw new InvalidOperationException("No server addresses found.");
-        ClientOptions.BaseAddress = addresses.Addresses.Select(x => new Uri(x)).Last();
+        // Grab the actual port Kestrel bound to
+        var server = this.host.Services.GetRequiredService<IServer>();
+        var addressFeature = server.Features.Get<IServerAddressesFeature>();
+        this.BaseURL = $"{addressFeature!.Addresses.First()}/";
 
-        testHost.Start();
         return testHost;
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        _host?.StopAsync().Wait();
-        Thread.Sleep(2000);
-        _host?.Dispose();
     }
 }

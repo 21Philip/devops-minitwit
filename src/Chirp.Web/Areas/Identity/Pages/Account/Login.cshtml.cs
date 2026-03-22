@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 #nullable disable
 
 using System.ComponentModel.DataAnnotations;
@@ -12,13 +14,13 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly SignInManager<Author> _signInManager;
-        private readonly ILogger<LoginModel> _logger;
+        private readonly SignInManager<Author> signInManager;
+        private readonly ILogger<LoginModel> logger;
 
         public LoginModel(SignInManager<Author> signInManager, ILogger<LoginModel> logger)
         {
-            _signInManager = signInManager;
-            _logger = logger;
+            this.signInManager = signInManager;
+            this.logger = logger;
         }
 
         [BindProperty]
@@ -29,6 +31,39 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
         [TempData]
         public string ErrorMessage { get; set; }
 
+        public void OnGet(string returnUrl = null)
+        {
+            this.ReturnUrl = returnUrl ?? this.Url.Content("~/");
+        }
+
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        {
+            returnUrl ??= this.Url.Content("~/");
+
+            if (!this.ModelState.IsValid)
+            {
+                return this.Page();
+            }
+
+            var result = await this.signInManager.PasswordSignInAsync(
+                this.Input.Email, this.Input.Password, isPersistent: true, lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                this.logger.LogInformation("User logged in.");
+                return this.LocalRedirect(returnUrl);
+            }
+
+            if (result.IsLockedOut)
+            {
+                this.logger.LogWarning("User account locked out.");
+                return this.RedirectToPage("./Lockout");
+            }
+
+            this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return this.Page();
+        }
+
         public class InputModel
         {
             [Required]
@@ -38,38 +73,6 @@ namespace Chirp.Web.Areas.Identity.Pages.Account
             [Required]
             [DataType(DataType.Password)]
             public string Password { get; set; }
-        }
-
-        public void OnGet(string returnUrl = null)
-        {
-            ReturnUrl = returnUrl ?? Url.Content("~/");
-        }
-
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
-        {
-            returnUrl ??= Url.Content("~/");
-
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            var result = await _signInManager.PasswordSignInAsync(
-                Input.Email, Input.Password, isPersistent: true, lockoutOnFailure: false);
-
-            if (result.Succeeded)
-            {
-                _logger.LogInformation("User logged in.");
-                return LocalRedirect(returnUrl);
-            }
-            if (result.IsLockedOut)
-            {
-                _logger.LogWarning("User account locked out.");
-                return RedirectToPage("./Lockout");
-            }
-
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            return Page();
         }
     }
 }

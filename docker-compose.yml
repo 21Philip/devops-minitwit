@@ -17,6 +17,11 @@ services:
       retries: 5
     networks:
       - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"      
+        max-file: "3"
     
   api:
     image: cecilieelkjaer/minitwit-api:latest
@@ -37,6 +42,11 @@ services:
         condition: service_healthy
     networks:
       - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   web:
     image: cecilieelkjaer/minitwit-web:latest
@@ -57,6 +67,13 @@ services:
         condition: service_healthy
     networks:
       - internal
+    labels:
+      logging: "promtail"
+    logging: 
+      driver: "json-file"
+      options:
+        max-size: "10m"      
+        max-file: "3"        
 
   prometheus:
     image: cecilieelkjaer/prometheus_image:latest
@@ -74,6 +91,50 @@ services:
       - "9090:9090"
     networks:
       - internal
+    labels:
+      logging: "promtail"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  
+  loki:
+    image: grafana/loki:3.6.7
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - internal
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+    networks:
+      - internal
+    depends_on:
+      - loki
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   grafana:
     image: cecilieelkjaer/grafana_image:latest
@@ -90,12 +151,21 @@ services:
     networks:
       - internal
     volumes:
-      - grafana-storage:/var/lib/grafana      
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - loki
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   grafana-storage: {}
   postgres_data:
   dataprotection_keys:
+  loki-data:
 
 networks:
   internal:

@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Chirp.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -8,30 +10,38 @@ namespace Chirp.Infrastructure
     public interface ICheepRepository
     {
         Task<List<CheepDTO>> GetCheeps(int pageNumber, int pageSize);
+
         Task SaveCheep(Cheep cheep, Author author);
+
         Task<List<Cheep>> GetCheepsByAuthor(int authorId);
+
         Task<bool> DoesUserLikeCheep(Cheep cheep, Author author);
+
         Task LikeCheep(Cheep cheep, Author author);
+
         Task UnLikeCheep(Cheep cheep, Author author);
+
         Task<Cheep?> FindCheep(string text, string timestamp, string authorName);
     }
+
     /// <summary>
     /// This class handles the handling of the infrastructure of the cheeps.
-    /// It acts as the layer between the database and the application logic
+    /// It acts as the layer between the database and the application logic.
     /// </summary>
     public class CheepRepository : ICheepRepository
     {
-        public readonly CheepDBContext _dbContext;
+        private readonly CheepDBContext dbContext;
 
         public CheepRepository(CheepDBContext dbContext)
         {
-            _dbContext = dbContext;
+            this.dbContext = dbContext;
             SQLitePCL.Batteries.Init();
         }
 
+        /// <inheritdoc/>
         public async Task<List<Cheep>> GetCheepsByAuthor(int authorId)
         {
-            return await _dbContext.Cheeps
+            return await this.dbContext.Cheeps
                 .Where(c => c.AuthorId == authorId) // Use the updated property name here
                 .OrderByDescending(c => c.TimeStamp)
                 .ToListAsync();
@@ -43,14 +53,14 @@ namespace Chirp.Infrastructure
         /// <param name="pageNumber">The current page number for pagination, starting from 1.</param>
         /// <param name="pageSize">The number of items to include in a single page.</param>
         /// <returns>
-        /// A task that represents the asynchronous operation. 
+        /// A task that represents the asynchronous operation.
         /// The task result contains a list of CheepDTO objects.
         /// </returns>
         public async Task<List<CheepDTO>> GetCheeps(int pageNumber, int pageSize)
         {
             pageNumber = pageNumber < 1 ? 1 : pageNumber;
 
-            var cheepsQuery = await _dbContext.Cheeps.OrderByDescending(cheep => cheep.TimeStamp)
+            var cheepsQuery = await this.dbContext.Cheeps.OrderByDescending(cheep => cheep.TimeStamp)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(cheep => new CheepDTO
@@ -63,7 +73,6 @@ namespace Chirp.Infrastructure
                 .ToListAsync();
             return cheepsQuery;
         }
-
 
         /// <summary>
         /// Saves a new Cheep to the database and reloads the Author's Cheeps collection.
@@ -90,7 +99,7 @@ namespace Chirp.Infrastructure
 
             if (cheep.CheepId != 0)
             {
-                var trackedEntry = _dbContext.ChangeTracker.Entries<Cheep>()
+                var trackedEntry = this.dbContext.ChangeTracker.Entries<Cheep>()
                     .FirstOrDefault(e => e.Entity.CheepId == cheep.CheepId);
 
                 if (trackedEntry != null)
@@ -105,13 +114,13 @@ namespace Chirp.Infrastructure
                 }
             }
 
-            if (_dbContext.Entry(cheepToTrack).State == EntityState.Detached)
+            if (this.dbContext.Entry(cheepToTrack).State == EntityState.Detached)
             {
-                await _dbContext.Cheeps.AddAsync(cheepToTrack);
+                await this.dbContext.Cheeps.AddAsync(cheepToTrack);
             }
 
-            await _dbContext.SaveChangesAsync();
-            await _dbContext.Entry(author).Collection(a => a.Cheeps!).LoadAsync();
+            await this.dbContext.SaveChangesAsync();
+            await this.dbContext.Entry(author).Collection(a => a.Cheeps!).LoadAsync();
         }
 
         /// <summary>
@@ -120,8 +129,8 @@ namespace Chirp.Infrastructure
         /// <param name="cheep">The Cheep to check for a like.</param>
         /// <param name="author">The Author whose liked Cheeps collection is being checked.</param>
         /// <returns>
-        /// A task that represents the asynchronous operation. 
-        /// The returned task result is true if the Author has liked the Cheep, else it is false
+        /// A task that represents the asynchronous operation.
+        /// The returned task result is true if the Author has liked the Cheep, else it is false.
         /// </returns>
         public Task<bool> DoesUserLikeCheep(Cheep cheep, Author author)
         {
@@ -141,8 +150,6 @@ namespace Chirp.Infrastructure
             return Task.FromResult(false);
         }
 
-
-
         /// <summary>
         /// Adds the specified Cheep to the Authors liked Cheeps collection and increments the Cheeps like count.
         /// </summary>
@@ -156,7 +163,8 @@ namespace Chirp.Infrastructure
                 author.LikedCheeps.Add(cheep);
                 cheep.Likes += 1;
             }
-            await _dbContext.SaveChangesAsync();
+
+            await this.dbContext.SaveChangesAsync();
         }
 
         /// <summary>
@@ -173,7 +181,7 @@ namespace Chirp.Infrastructure
                 cheep.Likes -= 1;
             }
 
-            await _dbContext.SaveChangesAsync();
+            await this.dbContext.SaveChangesAsync();
         }
 
         /// <summary>
@@ -183,7 +191,7 @@ namespace Chirp.Infrastructure
         /// <param name="timestamp">The timestamp of the Cheep as a string. Must be in a valid datetime format.</param>
         /// <param name="authorName">The name of the Author of the Cheep.</param>
         /// <returns>
-        /// A task that represents the asynchronous operation. 
+        /// A task that represents the asynchronous operation.
         /// The task result is the Cheep object if found; otherwise, null.
         /// </returns>
         /// <exception cref="ArgumentException">Thrown if the timestamp is not in a valid datetime format.</exception>
@@ -194,7 +202,7 @@ namespace Chirp.Infrastructure
                 throw new ArgumentException("Invalid timestamp format.");
             }
 
-            var cheeps = await _dbContext.Cheeps
+            var cheeps = await this.dbContext.Cheeps
                 .Include(c => c.Author)
                 .ToListAsync();
 

@@ -1,5 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 #nullable disable
 
 using System;
@@ -19,137 +19,106 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
 {
     public class EmailModel : PageModel
     {
-        private readonly UserManager<Author> _userManager;
-        private readonly SignInManager<Author> _signInManager;
-        private readonly IEmailSender _emailSender;
+        private readonly UserManager<Author> userManager;
+        private readonly IEmailSender emailSender;
 
         public EmailModel(
             UserManager<Author> userManager,
-            SignInManager<Author> signInManager,
             IEmailSender emailSender)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailSender = emailSender;
+            this.userManager = userManager;
+            this.emailSender = emailSender;
         }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     Gets or sets this API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public string Email { get; set; }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     Gets or sets a value indicating whether this API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public bool IsEmailConfirmed { get; set; }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     Gets or sets this API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     Gets or sets this API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public class InputModel
-        {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
-            [Display(Name = "New email")]
-            public string NewEmail { get; set; }
-        }
-
-        private async Task LoadAsync(Author user)
-        {
-            var email = await _userManager.GetEmailAsync(user);
-            Email = email;
-
-            Input = new InputModel
-            {
-                NewEmail = email,
-            };
-
-            IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
-        }
-
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
             }
 
-            await LoadAsync(user);
-            return Page();
+            await this.LoadAsync(user);
+            return this.Page();
         }
 
         public async Task<IActionResult> OnPostChangeEmailAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
             }
 
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                await LoadAsync(user);
-                return Page();
+                await this.LoadAsync(user);
+                return this.Page();
             }
 
-            var email = await _userManager.GetEmailAsync(user);
-            if (Input.NewEmail != email)
+            var email = await this.userManager.GetEmailAsync(user);
+            if (this.Input.NewEmail != email)
             {
                 // Update Email Claim
-                var existingEmailClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                var existingEmailClaim = (await this.userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == ClaimTypes.Email);
                 if (existingEmailClaim != null)
                 {
-                    var removeResult = await _userManager.RemoveClaimAsync(user, existingEmailClaim);
+                    var removeResult = await this.userManager.RemoveClaimAsync(user, existingEmailClaim);
                     if (!removeResult.Succeeded)
                     {
-                        StatusMessage = "Unexpected error when trying to remove existing email claim.";
-                        return RedirectToPage();
+                        this.StatusMessage = "Unexpected error when trying to remove existing email claim.";
+                        return this.RedirectToPage();
                     }
                 }
 
                 // Add the new email claim
-                var newEmailClaim = new Claim("Email", Input.NewEmail);
-                var addClaimResult = await _userManager.AddClaimAsync(user, newEmailClaim);
+                var newEmailClaim = new Claim("Email", this.Input.NewEmail);
+                var addClaimResult = await this.userManager.AddClaimAsync(user, newEmailClaim);
                 if (!addClaimResult.Succeeded)
                 {
-                    StatusMessage = "Unexpected error when trying to add new email claim.";
-                    return RedirectToPage();
+                    this.StatusMessage = "Unexpected error when trying to add new email claim.";
+                    return this.RedirectToPage();
                 }
 
-                //This updates the users (authors) email, which also makes sure that the cheeps have the NewEmail
-                user.Email = Input.NewEmail;
-                user.UserName = Input.NewEmail;
-                var updateResult = await _userManager.UpdateAsync(user);
+                // This updates the users (authors) email, which also makes sure that the cheeps have the NewEmail
+                user.Email = this.Input.NewEmail;
+                user.UserName = this.Input.NewEmail;
+                var updateResult = await this.userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
                 {
                     foreach (var error in updateResult.Errors)
                     {
-                        ModelState.AddModelError(string.Empty, error.Description);
+                        this.ModelState.AddModelError(string.Empty, error.Description);
                     }
-                    StatusMessage = "Unexpected error when trying to update email.";
-                    return RedirectToPage();
+
+                    this.StatusMessage = "Unexpected error when trying to update email.";
+                    return this.RedirectToPage();
                 }
 
                 /*
@@ -168,46 +137,73 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
                     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
                     */
 
-                StatusMessage = "Confirmation link to change email sent. Please check your email.";
-                return RedirectToPage();
-
+                this.StatusMessage = "Confirmation link to change email sent. Please check your email.";
+                return this.RedirectToPage();
             }
 
-            StatusMessage = "Your email is unchanged.";
-            return RedirectToPage();
+            this.StatusMessage = "Your email is unchanged.";
+            return this.RedirectToPage();
         }
-
 
         public async Task<IActionResult> OnPostSendVerificationEmailAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
             }
 
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                await LoadAsync(user);
-                return Page();
+                await this.LoadAsync(user);
+                return this.Page();
             }
 
-            var userId = await _userManager.GetUserIdAsync(user);
-            var email = await _userManager.GetEmailAsync(user);
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var userId = await this.userManager.GetUserIdAsync(user);
+            var email = await this.userManager.GetEmailAsync(user);
+            var code = await this.userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var callbackUrl = Url.Page(
+            var callbackUrl = this.Url.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
                 values: new { area = "Identity", userId = userId, code = code },
-                protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
+                protocol: this.Request.Scheme);
+            await this.emailSender.SendEmailAsync(
                 email,
                 "Confirm your email",
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-            StatusMessage = "Verification email sent. Please check your email.";
-            return RedirectToPage();
+            this.StatusMessage = "Verification email sent. Please check your email.";
+            return this.RedirectToPage();
+        }
+
+        private async Task LoadAsync(Author user)
+        {
+            var email = await this.userManager.GetEmailAsync(user);
+            this.Email = email;
+
+            this.Input = new InputModel
+            {
+                NewEmail = email,
+            };
+
+            this.IsEmailConfirmed = await this.userManager.IsEmailConfirmedAsync(user);
+        }
+
+        /// <summary>
+        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+        ///     directly from your code. This API may change or be removed in future releases.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            ///     Gets or sets this API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Required]
+            [EmailAddress]
+            [Display(Name = "New email")]
+            public string NewEmail { get; set; }
         }
     }
 }

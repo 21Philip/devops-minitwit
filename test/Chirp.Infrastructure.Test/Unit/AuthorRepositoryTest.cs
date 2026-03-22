@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Chirp.Core;
 using Chirp.Web;
 using Microsoft.AspNetCore.Identity;
@@ -7,16 +9,15 @@ using Xunit;
 using Xunit.Abstractions;
 using Assert = Xunit.Assert;
 
-
 namespace Chirp.Infrastructure.Test.Unit;
 
 public class AuthorRepositoryTest
 {
-    private readonly ITestOutputHelper _output;
+    private readonly ITestOutputHelper output;
 
     public AuthorRepositoryTest(ITestOutputHelper output)
     {
-        _output = output;
+        this.output = output;
     }
 
     [Fact]
@@ -27,7 +28,7 @@ public class AuthorRepositoryTest
         var testAuthor = new Author
         {
             Name = "Arthur",
-            Email = "arthursadventures@Email.com"
+            Email = "arthursadventures@Email.com",
         };
 
         db.DbContext.Authors.Add(testAuthor);
@@ -60,7 +61,7 @@ public class AuthorRepositoryTest
         var testAuthor = new Author
         {
             Name = "Arthur",
-            Email = "arthursadventures@Email.com"
+            Email = "arthursadventures@Email.com",
         };
 
         db.DbContext.Authors.Add(testAuthor);
@@ -85,13 +86,12 @@ public class AuthorRepositoryTest
         Assert.Equal($"Author with email nullemail@gmail.com not found.", exception.Message);
     }
 
-
     [Fact]
     public async Task UnitTestAddedToFollowersAndFollowedAuthorsWhenFollowing()
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
 
-        //arrange
+        // arrange
         var testAuthor1 = new Author
         {
             Name = "Delilah",
@@ -107,10 +107,11 @@ public class AuthorRepositoryTest
         db.DbContext.Authors.Add(testAuthor1);
         db.DbContext.Authors.Add(testAuthor2);
         await db.DbContext.SaveChangesAsync();
-        //Act - testAuthor1 follows testAuthor2
+
+        // Act - testAuthor1 follows testAuthor2
         await db.AuthorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
 
-        //assert
+        // assert
         Assert.NotNull(testAuthor1);
         Assert.NotNull(testAuthor2);
         Assert.NotNull(testAuthor1.FollowedAuthors);
@@ -118,7 +119,6 @@ public class AuthorRepositoryTest
         Assert.True(await db.AuthorRepository.IsFollowingAsync(testAuthor1.Id, testAuthor2.Id));
         Assert.Contains(testAuthor1, testAuthor2.Followers);
         Assert.Contains(testAuthor2, testAuthor1.FollowedAuthors);
-
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public class AuthorRepositoryTest
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
 
-        //arrange
+        // arrange
         var testAuthor1 = new Author
         {
             Name = "Delilah",
@@ -142,13 +142,13 @@ public class AuthorRepositoryTest
         db.DbContext.Authors.Add(testAuthor1);
         db.DbContext.Authors.Add(testAuthor2);
         await db.DbContext.SaveChangesAsync();
-        //Act - testAuthor1 follows testAuthor2
+
+        // Act - testAuthor1 follows testAuthor2
         await db.AuthorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
 
         await db.AuthorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
         Assert.True(await db.AuthorRepository.IsFollowingAsync(testAuthor1.Id, testAuthor2.Id));
     }
-
 
     [Fact]
     public async Task UnitTestFollowUserAsync_ThrowsExceptionIfFollowerIsNull()
@@ -169,8 +169,8 @@ public class AuthorRepositoryTest
         });
 
         Assert.Equal("Follower or follower's name is null.", exception.Message);
-
     }
+
     [Fact]
     public async Task UnitTestFollowUserAsync_ThrowsExceptionIfFollowerNameIsNull()
     {
@@ -189,7 +189,6 @@ public class AuthorRepositoryTest
         });
 
         Assert.Equal("Follower or follower's name is null.", exception.Message);
-
     }
 
     [Fact]
@@ -212,7 +211,6 @@ public class AuthorRepositoryTest
         });
 
         Assert.Equal("Followed author or followed author's name is null.", exception.Message);
-
     }
 
     [Fact]
@@ -240,7 +238,6 @@ public class AuthorRepositoryTest
         });
 
         Assert.Equal("Followed author or followed author's name is null.", exception.Message);
-
     }
 
     [Fact]
@@ -248,14 +245,13 @@ public class AuthorRepositoryTest
     {
         await using var db = await TestDatabaseFactory.CreateAsync();
 
-        //arrange
+        // arrange
         var testAuthor1 = new Author
         {
             Name = "Delilah",
             Email = "angelfromabove4@gmail.dk",
             FollowedAuthors = new List<Author>(),
-            Followers = new List<Author>()
-
+            Followers = new List<Author>(),
         };
 
         var testAuthor2 = new Author
@@ -263,19 +259,20 @@ public class AuthorRepositoryTest
             Name = "Clint",
             Email = "satanthedevil13@gmail.dk",
             FollowedAuthors = new List<Author>(),
-            Followers = new List<Author>()
+            Followers = new List<Author>(),
         };
 
         db.DbContext.Authors.Add(testAuthor1);
         db.DbContext.Authors.Add(testAuthor2);
         await db.DbContext.SaveChangesAsync();
 
-        //Act - testAuthor1 follows testAuthor2
+        // Act - testAuthor1 follows testAuthor2
         await db.AuthorRepository.FollowUserAsync(testAuthor1.Id, testAuthor2.Id);
-        //testAuthor1 unfollows testAuthor2
+
+        // testAuthor1 unfollows testAuthor2
         await db.AuthorRepository.UnFollowUserAsync(testAuthor1.Id, testAuthor2.Id);
 
-        //assert
+        // assert
         Assert.NotNull(testAuthor1);
         Assert.NotNull(testAuthor2);
         Assert.DoesNotContain(testAuthor1, testAuthor2.Followers);
@@ -293,7 +290,7 @@ public class AuthorRepositoryTest
             Name = "Jacqualine Gilcoine",
             Email = "Jacqualine@Gilcoine.com",
             FollowedAuthors = new List<Author>(),
-            Followers = new List<Author>()
+            Followers = new List<Author>(),
         };
         await db.DbContext.AddAsync(testAuthor1);
         await db.DbContext.SaveChangesAsync();
@@ -301,7 +298,6 @@ public class AuthorRepositoryTest
         List<AuthorDTO> authors = await db.AuthorRepository.SearchAuthorsAsync("jacq");
 
         Assert.Contains(authors, author => author.Name == "Jacqualine Gilcoine");
-
     }
 
     [Fact]
@@ -321,7 +317,7 @@ public class AuthorRepositoryTest
         await using var db = await TestDatabaseFactory.CreateAsync();
         await DBSeeder.Seed(db.DbContext);
 
-        List<AuthorDTO> authors = await db.AuthorRepository.SearchAuthorsAsync("");
+        List<AuthorDTO> authors = await db.AuthorRepository.SearchAuthorsAsync(string.Empty);
 
         Assert.Empty(authors);
     }
@@ -336,7 +332,7 @@ public class AuthorRepositoryTest
             new Author { Name = "Benjamin", Email = "benjaminen@example.com" },
             new Author { Name = "Babette", Email = "babette@example.com" },
             new Author { Name = "Betjent", Email = "hrbetjent@example.com" },
-            new Author { Name = "Arnebe", Email = "arnebe@example.com" }
+            new Author { Name = "Arnebe", Email = "arnebe@example.com" },
         };
 
         await db.DbContext.Authors.AddRangeAsync(authors);
@@ -352,9 +348,6 @@ public class AuthorRepositoryTest
         Assert.DoesNotContain(result, author => author.Name == "Babette");
         Assert.DoesNotContain(result, author => author.Name == "Arnebe");
     }
-
-
-
 
     [Fact]
     public async Task IfAuthorExistsReturnTrue()
@@ -373,8 +366,6 @@ public class AuthorRepositoryTest
         bool isAuthorFound = await db.AuthorRepository.FindIfAuthorExistsWithEmail(author.Email);
 
         Assert.True(isAuthorFound);
-
-
     }
 
     [Fact]
@@ -386,8 +377,6 @@ public class AuthorRepositoryTest
         bool isAuthorFound = await db.AuthorRepository.FindIfAuthorExistsWithEmail("CountCommint@itu.dk");
 
         Assert.False(isAuthorFound);
-
-
     }
 
     [Fact]
@@ -407,7 +396,6 @@ public class AuthorRepositoryTest
 
         Author foundAuthor = await db.AuthorRepository.FindAuthorWithId(author.Id);
         Assert.Equal(author, foundAuthor);
-
     }
 
     [Fact]
@@ -461,7 +449,6 @@ public class AuthorRepositoryTest
         });
 
         Assert.Equal("Follower or followed authors is null.", exception.Message);
-
     }
 
     [Fact(Skip = "Fails under EF InMemory due to Cheep ID tracking conflicts; GetLikedCheeps logic is covered elsewhere.")]
@@ -479,9 +466,9 @@ public class AuthorRepositoryTest
         var cheepToSave = new Cheep
         {
             Text = "What do you think about cults?",
-            AuthorId = author2.Id
+            AuthorId = author2.Id,
         };
-        
+
         await db.CheepRepository.SaveCheep(cheepToSave, author2);
 
         // fetch the tracked instance from the context
@@ -502,7 +489,7 @@ public class AuthorRepositoryTest
         await using var db = await TestDatabaseFactory.CreateAsync();
         await DBSeeder.Seed(db.DbContext);
 
-        //Act & Assert
+        // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
             await db.AuthorRepository.GetLikedCheeps(int.MaxValue);
