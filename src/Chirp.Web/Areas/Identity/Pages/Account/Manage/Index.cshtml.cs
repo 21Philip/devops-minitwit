@@ -1,5 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 #nullable disable
 
 using System;
@@ -19,18 +19,13 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<Author> _userManager;
-        private readonly SignInManager<Author> _signInManager;
-        private readonly CheepDBContext _context;
-        private readonly ICheepRepository _cheepRepository;
+        private readonly UserManager<Author> userManager;
+        private readonly SignInManager<Author> signInManager;
 
-        public IndexModel(UserManager<Author> userManager, SignInManager<Author> signInManager, CheepDBContext context, ICheepRepository cheepRepository)
+        public IndexModel(UserManager<Author> userManager, SignInManager<Author> signInManager)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _context = context;
-            _cheepRepository = cheepRepository;
-
+            this.userManager = userManager;
+            this.signInManager = signInManager;
         }
 
         public string Email { get; set; }
@@ -43,6 +38,131 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
 
+        public async Task<IActionResult> OnGetAsync()
+        {
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
+            }
+
+            await this.LoadAsync(user);
+            return this.Page();
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
+            }
+
+            if (!this.ModelState.IsValid)
+            {
+                await this.LoadAsync(user);
+                return this.Page();
+            }
+
+            if (user.PhoneNumber != this.Input.PhoneNumber)
+            {
+                var existingClaim = (await this.userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "PhoneNumber");
+                if (existingClaim != null)
+                {
+                    // Removes the claim if the claim exists
+                    var removeResult = await this.userManager.RemoveClaimAsync(user, existingClaim);
+                    if (!removeResult.Succeeded)
+                    {
+                        this.StatusMessage = "Unexpected error when trying to remove existing phone number claim.";
+                        return this.RedirectToPage();
+                    }
+                }
+
+                // Creates a new claim with the new username.
+                var newClaim = new Claim("PhoneNumber", this.Input.PhoneNumber);
+
+                // Adds the claim to database
+                var addClaimResult = await this.userManager.AddClaimAsync(user, newClaim);
+                if (!addClaimResult.Succeeded)
+                {
+                    this.StatusMessage = "Unexpected error when trying to add new phone number claim.";
+                    return this.RedirectToPage();
+                }
+
+                // This updates the users (authors) name, which also makes sure that the cheeps have the NewUserName
+                user.PhoneNumber = this.Input.PhoneNumber;
+                var updateResult = await this.userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    foreach (var error in updateResult.Errors)
+                    {
+                        this.ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    this.StatusMessage = "Unexpected error when trying to update phone number.";
+                    return this.RedirectToPage();
+                }
+            }
+
+            if (user.Name != this.Input.NewUserName)
+            {
+                // Gets the existing claim (Which is made in Register when a new user is created).
+                var existingClaim = (await this.userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "Name");
+                if (existingClaim != null)
+                {
+                    // Removes the claim if the claim exists
+                    var removeResult = await this.userManager.RemoveClaimAsync(user, existingClaim);
+                    if (!removeResult.Succeeded)
+                    {
+                        this.StatusMessage = "Unexpected error when trying to remove existing name claim.";
+                        return this.RedirectToPage();
+                    }
+                }
+
+                // Creates a new claim with the new username.
+                var newClaim = new Claim("Name", this.Input.NewUserName);
+
+                // Adds the claim to database
+                var addClaimResult = await this.userManager.AddClaimAsync(user, newClaim);
+                if (!addClaimResult.Succeeded)
+                {
+                    this.StatusMessage = "Unexpected error when trying to add new name claim.";
+                    return this.RedirectToPage();
+                }
+
+                // This updates the users (authors) name, which also makes sure that the cheeps have the NewUserName
+                user.Name = this.Input.NewUserName;
+                var updateResult = await this.userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    foreach (var error in updateResult.Errors)
+                    {
+                        this.ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    this.StatusMessage = "Unexpected error when trying to update name.";
+                    return this.RedirectToPage();
+                }
+            }
+
+            await this.signInManager.RefreshSignInAsync(user);
+            this.StatusMessage = "Your profile has been updated";
+            return this.RedirectToPage();
+        }
+
+        private async Task LoadAsync(Author user)
+        {
+            this.Email = await this.userManager.GetEmailAsync(user); // Retrieve email
+            var phoneNumber = await this.userManager.GetPhoneNumberAsync(user);
+            this.Username = user.Name; // Set current username
+
+            this.Input = new InputModel
+            {
+                NewUserName = this.Username, // Pre-fill with the current username
+                PhoneNumber = phoneNumber,
+            };
+        }
+
         public class InputModel
         {
             [Display(Name = "NewUserName")]
@@ -52,127 +172,5 @@ namespace Chirp.Web.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
         }
-
-        private async Task LoadAsync(Author user)
-        {
-            Email = await _userManager.GetEmailAsync(user); // Retrieve email
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            Username = user.Name; // Set current username
-
-            Input = new InputModel
-            {
-                NewUserName = Username, // Pre-fill with the current username
-                PhoneNumber = phoneNumber
-            };
-        }
-
-        public async Task<IActionResult> OnGetAsync()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            await LoadAsync(user);
-            return Page();
-        }
-        public async Task<IActionResult> OnPostAsync()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                await LoadAsync(user);
-                return Page();
-            }
-
-            if (user.PhoneNumber != Input.PhoneNumber)
-            {
-                var existingClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "PhoneNumber");
-                if (existingClaim != null)
-                {
-                    //Removes the claim if the claim exists
-                    var removeResult = await _userManager.RemoveClaimAsync(user, existingClaim);
-                    if (!removeResult.Succeeded)
-                    {
-                        StatusMessage = "Unexpected error when trying to remove existing phone number claim.";
-                        return RedirectToPage();
-                    }
-                }
-
-                //Creates a new claim with the new username.
-                var newClaim = new Claim("PhoneNumber", Input.PhoneNumber);
-                // Adds the claim to database
-                var addClaimResult = await _userManager.AddClaimAsync(user, newClaim);
-                if (!addClaimResult.Succeeded)
-                {
-                    StatusMessage = "Unexpected error when trying to add new phone number claim.";
-                    return RedirectToPage();
-                }
-
-                //This updates the users (authors) name, which also makes sure that the cheeps have the NewUserName
-                user.PhoneNumber = Input.PhoneNumber;
-                var updateResult = await _userManager.UpdateAsync(user);
-                if (!updateResult.Succeeded)
-                {
-                    foreach (var error in updateResult.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                    StatusMessage = "Unexpected error when trying to update phone number.";
-                    return RedirectToPage();
-                }
-
-            }
-
-            if (user.Name != Input.NewUserName)
-            {
-
-                //Gets the existing claim (Which is made in Register when a new user is created).
-                var existingClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "Name");
-                if (existingClaim != null)
-                {
-                    //Removes the claim if the claim exists
-                    var removeResult = await _userManager.RemoveClaimAsync(user, existingClaim);
-                    if (!removeResult.Succeeded)
-                    {
-                        StatusMessage = "Unexpected error when trying to remove existing name claim.";
-                        return RedirectToPage();
-                    }
-                }
-
-                //Creates a new claim with the new username.
-                var newClaim = new Claim("Name", Input.NewUserName);
-                // Adds the claim to database
-                var addClaimResult = await _userManager.AddClaimAsync(user, newClaim);
-                if (!addClaimResult.Succeeded)
-                {
-                    StatusMessage = "Unexpected error when trying to add new name claim.";
-                    return RedirectToPage();
-                }
-
-                //This updates the users (authors) name, which also makes sure that the cheeps have the NewUserName
-                user.Name = Input.NewUserName;
-                var updateResult = await _userManager.UpdateAsync(user);
-                if (!updateResult.Succeeded)
-                {
-                    foreach (var error in updateResult.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                    StatusMessage = "Unexpected error when trying to update name.";
-                    return RedirectToPage();
-                }
-            }
-            await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
-            return RedirectToPage();
-        }
-
     }
 }

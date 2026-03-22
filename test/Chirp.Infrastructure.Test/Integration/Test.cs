@@ -1,43 +1,44 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Chirp.Core; // Ensure this includes Author and CheepDBContext
+using Chirp.Infrastructure.Test;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 using Assert = Xunit.Assert;
-using Chirp.Infrastructure.Test;
 
 namespace Chirp.Infrastructure.Test.Integration;
 
 public class IntegrationTests : IClassFixture<IntegrationTestFixture>
 {
-    private readonly IntegrationTestFixture _fixture;
-    private readonly ITestOutputHelper _output;
-    private readonly HttpClient _client;
+    private readonly IntegrationTestFixture fixture;
+    private readonly ITestOutputHelper output;
+    private readonly HttpClient client;
 
     public IntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
     {
-        _output = output;
-        _fixture = fixture;
+        this.output = output;
+        this.fixture = fixture;
 
-        _client = fixture.CreateClient(new WebApplicationFactoryClientOptions
+        this.client = fixture.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = true,
-            HandleCookies = true
+            HandleCookies = true,
         });
     }
-
 
     [Fact]
     public async Task CanAccessHomePage()
     {
         // Act
-        HttpResponseMessage response = await _client.GetAsync("/");
+        HttpResponseMessage response = await this.client.GetAsync("/");
 
         // Assert
         if (!response.IsSuccessStatusCode)
         {
             string content = await response.Content.ReadAsStringAsync();
-            _output.WriteLine($"Failed to access home page. Status code: {response.StatusCode}, Response content: {content}");
+            this.output.WriteLine($"Failed to access home page. Status code: {response.StatusCode}, Response content: {content}");
         }
 
         response.EnsureSuccessStatusCode();
@@ -47,12 +48,12 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     public async Task FindTimelineByAuthor()
     {
         // Act
-        HttpResponseMessage response = await _client.GetAsync("/test_name0");
+        HttpResponseMessage response = await this.client.GetAsync("/test_name0");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
         Assert.Contains("test_cheep0", content);
         Assert.DoesNotContain("test_cheep1", content);
     }
@@ -63,13 +64,13 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
         // Act
         string searchWord = "12345æøå";
 
-        HttpResponseMessage response = await _client.GetAsync($"/SearchResults?searchWord={searchWord}");
+        HttpResponseMessage response = await this.client.GetAsync($"/SearchResults?searchWord={searchWord}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        _output.WriteLine("content: {0}", content);
-        for (int i = 0; i < DBSeeder.SEED_AMOUNT; i++)
+        this.output.WriteLine("content: {0}", content);
+        for (int i = 0; i < DBSeeder.SEEDAMOUNT; i++)
         {
             Assert.DoesNotContain($"test_name{i}", content);
         }
@@ -78,11 +79,11 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     [Fact]
     public async Task IfOnFirstPageCantGoToPreviousPage()
     {
-        HttpResponseMessage response = await _client.GetAsync("/");
+        HttpResponseMessage response = await this.client.GetAsync("/");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
 
         Assert.DoesNotContain("Previous", content);
     }
@@ -90,11 +91,11 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     [Fact]
     public async Task IfOnFirstPageCanGoToNextPage()
     {
-        HttpResponseMessage response = await _client.GetAsync("/");
+        HttpResponseMessage response = await this.client.GetAsync("/");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
 
         Assert.Contains("Next", content);
     }
@@ -102,11 +103,11 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     [Fact]
     public async Task IfOnSecondPageCanGoToNextAndPreviousPage()
     {
-        HttpResponseMessage response = await _client.GetAsync("/?page=2");
+        HttpResponseMessage response = await this.client.GetAsync("/?page=2");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
 
         Assert.Contains("Next", content);
         Assert.Contains("Previous", content);
@@ -117,15 +118,15 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     {
         // Arrange (this is very fragile)
         int pageSize = 32;
-        int page = DBSeeder.SEED_AMOUNT / pageSize + 1;
+        int page = (DBSeeder.SEEDAMOUNT / pageSize) + 1;
 
         // Act
-        HttpResponseMessage response = await _client.GetAsync($"/?page={page}");
+        HttpResponseMessage response = await this.client.GetAsync($"/?page={page}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
         Assert.DoesNotContain("Next", content);
     }
 
@@ -134,15 +135,15 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     {
         // Arrange (this is very fragile)
         int pageSize = 32;
-        int page = DBSeeder.SEED_AMOUNT / pageSize + 1;
+        int page = (DBSeeder.SEEDAMOUNT / pageSize) + 1;
 
         // Act
-        HttpResponseMessage response = await _client.GetAsync($"/?page={page}");
+        HttpResponseMessage response = await this.client.GetAsync($"/?page={page}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
         Assert.Contains("Previous", content);
     }
 
@@ -150,15 +151,15 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     public async Task WhenLoggedOutCannotFollowUsers()
     {
         // Act
-        HttpResponseMessage response = await _client.GetAsync("/");
-        HttpResponseMessage response2 = await _client.GetAsync("/test_name0");
+        HttpResponseMessage response = await this.client.GetAsync("/");
+        HttpResponseMessage response2 = await this.client.GetAsync("/test_name0");
 
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
         string content2 = await response2.Content.ReadAsStringAsync();
 
         // Assert
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
 
         Assert.DoesNotContain("Follow", content);
         Assert.DoesNotContain("Unfollow", content);
@@ -169,7 +170,7 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
     [Fact]
     public async Task CanCreateUserAndFindUser()
     {
-        using var scope = _fixture.Services.CreateScope();
+        using var scope = this.fixture.Services.CreateScope();
         var services = scope.ServiceProvider;
 
         var authorRepository = services.GetRequiredService<IAuthorRepository>();
@@ -185,18 +186,18 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
             Text = "Lorem ipsum dolor sit amet",
             TimeStamp = DateTime.UtcNow,
             Author = testAuthor,
-            AuthorId = testAuthor.Id
+            AuthorId = testAuthor.Id,
         };
 
         await cheepRepository.SaveCheep(testCheep, testAuthor);
 
         // Act
-        HttpResponseMessage response = await _client.GetAsync($"/{testAuthor.Name}");
+        HttpResponseMessage response = await this.client.GetAsync($"/{testAuthor.Name}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
         Assert.Contains("Jacqualine", content);
     }
 
@@ -206,12 +207,12 @@ public class IntegrationTests : IClassFixture<IntegrationTestFixture>
         // Act
         string searchWord = "Jacq";
 
-        HttpResponseMessage response = await _client.GetAsync($"/SearchResults?searchWord={searchWord}");
+        HttpResponseMessage response = await this.client.GetAsync($"/SearchResults?searchWord={searchWord}");
         response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        _output.WriteLine("content: {0}", content);
+        this.output.WriteLine("content: {0}", content);
         Assert.Contains("Jacqualine", content);
     }
 }

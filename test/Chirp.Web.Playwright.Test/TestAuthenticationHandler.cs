@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 namespace Chirp.Web.Playwright.Test;
 
 using System.Security.Claims;
@@ -6,8 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-//Referenced from: https://mazeez.dev/posts/auth-in-integration-tests
-
+// Referenced from: https://mazeez.dev/posts/auth-in-integration-tests
 public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public const string AuthenticationScheme = "Identity.Application";
@@ -20,6 +21,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
     {
     }
 
+    /// <inheritdoc/>
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var claims = new List<Claim>

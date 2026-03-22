@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,19 +8,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chirp.Core
 {
-
     /// <summary>
-    /// Represents an author (user) in the Chirp application. This class extends <see cref="IdentityUser{TKey}"/> 
-    /// to include additional properties specific to the application, such as the author's name, cheeps, 
+    /// Represents an author (user) in the Chirp application. This class extends <see cref="IdentityUser{TKey}"/>
+    /// to include additional properties specific to the application, such as the author's name, cheeps,
     /// followed authors, followers, and liked cheeps.
     /// </summary>
     public class Author : IdentityUser<int>
     {
         public string? Name { get; set; }
+
         [NotMapped]
         public ICollection<Cheep>? Cheeps { get; set; } = new List<Cheep>();
+
         public List<Author>? FollowedAuthors { get; set; } = new List<Author>();
+
         public List<Author>? Followers { get; set; } = new List<Author>();
+
         public List<Cheep>? LikedCheeps { get; set; } = new List<Cheep>();
     }
 }

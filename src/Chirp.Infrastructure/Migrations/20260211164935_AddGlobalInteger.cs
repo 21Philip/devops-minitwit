@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -15,7 +17,7 @@ namespace Chirp.Infrastructure.Migrations
                 columns: table => new
                 {
                     Key = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
-                    Value = table.Column<int>(type: "INTEGER", nullable: false)
+                    Value = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
