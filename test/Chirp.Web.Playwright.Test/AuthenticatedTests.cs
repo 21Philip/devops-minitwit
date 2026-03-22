@@ -25,6 +25,7 @@ public class AuthenticatedTests : PageTest, IClassFixture<PlaywrightFixture>, IA
 
         this.Context.SetDefaultTimeout(PlaywrightFixture.TIMEOUTMS);
         await this.Page.GotoAsync(this.baseURL);
+        await this.Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // first register user, because a new in memory database is created for each test.
         await this.Page.GetByRole(AriaRole.Link, new () { NameString = "Register" }).ClickAsync();

@@ -23,6 +23,7 @@ public class UnauthenticatedTests : PageTest, IClassFixture<PlaywrightFixture>, 
 
         this.Context.SetDefaultTimeout(PlaywrightFixture.TIMEOUTMS);
         await this.Page.GotoAsync(this.baseURL);
+        await this.Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }
 
     public override async Task DisposeAsync()
