@@ -1,10 +1,6 @@
 ---
 name: Continuous Deployment
 
-permissions:
-  contents: write
-  pull-requests: write
-
 on:
   push:
     # Run workflow every time something is pushed to the main branch
@@ -57,9 +53,48 @@ jobs:
         env:
           PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
   
+  security-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            3.1.x
+            8.0.x
+
+      - name: Set up Security Code Scan
+        uses: security-code-scan/security-code-scan-add-action@5f75674efc0abc4d41aa8cf3f1706ed5fe9365dd # v1.2
+
+      - name: Build
+        run: |
+          dotnet restore
+          dotnet build
+
+      - name: Convert sarif for uploading to GitHub
+        uses: security-code-scan/security-code-scan-results-action@cdb3d5e639054395e45bf401cba8688fcaf7a687 # v1
+
+      - name: Merge sarif files
+        run: |
+          sarif merge /home/runner/work/devops-minitwit/results/*.sarif --merge-runs --output-file /home/runner/work/devops-minitwit/results/merged.sarif
+          rm /home/runner/work/devops-minitwit/results/[0-9]*.sarif
+
+      - name: Upload sarif
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: /home/runner/work/devops-minitwit/results/merged.sarif
+          category: security-code-scan
+
   release:
     needs: [test, test-playwright]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
@@ -122,6 +157,19 @@ jobs:
 
       - name: Build images
         run: docker compose build
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.6
+        with:
+          version: v0.69.3
+
+      - name: Scan Docker images with Trivy
+        run: |
+          IMAGES=$(docker compose config --images)
+          for IMAGE in $IMAGES; do
+            echo "Scanning $IMAGE..."
+            trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed "$IMAGE"
+          done
 
       - name: Push images
         run: docker compose push
