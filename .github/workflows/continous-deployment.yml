@@ -64,6 +64,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            3.1.x
+            8.0.x
+
       - name: Set up Security Code Scan
         uses: security-code-scan/security-code-scan-add-action@v1.2
 
