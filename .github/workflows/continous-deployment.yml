@@ -4,6 +4,7 @@ name: Continuous Deployment
 permissions:
   contents: write
   pull-requests: write
+  security-events: write
 
 on:
   push:
@@ -57,6 +58,26 @@ jobs:
         env:
           PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
   
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Security Code Scan
+        uses: security-code-scan/security-code-scan-add-action@v1.2
+
+      - name: Build
+        run: |
+          dotnet restore
+          dotnet build
+
+      - name: Convert sarif for uploading to GitHub
+        uses: security-code-scan/security-code-scan-results-action@v1
+
+      - name: Upload sarif
+        uses: github/codeql-action/upload-sarif@v3
+
   release:
     needs: [test, test-playwright]
     runs-on: ubuntu-latest
