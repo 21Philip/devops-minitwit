@@ -83,10 +83,15 @@ jobs:
         uses: security-code-scan/security-code-scan-results-action@v1
 
       - name: Merge sarif files
-        run: sarif merge /home/runner/work/devops-minitwit/results/*.sarif --merge-runs --output-file /home/runner/work/devops-minitwit/results/merged.sarif
+        run: |
+          sarif merge /home/runner/work/devops-minitwit/results/*.sarif --merge-runs --output-file /home/runner/work/devops-minitwit/results/merged.sarif
+          rm /home/runner/work/devops-minitwit/results/[0-9]*.sarif
 
       - name: Upload sarif
         uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: /home/runner/work/devops-minitwit/results/merged.sarif
+          category: security-code-scan
 
   release:
     needs: [test, test-playwright]
