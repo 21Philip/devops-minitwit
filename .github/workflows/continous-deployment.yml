@@ -159,6 +159,19 @@ jobs:
       - name: Build images
         run: docker compose build
 
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.6
+        with:
+          version: v0.69.3
+
+      - name: Scan Docker images with Trivy
+        run: |
+          IMAGES=$(docker compose config --images)
+          for IMAGE in $IMAGES; do
+            echo "Scanning $IMAGE..."
+            trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed "$IMAGE"
+          done
+
       - name: Push images
         run: docker compose push
 
