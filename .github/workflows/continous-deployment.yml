@@ -82,8 +82,11 @@ jobs:
       - name: Convert sarif for uploading to GitHub
         uses: security-code-scan/security-code-scan-results-action@v1
 
+      - name: Merge sarif files
+        run: sarif merge /home/runner/work/devops-minitwit/results/*.sarif --merge-runs --output-file /home/runner/work/devops-minitwit/results/merged.sarif
+
       - name: Upload sarif
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
 
   release:
     needs: [test, test-playwright]
