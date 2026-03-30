@@ -20,3 +20,10 @@ CVE-2026-34040
 
 # antchfx/xpath infinite loop - Alloy v1.14.2 ships v1.3.5, fix requires 1.3.6. No stable Alloy release with fix yet
 CVE-2026-32287
+
+# Go stdlib vulnerabilities in gosu binary (Alloy base image) - built with Go 1.24.6, can't fix upstream
+CVE-2025-68121
+CVE-2025-58183
+CVE-2025-61726
+CVE-2025-61728
+CVE-2025-61729
