@@ -1,0 +1,4 @@
+# OpenTelemetry Go SDK PATH Hijacking - no stable Prometheus release with fix available yet
+# Prometheus v3.10.0 ships otel/sdk v1.39.0, fix requires v1.40.0
+# Remove this entry once a stable Prometheus release includes the fix
+CVE-2026-24051
