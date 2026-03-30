@@ -11,3 +11,9 @@ CVE-2026-25679
 
 # Go stdlib crypto/x509 email constraints - Prometheus v3.10.0 built with Go 1.26.0, fix requires 1.26.1
 CVE-2026-27137
+
+# buger/jsonparser DoS - Prometheus v3.10.0 ships v1.1.1, fix requires 1.1.2. No stable release with fix yet
+GHSA-6g7g-w4f8-9c9x
+
+# Moby AuthZ plugin bypass - Prometheus v3.10.0 ships docker v28.5.2, fix requires 29.3.1. No stable release with fix yet
+CVE-2026-34040
