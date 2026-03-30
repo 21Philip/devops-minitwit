@@ -2,3 +2,12 @@
 # Prometheus v3.10.0 ships otel/sdk v1.39.0, fix requires v1.40.0
 # Remove this entry once a stable Prometheus release includes the fix
 CVE-2026-24051
+
+# gRPC-Go authorization bypass - Prometheus v3.10.0 ships grpc v1.78.0, fix requires v1.79.3
+CVE-2026-33186
+
+# Go stdlib net/url IPv6 parsing - Prometheus v3.10.0 built with Go 1.26.0, fix requires 1.26.1
+CVE-2026-25679
+
+# Go stdlib crypto/x509 email constraints - Prometheus v3.10.0 built with Go 1.26.0, fix requires 1.26.1
+CVE-2026-27137
