@@ -17,3 +17,6 @@ GHSA-6g7g-w4f8-9c9x
 
 # Moby AuthZ plugin bypass - Prometheus v3.10.0 ships docker v28.5.2, fix requires 29.3.1. No stable release with fix yet
 CVE-2026-34040
+
+# antchfx/xpath infinite loop - Alloy v1.14.2 ships v1.3.5, fix requires 1.3.6. No stable Alloy release with fix yet
+CVE-2026-32287
