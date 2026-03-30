@@ -13,8 +13,11 @@ RUN dotnet restore Chirp.Api
 RUN dotnet publish -c Release -o /app/publish Chirp.Api
 
 # Run
-FROM base AS runner
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runner
+RUN apk update && apk upgrade --no-cache
 WORKDIR /app
 COPY --from=build /app/publish .
+
+USER $APP_UID
 
 ENTRYPOINT ["dotnet", "Chirp.Api.dll"]
