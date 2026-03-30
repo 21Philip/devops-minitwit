@@ -13,7 +13,8 @@ RUN dotnet restore Chirp.Web
 RUN dotnet publish -c Release -o /app/publish Chirp.Web
 
 # Run
-FROM base AS runner
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runner
+RUN apk update && apk upgrade --no-cache
 WORKDIR /app
 COPY --from=build /app/publish .
 
