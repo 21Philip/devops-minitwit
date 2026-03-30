@@ -18,4 +18,6 @@ RUN apk update && apk upgrade --no-cache
 WORKDIR /app
 COPY --from=build /app/publish .
 
+USER $APP_UID
+
 ENTRYPOINT ["dotnet", "Chirp.Web.dll"]
