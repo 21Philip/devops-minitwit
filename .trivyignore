@@ -27,3 +27,19 @@ CVE-2025-58183
 CVE-2025-61726
 CVE-2025-61728
 CVE-2025-61729
+
+# pgproto3 v2.3.3 - no upstream fix available yet (2026-04-07)
+# Tracked at: https://avd.aquasec.com/nvd/cve-2026-32286
+# Remove when grafana/alloy ships a patched version
+CVE-2026-32286
+
+# buger/jsonparser DoS - CVE alias for GHSA-6g7g-w4f8-9c9x already listed above
+# Prometheus v3.10.0 ships v1.1.1, no stable release with fix yet
+CVE-2026-32285
+
+# go-jose/go-jose/v4 JWE panic - Loki v3.6.9 and Alloy v1.14.2 ship v4.1.3, fix requires 4.1.4
+# No upstream release with fix yet
+CVE-2026-34986
+
+# jackc/pgproto3/v2 DoS - Alloy v1.14.2 ships v2.3.3, no fixed version available yet
+CVE-2026-32286
