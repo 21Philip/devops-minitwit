@@ -316,11 +316,49 @@ namespace Chirp.Infrastructure
         /// Deletes an author/user from the database.
         /// </summary>
         /// <param name="author">The author to delete.</param>
-        /// <returns>True if the operation succeeded.</returns>
+        /// <returns>True if the author was found and deleted; otherwise, false.</returns>
         public async Task<bool> DeleteAuthor(Author author)
         {
-            IdentityResult result = await this.userManager.DeleteAsync(author);
-            return result.Succeeded;
+            var authorEntry = await this.dbContext.Authors
+                .Include(a => a.Cheeps)
+                .Include(a => a.Followers)
+                .Include(a => a.FollowedAuthors)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(a => a.Id == author.Id);
+
+            if (authorEntry == null)
+            {
+                return false;
+            }
+
+            // Remove cheeps
+            var cheepsToDelete = authorEntry.Cheeps?.ToList() ?? new List<Cheep>();
+            foreach (var cheep in cheepsToDelete)
+            {
+                this.dbContext.Cheeps.Remove(cheep);
+            }
+
+            // Clear follower relationships (authors who follow this author)
+            if (authorEntry.Followers != null)
+            {
+                foreach (var follower in authorEntry.Followers.ToList())
+                {
+                    authorEntry.Followers.Remove(follower);
+                }
+            }
+
+            // Clear followed relationships (authors this author follows)
+            if (authorEntry.FollowedAuthors != null)
+            {
+                foreach (var followed in authorEntry.FollowedAuthors.ToList())
+                {
+                    authorEntry.FollowedAuthors.Remove(followed);
+                }
+            }
+
+            this.dbContext.Authors.Remove(authorEntry);
+            await this.dbContext.SaveChangesAsync();
+            return true;
         }
     }
 }
