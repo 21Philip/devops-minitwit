@@ -23,6 +23,14 @@ services:
         max-size: "10m"      
         max-file: "3"
     
+  keys-init:
+    image: busybox
+    command: ["sh", "-c", "chown -R 1654:1654 /app/keys"]
+    volumes:
+      - dataprotection_keys:/app/keys
+    networks:
+      - internal
+
   api:
     image: cecilieelkjaer/minitwit-api:latest
     build:
@@ -38,8 +46,10 @@ services:
     ports:
       - "5000:8080"
     depends_on:
-      postgres: 
+      postgres:
         condition: service_healthy
+      keys-init:
+        condition: service_completed_successfully
     networks:
       - internal
     logging:
@@ -63,8 +73,10 @@ services:
     ports:
       - "5001:8080"
     depends_on:
-      postgres: 
+      postgres:
         condition: service_healthy
+      keys-init:
+        condition: service_completed_successfully
     networks:
       - internal
     labels:
