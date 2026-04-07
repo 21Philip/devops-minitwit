@@ -270,7 +270,7 @@ namespace Chirp.Infrastructure
             {
                 // Perform a case-insensitive search for authors whose name contains the search word
                 return await this.dbContext.Authors
-                    .Where(a => EF.Functions.ILike(a.Name!, $"%{searchWord}%"))
+                    .Where(a => EF.Functions.Like(a.Name, $"%{searchWord}%"))
                     .Select(a => new AuthorDTO
                     {
                         Name = a.Name, // Map Author entity to AuthorDTO
@@ -280,7 +280,7 @@ namespace Chirp.Infrastructure
             else
             {
                 return await this.dbContext.Authors
-                    .Where(a => EF.Functions.ILike(a.Name!, $"{searchWord}%"))
+                    .Where(a => EF.Functions.Like(a.Name, $"{searchWord}%"))
                     .Select(a => new AuthorDTO
                     {
                         Name = a.Name, // Map Author entity to AuthorDTO
