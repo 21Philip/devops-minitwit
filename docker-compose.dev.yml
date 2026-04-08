@@ -28,14 +28,17 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
     
   web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   prometheus:
     environment:
