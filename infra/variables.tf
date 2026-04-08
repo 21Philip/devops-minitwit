@@ -22,7 +22,7 @@ variable "reserved_ip" {
 
 variable "minitwit_instance_names" {
   type = list(string)
-  default = ["minitwit1", "minitwit2"]
+  default = ["web1", "web2"]
 }
 
 variable "load_balancer_names" {

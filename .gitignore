@@ -479,3 +479,4 @@ $RECYCLE.BIN/
 # Terraform
 terraform*
 .terraform*
+.env

@@ -34,7 +34,11 @@ resource "digitalocean_droplet" "minitwit" {
   }
 
   provisioner "remote-exec" {
-    inline = ["mkdir -p /app"]
+    inline = [
+      "apt-get update",
+      "apt-get install -y nginx",
+      "mkdir -p /app",
+    ]
   }
 
   # Copy docker-compose.yml to the droplet
@@ -47,8 +51,8 @@ resource "digitalocean_droplet" "minitwit" {
   provisioner "remote-exec" {
     inline = [
       "cd /app",
-      "docker compose pull",
-      "docker compose up -d",
+//      "docker compose pull",
+//      "docker compose up -d",
     ]
   } 
 }
@@ -73,7 +77,7 @@ resource "digitalocean_droplet" "load_balancers" {
   provisioner "remote-exec" {
     inline = [
       "apt-get update",
-      "apt-get install -y nginx keepalived"
+      "apt-get install -y nginx keepalived",
     ]
   }
 
@@ -86,8 +90,8 @@ resource "digitalocean_droplet" "load_balancers" {
   provisioner "remote-exec" {
     inline = [
       "nginx -t",
-      "systemctl restart nginx"
-      "systemctl enable nginx"
+      "systemctl restart nginx",
+      "systemctl enable nginx",
     ]
   }
 
@@ -112,7 +116,7 @@ resource "digitalocean_droplet" "load_balancers" {
       "echo 'net.ipv4.ip_nonlocal_bind=1' >> /etc/sysctl.conf",
       "sysctl -p",
       "systemctl start keepalived",
-      "systemctl enable keepalived"
+      "systemctl enable keepalived",
     ]
   }
 }
@@ -120,15 +124,15 @@ resource "digitalocean_droplet" "load_balancers" {
 ###################### Assign reserved ip ######################
 
 # Get reserved ip
-data "digitalocean_reserved_ip" "app" {
+data "digitalocean_reserved_ip" "minitwit" {
   ip_address = var.reserved_ip
 }
 
-resource "digitalocean_reserved_ip_assignment" "app" {
-  ip_address = data.digitalocean_reserved_ip.app.ip_address
-  droplet_id = digitalocean_droplet.app.id
+resource "digitalocean_reserved_ip_assignment" "minitwit" {
+  ip_address = data.digitalocean_reserved_ip.minitwit.ip_address
+  droplet_id = digitalocean_droplet.minitwit[0].id
 }
 
 output "droplet_ip" {
-  value = digitalocean_droplet.app.ipv4_address
+  value = digitalocean_droplet.minitwit[0].ipv4_address
 }
