@@ -148,11 +148,7 @@ namespace Org.OpenAPITools
             })
             .AddEntityFrameworkStores<CheepDBContext>();
 
-            // Must be changed if we ever deploy several instances.
-            // We should persist keys to the database
-            services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
-                .SetApplicationName("minitwit");
+            services.AddDataProtection().PersistKeysToDbContext<CheepDBContext>();
         }
 
         /// <summary>
