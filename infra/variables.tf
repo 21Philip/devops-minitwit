@@ -19,3 +19,13 @@ variable "droplet_size" {
 variable "reserved_ip" {
   default = "146.190.204.218"
 }
+
+variable "minitwit_instance_names" {
+  type = list(string)
+  default = ["minitwit1", "minitwit2"]
+}
+
+variable "load_balancer_names" {
+  type = list(string)
+  default = ["ld1", "ld2"]
+}
