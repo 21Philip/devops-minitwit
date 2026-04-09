@@ -8,17 +8,14 @@ Requires: docker
     ```bash
     cd path/to/repository
     ```
-2. Build docker image:
+2. Build and run development compose:
     ```bash
-    docker compose build
+    docker compose -f docker-compose-db.yml -f docker-compose-app.yml -f docker-compose.dev.yml up --build
     ```
-3. Run container:
-    ```bash
-    docker compose up
-    ```
-4. Reached at:
+3. Reached at:
    - Api: localhost:5000. 
    - Web app: localhost:5001. 
+   - Monitoring: localhost:3000.
 
 ## How to deploy
 Requires: Terraform
