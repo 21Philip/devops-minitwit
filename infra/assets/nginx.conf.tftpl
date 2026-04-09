@@ -1,12 +1,11 @@
 upstream backend_servers {
-    server 192.168.20.2:80;
-    server 192.168.20.3:80;
+%{ for ip in backend_ips ~}
+    server ${ip};
+%{ endfor ~}
 }
-
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-
     location / {
         proxy_pass http://backend_servers;
         proxy_set_header Host $host;

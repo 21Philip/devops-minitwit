@@ -63,12 +63,12 @@ resource "digitalocean_volume_attachment" "database" {
 ###################### Create Minitwit instances ######################
 
 resource "digitalocean_droplet" "minitwit" {
-  count    = length(var.minitwit_instance_names)
-  name     = var.minitwit_instance_names[count.index]
-  region   = var.region
-  size     = var.minitwit_droplet_size
-  image    = "docker-20-04"
-  ssh_keys = [data.digitalocean_ssh_key.default.id]
+  count              = length(var.minitwit_instance_names)
+  name               = var.minitwit_instance_names[count.index]
+  region             = var.region
+  size               = var.minitwit_droplet_size
+  image              = "docker-20-04"
+  ssh_keys           = [data.digitalocean_ssh_key.default.id]
 
   connection {
     type        = "ssh"
@@ -78,11 +78,7 @@ resource "digitalocean_droplet" "minitwit" {
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "apt-get update",
-      "apt-get install -y nginx",
-      "mkdir -p /app",
-    ]
+    inline = ["mkdir -p /app"]
   }
 
   # Copy docker-compose.yml to the droplet
@@ -127,7 +123,9 @@ resource "digitalocean_droplet" "load_balancers" {
 
   # Configure Nginx
   provisioner "file" {
-    source      = "${path.module}/assets/nginx.conf"
+    content     = templatefile("${path.module}/assets/nginx.conf.tpl", {
+      backend_ips = digitalocean_droplet.minitwit[*].ipv4_address
+    })
     destination = "/etc/nginx/sites-available/default"
   }
   
@@ -151,7 +149,11 @@ resource "digitalocean_droplet" "load_balancers" {
 
   # Configure Keepalived
   provisioner "file" {
-    source      = "${path.module}/assets/keepalived.conf"
+    content     = templatefile("${path.module}/assets/keepalived.conf.tftpl", {
+      state = count.index == 0 ? "MASTER" : "BACKUP"
+      priority = 255 - (count.index * 5)
+      reserved_ip = var.reserved_ip
+    })
     destination = "/etc/keepalived/keepalived.conf"
   }
 
