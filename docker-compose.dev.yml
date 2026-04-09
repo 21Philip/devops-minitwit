@@ -23,22 +23,35 @@ services:
         max-size: "10m"      
         max-file: "3"
 
+  migrate:
+    image: cecilieelkjaer/minitwit-migrate
+    build:
+      context: .
+      dockerfile: src/Chirp.Infrastructure/Dockerfile
+    container_name: dbmigrate
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
   api: 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     depends_on:
-      postgres:
-        condition: service_healthy
-
+      migrate:
+        condition: service_completed_successfully
     
   web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   prometheus:
     environment:

@@ -149,14 +149,6 @@ namespace Org.OpenAPITools
             .AddEntityFrameworkStores<CheepDBContext>();
 
             services.AddDataProtection().PersistKeysToDbContext<CheepDBContext>();
-
-            // Check if database exists, otherwise create it.
-            var sp = services.BuildServiceProvider(); 
-            using (var scope = sp.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
-                db.Database.Migrate();
-            }
         }
 
         /// <summary>
