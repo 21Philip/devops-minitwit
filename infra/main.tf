@@ -4,6 +4,10 @@ terraform {
       source  = "digitalocean/digitalocean"
       version = "~> 2.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -26,6 +30,8 @@ resource "digitalocean_droplet" "database" {
   ssh_keys           = [data.digitalocean_ssh_key.default.id]
   private_networking = true
 
+  // Create the /app directory but do not start containers
+  // until volume has been attached.
   connection {
     type        = "ssh"
     user        = "root"
@@ -51,6 +57,28 @@ resource "digitalocean_droplet" "database" {
     source      = "${path.module}/../docker-compose-db.yml"
     destination = "/app/docker-compose-db.yml"
   }
+}
+
+// Get existing volume and attach to droplet
+data "digitalocean_volume" "database" {
+  name = var.volume_name
+}
+
+resource "digitalocean_volume_attachment" "database" {
+  droplet_id = digitalocean_droplet.database.id
+  volume_id  = data.digitalocean_volume.database.id
+}
+
+// Start the containers
+resource "null_resource" "start_database" {
+  depends_on = [digitalocean_volume_attachment.database]
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    private_key = var.ssh_private_key
+    host        = digitalocean_droplet.database.ipv4_address
+  }
 
   provisioner "remote-exec" {
     inline = [
@@ -59,16 +87,6 @@ resource "digitalocean_droplet" "database" {
       "docker compose -f docker-compose-db.yml up -d",
     ]
   }
-}
-
-// Load existing volume and assign to droplet
-data "digitalocean_volume" "database" {
-  name = var.volume_name
-}
-
-resource "digitalocean_volume_attachment" "database" {
-  droplet_id = digitalocean_droplet.database.id
-  volume_id  = digitalocean_volume.database.id
 }
 
 ###################### Create Minitwit instances ######################
@@ -189,7 +207,7 @@ resource "digitalocean_droplet" "load_balancers" {
   }
 }
 
-// Load and assign reserved ip
+// Get and assign reserved ip
 data "digitalocean_reserved_ip" "minitwit" {
   ip_address = var.reserved_ip
 }
