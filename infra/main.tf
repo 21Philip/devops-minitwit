@@ -19,11 +19,12 @@ data "digitalocean_ssh_key" "default" {
 ###################### Create database ######################
 
 resource "digitalocean_droplet" "database" {
-  name     = "database1"
-  region   = var.region
-  size     = var.db_droplet_size
-  image    = "docker-20-04"
-  ssh_keys = [data.digitalocean_ssh_key.default.id]
+  name               = "database1"
+  region             = var.region
+  size               = var.db_droplet_size
+  image              = "docker-20-04"
+  ssh_keys           = [data.digitalocean_ssh_key.default.id]
+  private_networking = true
 
   connection {
     type        = "ssh"
@@ -34,6 +35,15 @@ resource "digitalocean_droplet" "database" {
 
   provisioner "remote-exec" {
     inline = ["mkdir -p /app"]
+  }
+
+  provisioner "file" {
+    content     = templatefile("${path.module}/assets/.env.db.tftpl", {
+      postgres_user     = var.postgres_user
+      postgres_password = var.postgres_password
+      postgres_db       = var.postgres_db
+    })
+    destination = "/app/.env"
   }
 
   provisioner "file" {
@@ -69,6 +79,7 @@ resource "digitalocean_droplet" "minitwit" {
   size               = var.minitwit_droplet_size
   image              = "docker-20-04"
   ssh_keys           = [data.digitalocean_ssh_key.default.id]
+  private_networking = true
 
   connection {
     type        = "ssh"
@@ -80,6 +91,16 @@ resource "digitalocean_droplet" "minitwit" {
   provisioner "remote-exec" {
     inline = ["mkdir -p /app"]
   }
+
+  provisioner "file" {
+    content     = templatefile("${path.module}/assets/.env.app.tftpl", {
+      postgres_host     = digitalocean_droplet.database.ipv4_address_private
+      postgres_user     = var.postgres_user
+      postgres_password = var.postgres_password
+      postgres_db       = var.postgres_db
+    })
+    destination = "/app/.env"
+  } 
 
   # Copy docker-compose.yml to the droplet
   provisioner "file" {
@@ -123,8 +144,8 @@ resource "digitalocean_droplet" "load_balancers" {
 
   # Configure Nginx
   provisioner "file" {
-    content     = templatefile("${path.module}/assets/nginx.conf.tpl", {
-      backend_ips = digitalocean_droplet.minitwit[*].ipv4_address
+    content     = templatefile("${path.module}/assets/nginx.conf.tftpl", {
+      backend_ips = digitalocean_droplet.minitwit[*].ipv4_address_private
     })
     destination = "/etc/nginx/sites-available/default"
   }
@@ -150,8 +171,8 @@ resource "digitalocean_droplet" "load_balancers" {
   # Configure Keepalived
   provisioner "file" {
     content     = templatefile("${path.module}/assets/keepalived.conf.tftpl", {
-      state = count.index == 0 ? "MASTER" : "BACKUP"
-      priority = 255 - (count.index * 5)
+      state       = count.index == 0 ? "MASTER" : "BACKUP"
+      priority    = 255 - (count.index * 5)
       reserved_ip = var.reserved_ip
     })
     destination = "/etc/keepalived/keepalived.conf"
@@ -175,8 +196,4 @@ data "digitalocean_reserved_ip" "minitwit" {
 resource "digitalocean_reserved_ip_assignment" "minitwit" {
   ip_address = data.digitalocean_reserved_ip.minitwit.ip_address
   droplet_id = digitalocean_droplet.load_balancers[0].id
-}
-
-output "droplet_ip" {
-  value = digitalocean_droplet.load_balancers[0].ipv4_address
 }

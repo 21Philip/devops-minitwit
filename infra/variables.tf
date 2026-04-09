@@ -1,3 +1,5 @@
+########## Private ##########
+
 variable "do_token" {
   description = "DigitalOcean API token"
   sensitive   = true
@@ -7,6 +9,28 @@ variable "ssh_private_key" {
   description = "Private key for droplet ssh authentication"
   sensitive   = true
 }
+
+variable "postgres_user" {
+  type      = string
+  sensitive = true
+}
+
+variable "postgres_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "postgres_db" {
+  type      = string
+  sensitive = true
+}
+
+variable "db_connection" {
+  type      = string
+  sensitive = true
+}
+
+########## Public ##########
 
 variable "region" {
   default = "fra1"
