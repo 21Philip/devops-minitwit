@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17
-    container_name: dbserver
+    container_name: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -10,6 +10,32 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - db_internal
+
+  migrate:
+    image: cecilieelkjaer/minitwit-migrate
+    build:
+      context: .
+      dockerfile: src/Chirp.Infrastructure/Dockerfile
+    container_name: dbmigrate
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - db_internal
 
 volumes: 
   postgres_data:
+
+networks:
+  db_internal:
+    driver: bridge
+    name: db_internal

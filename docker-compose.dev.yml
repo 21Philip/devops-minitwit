@@ -1,67 +1,46 @@
 services:
   postgres:
-    image: postgres:17
-    container_name: dbserver
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "pg123"
       POSTGRES_DB: "primarydb"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - internal
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"      
-        max-file: "3"
 
   migrate:
-    image: cecilieelkjaer/minitwit-migrate
-    build:
-      context: .
-      dockerfile: src/Chirp.Infrastructure/Dockerfile
-    container_name: dbmigrate
     environment:
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - internal
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
 
   api: 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
     depends_on:
       migrate:
         condition: service_completed_successfully
-    
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
+
   web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
     depends_on:
       migrate:
         condition: service_completed_successfully
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
 
   prometheus:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
 
   grafana:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
-
-volumes: 
-  postgres_data:
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
+    extra_hosts:
+        - "host.docker.internal:host-gateway"

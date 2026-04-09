@@ -11,7 +11,7 @@ services:
     ports:
       - "5000:8080"
     networks:
-      - internal
+      - app_internal
     logging:
       driver: "json-file"
       options:
@@ -30,7 +30,7 @@ services:
     ports:
       - "5001:8080"
     networks:
-      - internal
+      - app_internal
     labels:
       logging: "promtail"
     logging: 
@@ -53,7 +53,7 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - internal
+      - app_internal
     labels:
       logging: "promtail"
     logging:
@@ -74,7 +74,7 @@ services:
       - loki-data:/loki
     command: -config.file=/etc/loki/loki-config.yml
     networks:
-      - internal
+      - app_internal
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -93,7 +93,7 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
     networks:
-      - internal
+      - app_internal
     depends_on:
       - loki
     restart: unless-stopped
@@ -115,7 +115,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - internal
+      - app_internal
     volumes:
       - grafana-storage:/var/lib/grafana
     depends_on:
@@ -132,7 +132,7 @@ volumes:
   loki-data:
 
 networks:
-  internal:
+  app_internal:
     driver: bridge
-    name: internal
+    name: app_internal
     
