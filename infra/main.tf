@@ -16,13 +16,57 @@ data "digitalocean_ssh_key" "default" {
   name = "digital-ocean-ssh"
 }
 
+###################### Create database ######################
+
+resource "digitalocean_droplet" "database" {
+  name     = "database1"
+  region   = var.region
+  size     = var.db_droplet_size
+  image    = "docker-20-04"
+  ssh_keys = [data.digitalocean_ssh_key.default.id]
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    private_key = var.ssh_private_key
+    host        = self.ipv4_address
+  }
+
+  provisioner "remote-exec" {
+    inline = ["mkdir -p /app"]
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/../docker-compose-db.yml"
+    destination = "/app/docker-compose-db.yml"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "cd /app",
+      "docker compose -f docker-compose-db.yml pull",
+      "docker compose -f docker-compose-db.yml up -d",
+    ]
+  }
+}
+
+// Load existing volume and assign to droplet
+data "digitalocean_volume" "database" {
+  name = var.volume_name
+}
+
+resource "digitalocean_volume_attachment" "database" {
+  droplet_id = digitalocean_droplet.database.id
+  volume_id  = digitalocean_volume.database.id
+}
+
 ###################### Create Minitwit instances ######################
 
 resource "digitalocean_droplet" "minitwit" {
-  count = length(var.minitwit_instance_names)
-  name = var.minitwit_instance_names[count.index]
-  region = var.region
-  size     = var.droplet_size
+  count    = length(var.minitwit_instance_names)
+  name     = var.minitwit_instance_names[count.index]
+  region   = var.region
+  size     = var.minitwit_droplet_size
   image    = "docker-20-04"
   ssh_keys = [data.digitalocean_ssh_key.default.id]
 
@@ -43,16 +87,16 @@ resource "digitalocean_droplet" "minitwit" {
 
   # Copy docker-compose.yml to the droplet
   provisioner "file" {
-    source      = "${path.module}/../docker-compose.yml"
-    destination = "/app/docker-compose.yml"
+    source      = "${path.module}/../docker-compose-app.yml"
+    destination = "/app/docker-compose-app.yml"
   }
 
   # Pull images and start containers
   provisioner "remote-exec" {
     inline = [
       "cd /app",
-//      "docker compose pull",
-//      "docker compose up -d",
+      "docker compose -f docker-compose-app.yml pull",
+      "docker compose -f docker-compose-app.yml up -d",
     ]
   } 
 }
@@ -60,10 +104,10 @@ resource "digitalocean_droplet" "minitwit" {
 ###################### Create load balancers ######################
 
 resource "digitalocean_droplet" "load_balancers" {
-  count = length(var.load_balancer_names)
-  name = var.load_balancer_names[count.index]
-  region = var.region
-  size     = var.droplet_size
+  count    = length(var.load_balancer_names)
+  name     = var.load_balancer_names[count.index]
+  region   = var.region
+  size     = var.lb_droplet_size
   image    = "docker-20-04"
   ssh_keys = [data.digitalocean_ssh_key.default.id]
 
@@ -83,7 +127,7 @@ resource "digitalocean_droplet" "load_balancers" {
 
   # Configure Nginx
   provisioner "file" {
-    source      = "${path.module}/nginx.conf"
+    source      = "${path.module}/assets/nginx.conf"
     destination = "/etc/nginx/sites-available/default"
   }
   
@@ -97,7 +141,7 @@ resource "digitalocean_droplet" "load_balancers" {
 
   # Create Nginx health check script
   provisioner "file" {
-    source      = "${path.module}/check_nginx.sh"
+    source      = "${path.module}/assets/check_nginx.sh"
     destination = "/etc/keepalived/check_nginx.sh"
   }
 
@@ -107,7 +151,7 @@ resource "digitalocean_droplet" "load_balancers" {
 
   # Configure Keepalived
   provisioner "file" {
-    source      = "${path.module}/keepalived.conf"
+    source      = "${path.module}/assets/keepalived.conf"
     destination = "/etc/keepalived/keepalived.conf"
   }
 
@@ -121,18 +165,16 @@ resource "digitalocean_droplet" "load_balancers" {
   }
 }
 
-###################### Assign reserved ip ######################
-
-# Get reserved ip
+// Load and assign reserved ip
 data "digitalocean_reserved_ip" "minitwit" {
   ip_address = var.reserved_ip
 }
 
 resource "digitalocean_reserved_ip_assignment" "minitwit" {
   ip_address = data.digitalocean_reserved_ip.minitwit.ip_address
-  droplet_id = digitalocean_droplet.minitwit[0].id
+  droplet_id = digitalocean_droplet.load_balancers[0].id
 }
 
 output "droplet_ip" {
-  value = digitalocean_droplet.minitwit[0].ipv4_address
+  value = digitalocean_droplet.load_balancers[0].ipv4_address
 }
