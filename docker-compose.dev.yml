@@ -4,6 +4,8 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "pg123"
       POSTGRES_DB: "primarydb"
+    volumes:
+      - /tmp/minitwit-db:/var/lib/postgresql/data
 
   migrate:
     environment:

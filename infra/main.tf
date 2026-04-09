@@ -42,6 +42,7 @@ resource "digitalocean_droplet" "database" {
       postgres_user     = var.postgres_user
       postgres_password = var.postgres_password
       postgres_db       = var.postgres_db
+      volume_name       = var.volume_name
     })
     destination = "/app/.env"
   }
