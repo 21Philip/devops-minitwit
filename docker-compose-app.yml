@@ -45,9 +45,6 @@ services:
       dockerfile: ./Dockerfile
       context: ./monitoring/prometheus
     container_name: prometheus
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=${DB_CONNECTION}
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
@@ -109,9 +106,6 @@ services:
       dockerfile: ./Dockerfile
       context: ./monitoring/grafana
     container_name: grafana
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=${DB_CONNECTION}
     ports:
       - "3000:3000"
     networks:

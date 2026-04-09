@@ -30,17 +30,3 @@ services:
         condition: service_completed_successfully
     extra_hosts:
         - "host.docker.internal:host-gateway"
-
-  prometheus:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
-    extra_hosts:
-        - "host.docker.internal:host-gateway"
-
-  grafana:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
-    extra_hosts:
-        - "host.docker.internal:host-gateway"

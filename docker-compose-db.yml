@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: src/Chirp.Infrastructure/Dockerfile
-    container_name: dbmigrate
+    container_name: migrate
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     depends_on:
