@@ -1,15 +1,21 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS base
 
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="/root/.dotnet/tools:${PATH}"
-
+# Build
+FROM base AS build
 WORKDIR /src
+
 COPY src/Chirp.Core ./Chirp.Core
 COPY src/Chirp.Infrastructure ./Chirp.Infrastructure
-COPY src/Chirp.Api ./Chirp.Api
 
-RUN dotnet restore Chirp.Core
 RUN dotnet restore Chirp.Infrastructure
-RUN dotnet restore Chirp.Api
+RUN dotnet publish -c Release -o /app/publish Chirp.Infrastructure
 
-ENTRYPOINT ["dotnet-ef", "database", "update", "--project", "Chirp.Infrastructure", "--startup-project", "Chirp.Api"]
+# Run
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runner
+RUN apk update && apk upgrade --no-cache
+WORKDIR /app
+COPY --from=build /app/publish .
+
+USER $APP_UID
+
+ENTRYPOINT ["dotnet", "Chirp.Infrastructure.dll"]

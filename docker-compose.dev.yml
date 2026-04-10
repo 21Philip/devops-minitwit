@@ -5,7 +5,7 @@ services:
       POSTGRES_PASSWORD: "pg123"
       POSTGRES_DB: "primarydb"
     volumes:
-      - /tmp/minitwit-db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
   migrate:
     environment:
@@ -32,3 +32,6 @@ services:
         condition: service_completed_successfully
     extra_hosts:
         - "host.docker.internal:host-gateway"
+
+volumes:
+  postgres_data:
