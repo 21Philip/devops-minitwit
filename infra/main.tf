@@ -172,6 +172,7 @@ resource "digitalocean_droplet" "load_balancers" {
       "nginx -t",
       "systemctl restart nginx",
       "systemctl enable nginx",
+      "ufw allow 80/tcp"
     ]
   }
 
