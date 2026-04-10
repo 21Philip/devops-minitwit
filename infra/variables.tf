@@ -25,7 +25,7 @@ variable "postgres_db" {
   sensitive = true
 }
 
-variable "db_connection" {
+variable "keepalived_password" {
   type      = string
   sensitive = true
 }
@@ -49,7 +49,8 @@ variable "db_droplet_size" {
 }
 
 variable "reserved_ip" {
-  default = "146.190.204.218"
+  default = "67.207.78.123"
+  //default = "146.190.204.218" real ip
 }
 
 variable "volume_name" {

@@ -28,7 +28,6 @@ resource "digitalocean_droplet" "database" {
   size               = var.db_droplet_size
   image              = "docker-20-04"
   ssh_keys           = [data.digitalocean_ssh_key.default.id]
-  private_networking = true
 
   // Create the /app directory but do not start containers
   // until volume has been attached.
@@ -98,7 +97,6 @@ resource "digitalocean_droplet" "minitwit" {
   size               = var.minitwit_droplet_size
   image              = "docker-20-04"
   ssh_keys           = [data.digitalocean_ssh_key.default.id]
-  private_networking = true
 
   connection {
     type        = "ssh"
@@ -193,6 +191,7 @@ resource "digitalocean_droplet" "load_balancers" {
       state       = count.index == 0 ? "MASTER" : "BACKUP"
       priority    = 255 - (count.index * 5)
       reserved_ip = var.reserved_ip
+      password    = var.keepalived_password
     })
     destination = "/etc/keepalived/keepalived.conf"
   }
