@@ -7,7 +7,7 @@ services:
     container_name: apiserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=${DB_CONNECTION}
+      - ConnectionStrings__DefaultConnection=${MINITWIT_DB_CONNECTION}
     ports:
       - "5000:8080"
     networks:
@@ -26,7 +26,7 @@ services:
     container_name: webserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=${DB_CONNECTION}
+      - ConnectionStrings__DefaultConnection=${MINITWIT_DB_CONNECTION}
     ports:
       - "5001:8080"
     networks:
@@ -106,6 +106,8 @@ services:
       dockerfile: ./Dockerfile
       context: ./monitoring/grafana
     container_name: grafana
+    environment:
+      - GF_DATABASE_URL=${GRAFANA_DB_CONNECTION}
     ports:
       - "3000:3000"
     networks:

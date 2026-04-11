@@ -1,37 +1,65 @@
 services:
-  postgres:
+  minitwit_db:
     environment:
-      POSTGRES_USER: "postgres"
+      POSTGRES_USER: "minitwit"
       POSTGRES_PASSWORD: "pg123"
-      POSTGRES_DB: "primarydb"
+      POSTGRES_DB: "primary"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - minitwit_db_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minitwit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   migrate:
     environment:
-      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primary;Username=minitwit;Password=pg123;Port=5433
     extra_hosts:
-        - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
+
+  grafana_db:
+    environment:
+      POSTGRES_USER: "grafana"
+      POSTGRES_PASSWORD: "pg123"
+      POSTGRES_DB: "primary"
+    volumes:
+      - grafana_db_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grafana"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api: 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primary;Username=minitwit;Password=pg123;Port=5433
     depends_on:
       migrate:
         condition: service_completed_successfully
     extra_hosts:
-        - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
 
   web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primarydb;Username=postgres;Password=pg123
+      - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primary;Username=minitwit;Password=pg123;Port=5433
     depends_on:
       migrate:
         condition: service_completed_successfully
     extra_hosts:
-        - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
+  
+  grafana:
+    environment:
+      - GF_DATABASE_URL=postgres://grafana:pg123@host.docker.internal:5434/primary
+    depends_on:
+      grafana_db:
+        condition: service_healthy 
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
-  postgres_data:
+  minitwit_db_dev:
+  grafana_db_dev:
