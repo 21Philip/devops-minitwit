@@ -1,6 +1,6 @@
-upstream web_servers {
+upstream monitoring_servers {
 %{ for ip in backend_ips ~}
-    server ${ip}:5001;
+    server ${ip}:3000;
 %{ endfor ~}
 }
 
@@ -10,9 +10,9 @@ upstream api_servers {
 %{ endfor ~}
 }
 
-upstream monitoring_servers {
+upstream web_servers {
 %{ for ip in backend_ips ~}
-    server ${ip}:3000;
+    server ${ip}:5001;
 %{ endfor ~}
 }
 
@@ -21,7 +21,7 @@ server {
     listen [::]:80 default_server;
 
     location / {
-        proxy_pass http://web_servers;
+        proxy_pass http://monitoring_servers;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -29,15 +29,15 @@ server {
     }
 
     location /api/ {
-        proxy_pass http://api_servers/;
+        proxy_pass http://api_servers;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    location /monitoring/ {
-        proxy_pass http://monitoring_servers/;
+    location /web/ {
+        proxy_pass http://web_servers;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

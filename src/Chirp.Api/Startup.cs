@@ -164,6 +164,7 @@ namespace Org.OpenAPITools
             }
             else
             {
+                app.UsePathBase("/api");
                 app.UseHsts();
             }
 

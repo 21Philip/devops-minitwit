@@ -36,6 +36,11 @@ public class Program
 
         var app = builder.Build();
 
+        if (app.Environment.IsProduction())
+        {
+            app.UsePathBase("/web");
+        }
+
         // Simple request logging middleware so each HTTP request/response is logged to stdout
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
         app.Use(async (context, next) =>
