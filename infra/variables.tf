@@ -32,6 +32,18 @@ variable "keepalived_password" {
 
 ########## Public ##########
 
+variable "web_domain" {
+  default = "web.walkablecity.app"
+}
+
+variable "api_domain" {
+  default = "api.walkablecity.app"
+}
+
+variable "monitor_domain" {
+  default = "monitor.walkablecity.app"
+}
+
 variable "region" {
   default = "fra1"
 }

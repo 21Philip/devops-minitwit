@@ -162,17 +162,21 @@ resource "digitalocean_droplet" "load_balancers" {
   # Configure Nginx
   provisioner "file" {
     content     = templatefile("${path.module}/assets/nginx.conf.tftpl", {
-      backend_ips = digitalocean_droplet.minitwit[*].ipv4_address_private
+      backend_ips    = digitalocean_droplet.minitwit[*].ipv4_address_private
+      web_domain     = var.web_domain
+      api_domain     = var.api_domain
+      monitor_domain = var.monitor_domain
     })
     destination = "/etc/nginx/sites-available/default"
   }
   
   provisioner "remote-exec" {
     inline = [
-      "nginx -t",
+      "snap install certbot --classic"
+      "certbot --nginx -d '${var.web_domain},${var.api_domain},${var.monitor_domain}'"
       "systemctl restart nginx",
       "systemctl enable nginx",
-      "ufw allow 80/tcp"
+      "ufw allow 'Nginx Full'"
     ]
   }
 
