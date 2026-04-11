@@ -15,19 +15,24 @@ provider "digitalocean" {
   token = var.do_token
 }
 
-# Get ssh key defined on Digital Ocean website
+# Get default Digital Ocean ssh key
 data "digitalocean_ssh_key" "default" {
   name = "digital-ocean-ssh"
+}
+
+# Get personal ssh keys (add your own)
+data "digitalocean_ssh_key" "philip" {
+  name = "philip-hjem"
 }
 
 ###################### Create database ######################
 
 resource "digitalocean_droplet" "database" {
-  name               = "database1"
-  region             = var.region
-  size               = var.db_droplet_size
-  image              = "docker-20-04"
-  ssh_keys           = [data.digitalocean_ssh_key.default.id]
+  name     = "database1"
+  region   = var.region
+  size     = var.db_droplet_size
+  image    = "docker-20-04"
+  ssh_keys = [data.digitalocean_ssh_key.default.id, data.digitalocean_ssh_key.philip.id]
 
   // Create the /app directory but do not start containers
   // until volume has been attached.
@@ -91,12 +96,12 @@ resource "null_resource" "start_database" {
 ###################### Create Minitwit instances ######################
 
 resource "digitalocean_droplet" "minitwit" {
-  count              = length(var.minitwit_instance_names)
-  name               = var.minitwit_instance_names[count.index]
-  region             = var.region
-  size               = var.minitwit_droplet_size
-  image              = "docker-20-04"
-  ssh_keys           = [data.digitalocean_ssh_key.default.id]
+  count    = length(var.minitwit_instance_names)
+  name     = var.minitwit_instance_names[count.index]
+  region   = var.region
+  size     = var.minitwit_droplet_size
+  image    = "docker-20-04"
+  ssh_keys = [data.digitalocean_ssh_key.default.id, data.digitalocean_ssh_key.philip.id]
 
   connection {
     type        = "ssh"
@@ -143,7 +148,7 @@ resource "digitalocean_droplet" "load_balancers" {
   region   = var.region
   size     = var.lb_droplet_size
   image    = "docker-20-04"
-  ssh_keys = [data.digitalocean_ssh_key.default.id]
+  ssh_keys = [data.digitalocean_ssh_key.default.id, data.digitalocean_ssh_key.philip.id]
 
   connection {
     type        = "ssh"
