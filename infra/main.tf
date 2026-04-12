@@ -157,14 +157,14 @@ resource "digitalocean_droplet" "load_balancers" {
     host        = self.ipv4_address
   }
 
+  ########### Nginx ##########
   provisioner "remote-exec" {
     inline = [
       "apt-get update",
-      "apt-get install -y nginx keepalived",
+      "apt-get install -y nginx",
     ]
   }
 
-  # Configure Nginx
   provisioner "file" {
     content     = templatefile("${path.module}/assets/nginx.conf.tftpl", {
       backend_ips    = digitalocean_droplet.minitwit[*].ipv4_address_private
@@ -177,42 +177,51 @@ resource "digitalocean_droplet" "load_balancers" {
   
   provisioner "remote-exec" {
     inline = [
-      "snap install certbot --classic"
-      "certbot --nginx -d '${var.web_domain},${var.api_domain},${var.monitor_domain}'"
+      "snap install certbot --classic",
+      "certbot --nginx -d '${var.web_domain},${var.api_domain},${var.monitor_domain}'",
       "systemctl restart nginx",
       "systemctl enable nginx",
-      "ufw allow 'Nginx Full'"
+      "ufw allow 'Nginx Full'",
     ]
   }
 
-  # Create Nginx health check script
-  provisioner "file" {
-    source      = "${path.module}/assets/check_nginx.sh"
-    destination = "/etc/keepalived/check_nginx.sh"
-  }
-
+  ########## Keepalived ##########
   provisioner "remote-exec" {
-    inline = ["chmod +x /etc/keepalived/check_nginx.sh"]
-  }
-
-  # Configure Keepalived
-  provisioner "file" {
-    content     = templatefile("${path.module}/assets/keepalived.conf.tftpl", {
-      state       = count.index == 0 ? "MASTER" : "BACKUP"
-      priority    = 255 - (count.index * 5)
-      reserved_ip = var.reserved_ip
-      password    = var.keepalived_password
-    })
-    destination = "/etc/keepalived/keepalived.conf"
+    inline = [
+      "apt-get install build-essential libssl-dev",
+      "wget http://www.keepalived.org/software/keepalived-1.2.19.tar.gz",
+      "tar xzvf keepalived-1.2.19.tar.gz",
+      "cd keepalived-1.2.19",
+      "./configure",
+      "make",
+      "make install",
+    ]
   }
 
   provisioner "remote-exec" {
     inline = [
-      "echo 'net.ipv4.ip_nonlocal_bind=1' >> /etc/sysctl.conf",
-      "sysctl -p",
-      "systemctl start keepalived",
-      "systemctl enable keepalived",
+      "mkdir -p /etc/keepalived",
+      "cd /etc/keepalived",
+      "curl -LO http://do.co/assign-ip",
     ]
+  }
+
+  # Initial configuration of keepalived
+  provisioner "file" {
+    source      = "${path.module}/assets/keepalived_init"
+    destination = "/etc/init/keepalived.conf"
+  }
+
+  provisioner "file" {
+    content     = templatefile("${path.module}/assets/master.sh.tftpl", {
+      do_token    = var.do_token
+      reserved_ip = var.reserved_ip
+    })
+    destination = "/etc/keepalived/master.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["chmod +x /etc/keepalived/master.sh"]
   }
 }
 
@@ -224,4 +233,33 @@ data "digitalocean_reserved_ip" "minitwit" {
 resource "digitalocean_reserved_ip_assignment" "minitwit" {
   ip_address = data.digitalocean_reserved_ip.minitwit.ip_address
   droplet_id = digitalocean_droplet.load_balancers[0].id
+}
+
+// Finish keepalived configuration and start keepalived
+resource "null_resource" "start_keepalived" {
+  depends_on = [digitalocean_droplet.load_balancers, digitalocean_reserved_ip_assignment.minitwit]
+  count = length(digitalocean_droplet.load_balancers)
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    private_key = var.ssh_private_key
+    host        = digitalocean_droplet.load_balancers[count.index].ipv4_address
+  }
+
+  provisioner "file" {
+    content     = templatefile("${path.module}/assets/keepalived.conf.tftpl", {
+      state    = count.index == 0 ? "MASTER" : "BACKUP"
+      priority = 255 - (count.index * 5)
+      self_ip  = digitalocean_droplet.load_balancers[count.index].ipv4_address_private
+      peer_ips = [for i, ip in digitalocean_droplet.load_balancers[*].ipv4_address_private :
+                  ip if i != count.index]
+      password = var.keepalived_password
+    })
+    destination = "/etc/keepalived/keepalived.conf"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["systemctl start keepalived"]
+  }
 }
