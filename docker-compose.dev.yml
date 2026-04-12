@@ -7,7 +7,7 @@ services:
     volumes:
       - minitwit_db_dev:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U minitwit"]
+      test: ["CMD-SHELL", "pg_isready -U minitwit -d primary"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -17,19 +17,6 @@ services:
       - ConnectionStrings__DefaultConnection=Host=host.docker.internal;Database=primary;Username=minitwit;Password=pg123;Port=5433
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-  grafana_db:
-    environment:
-      POSTGRES_USER: "grafana"
-      POSTGRES_PASSWORD: "pg123"
-      POSTGRES_DB: "primary"
-    volumes:
-      - grafana_db_dev:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U grafana"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   api: 
     environment:
@@ -50,7 +37,20 @@ services:
         condition: service_completed_successfully
     extra_hosts:
       - "host.docker.internal:host-gateway"
-  
+
+  grafana_db:
+    environment:
+      POSTGRES_USER: "grafana"
+      POSTGRES_PASSWORD: "pg123"
+      POSTGRES_DB: "primary"
+    volumes:
+      - grafana_db_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grafana -d primary"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   grafana:
     environment:
       - GF_DATABASE_URL=postgres://grafana:pg123@host.docker.internal:5434/primary
