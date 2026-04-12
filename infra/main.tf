@@ -166,10 +166,7 @@ resource "digitalocean_droplet" "load_balancers" {
       "export Namecom_Token=${var.namecom_token}",
       "~/.acme.sh/acme.sh --issue --dns dns_namecom -d 'walkablecity.app' -d '*.walkablecity.app'",
       "mkdir -p /etc/letsencrypt/live/walkablecity.app",
-      "~/.acme.sh/acme.sh --install-cert -d 'walkablecity.app' \
-        --cert-file /etc/letsencrypt/live/walkablecity.app/cert.pem \
-        --key-file /etc/letsencrypt/live/walkablecity.app/privkey.pem \
-        --fullchain-file /etc/letsencrypt/live/walkablecity.app/fullchain.pem",
+      "~/.acme.sh/acme.sh --install-cert -d 'walkablecity.app' --cert-file /etc/letsencrypt/live/walkablecity.app/cert.pem --key-file /etc/letsencrypt/live/walkablecity.app/privkey.pem --fullchain-file /etc/letsencrypt/live/walkablecity.app/fullchain.pem",
       #nginx
       "apt-get update",
       "apt-get install -y nginx",
@@ -260,34 +257,6 @@ resource "null_resource" "start_keepalived" {
     inline = [
       "systemctl enable keepalived",
       "systemctl start keepalived",
-    ]
-  }
-}
-
-// Finish nginx configuration abd start nginx
-resource "null_resource" "create_certificates" {
-  depends_on = [digitalocean.load_balancers]
-
-  connection {
-    type        = "ssh"
-    user        = "root"
-    private_key = var.ssh_private_key
-    host        = digitalocean_droplet.load_balancers[0].ipv4_address
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "curl https://get.acme.sh | sh -s email=bruh@mail.com",
-      "export Namecom_Username=${var.namecom_username}",
-      "export Namecom_Token=${var.namecom_token}",
-      "~/.acme.sh/acme.sh --issue --dns dns_namecom -d 'walkablecity.app' -d '*.walkablecity.app'",
-      "mkdir -p /etc/letsencrypt/live/walkablecity.app",
-      "~/.acme.sh/acme.sh --install-cert -d 'walkablecity.app' \
-        --cert-file /etc/letsencrypt/live/walkablecity.app/cert.pem \
-        --key-file /etc/letsencrypt/live/walkablecity.app/privkey.pem \
-        --fullchain-file /etc/letsencrypt/live/walkablecity.app/fullchain.pem",
-      "systemctl enable nginx",
-      "systemctl start nginx",
     ]
   }
 }
