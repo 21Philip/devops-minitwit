@@ -30,6 +30,16 @@ variable "keepalived_password" {
   sensitive = true
 }
 
+variable "namecom_username" {
+  type      = string
+  sensitive = true
+}
+
+variable "namecom_token" {
+  type      = string
+  sensitive = true
+}
+
 ########## Public ##########
 
 variable "web_domain" {

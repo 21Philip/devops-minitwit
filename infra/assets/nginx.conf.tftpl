@@ -17,9 +17,11 @@ upstream monitoring_servers {
 }
 
 server {
-    listen 80;
-    listen [::]:80;
+    listen 443 ssl;
     server_name ${web_domain};
+
+    ssl_certificate /etc/letsencrypt/live/walkablecity.app/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/walkablecity.app/privkey.pem;
 
     location / {
         proxy_pass http://web_servers;
@@ -36,9 +38,11 @@ server {
 }
 
 server {
-    listen 80;
-    listen [::]:80;
+    listen 443 ssl;
     server_name ${api_domain};
+
+    ssl_certificate /etc/letsencrypt/live/walkablecity.app/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/walkablecity.app/privkey.pem;
 
     location / {
         proxy_pass http://api_servers;
@@ -55,9 +59,11 @@ server {
 }
 
 server {
-    listen 80;
-    listen [::]:80;
+    listen 443 ssl;
     server_name ${monitor_domain};
+
+    ssl_certificate /etc/letsencrypt/live/walkablecity.app/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/walkablecity.app/privkey.pem;
     
     location / {
         proxy_pass http://monitoring_servers;

@@ -6,7 +6,7 @@ global_defs {
 vrrp_script check_nginx {
     script "systemctl is-active --quiet nginx"
     interval 2
-    weight 2
+    weight 3
 }
 
 vrrp_instance VI_1 {
@@ -19,7 +19,7 @@ vrrp_instance VI_1 {
     unicast_peer {
     %{ for ip in peer_ips ~}
         ${ip}
-    %{ endfor ~} 
+    %{ endfor ~}
     }
 
     authentication {

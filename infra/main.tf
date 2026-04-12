@@ -162,8 +162,6 @@ resource "digitalocean_droplet" "load_balancers" {
     inline = [
       "apt-get update",
       "apt-get install -y nginx",
-      "systemctl enable nginx",
-      "systemctl start nginx",
       "ufw allow 'Nginx Full'",
     ]
   }
@@ -177,30 +175,11 @@ resource "digitalocean_droplet" "load_balancers" {
     })
     destination = "/etc/nginx/sites-available/default"
   }
-  
-  provisioner "remote-exec" {
-    inline = [
-      "snap install certbot --classic",
-      "certbot --nginx --non-interactive --agree-tos -m devops@itu.dk -d '${var.web_domain},${var.api_domain},${var.monitor_domain}'",
-      "systemctl restart nginx",
-    ]
-  }
 
   ########## Keepalived ##########
   provisioner "remote-exec" {
     inline = [
-      "apt-get install -y build-essential libssl-dev",
-      "wget http://www.keepalived.org/software/keepalived-1.2.19.tar.gz",
-      "tar xzvf keepalived-1.2.19.tar.gz",
-      "cd keepalived-1.2.19",
-      "./configure",
-      "make",
-      "make install",
-    ]
-  }
-
-  provisioner "remote-exec" {
-    inline = [
+      "apt-get install -y keepalived",
       "mkdir -p /etc/keepalived",
       "cd /etc/keepalived",
       "curl -LO http://do.co/assign-ip",
@@ -251,7 +230,7 @@ resource "null_resource" "start_keepalived" {
   provisioner "file" {
     content     = templatefile("${path.module}/assets/keepalived.conf.tftpl", {
       state    = count.index == 0 ? "MASTER" : "BACKUP"
-      priority = 255 - (count.index * 5)
+      priority = 250 - (count.index * 5)
       self_ip  = digitalocean_droplet.load_balancers[count.index].ipv4_address_private
       peer_ips = [for i, ip in digitalocean_droplet.load_balancers[*].ipv4_address_private :
                   ip if i != count.index]
@@ -264,6 +243,34 @@ resource "null_resource" "start_keepalived" {
     inline = [
       "systemctl enable keepalived",
       "systemctl start keepalived",
+    ]
+  }
+}
+
+// Finish nginx configuration abd start nginx
+resource "null_resource" "create_certificates" {
+  depends_on = [digitalocean.load_balancers]
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    private_key = var.ssh_private_key
+    host        = digitalocean_droplet.load_balancers[0].ipv4_address
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "curl https://get.acme.sh | sh -s email=bruh@mail.com",
+      "export Namecom_Username=${var.namecom_username}",
+      "export Namecom_Token=${var.namecom_token}",
+      "~/.acme.sh/acme.sh --issue --dns dns_namecom -d 'walkablecity.app' -d '*.walkablecity.app'",
+      "mkdir -p /etc/letsencrypt/live/walkablecity.app",
+      "~/.acme.sh/acme.sh --install-cert -d 'walkablecity.app' \
+        --cert-file /etc/letsencrypt/live/walkablecity.app/cert.pem \
+        --key-file /etc/letsencrypt/live/walkablecity.app/privkey.pem \
+        --fullchain-file /etc/letsencrypt/live/walkablecity.app/fullchain.pem",
+      "systemctl enable nginx",
+      "systemctl start nginx",
     ]
   }
 }
