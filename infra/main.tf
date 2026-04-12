@@ -162,6 +162,9 @@ resource "digitalocean_droplet" "load_balancers" {
     inline = [
       "apt-get update",
       "apt-get install -y nginx",
+      "systemctl enable nginx",
+      "systemctl start nginx",
+      "ufw allow 'Nginx Full'",
     ]
   }
 
@@ -178,17 +181,15 @@ resource "digitalocean_droplet" "load_balancers" {
   provisioner "remote-exec" {
     inline = [
       "snap install certbot --classic",
-      "certbot --nginx -d '${var.web_domain},${var.api_domain},${var.monitor_domain}'",
+      "certbot --nginx --non-interactive --agree-tos -m devops@itu.dk -d '${var.web_domain},${var.api_domain},${var.monitor_domain}'",
       "systemctl restart nginx",
-      "systemctl enable nginx",
-      "ufw allow 'Nginx Full'",
     ]
   }
 
   ########## Keepalived ##########
   provisioner "remote-exec" {
     inline = [
-      "apt-get install build-essential libssl-dev",
+      "apt-get install -y build-essential libssl-dev",
       "wget http://www.keepalived.org/software/keepalived-1.2.19.tar.gz",
       "tar xzvf keepalived-1.2.19.tar.gz",
       "cd keepalived-1.2.19",
@@ -260,6 +261,9 @@ resource "null_resource" "start_keepalived" {
   }
 
   provisioner "remote-exec" {
-    inline = ["systemctl start keepalived"]
+    inline = [
+      "systemctl enable keepalived",
+      "systemctl start keepalived",
+    ]
   }
 }
