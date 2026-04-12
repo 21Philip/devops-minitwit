@@ -25,7 +25,7 @@ services:
       dockerfile: src/Chirp.Infrastructure/Dockerfile
     container_name: migrate
     environment:
-      - ConnectionStrings__DefaultConnection=Host=minitwit_db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Port=5433
+      - ConnectionStrings__DefaultConnection=Host=minitwit_db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     depends_on:
       minitwit_db:
         condition: service_healthy

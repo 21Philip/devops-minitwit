@@ -49,7 +49,7 @@ variable "region" {
 }
 
 variable "minitwit_droplet_size" {
-  default = "s-2vcpu-4gb"
+  default = "s-2vcpu-2gb"
 }
 
 variable "lb_droplet_size" {
