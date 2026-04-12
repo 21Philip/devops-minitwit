@@ -160,9 +160,22 @@ resource "digitalocean_droplet" "load_balancers" {
   ########### Nginx ##########
   provisioner "remote-exec" {
     inline = [
+      #certificates
+      "curl https://get.acme.sh | sh -s email=bruh@mail.com",
+      "export Namecom_Username=${var.namecom_username}",
+      "export Namecom_Token=${var.namecom_token}",
+      "~/.acme.sh/acme.sh --issue --dns dns_namecom -d 'walkablecity.app' -d '*.walkablecity.app'",
+      "mkdir -p /etc/letsencrypt/live/walkablecity.app",
+      "~/.acme.sh/acme.sh --install-cert -d 'walkablecity.app' \
+        --cert-file /etc/letsencrypt/live/walkablecity.app/cert.pem \
+        --key-file /etc/letsencrypt/live/walkablecity.app/privkey.pem \
+        --fullchain-file /etc/letsencrypt/live/walkablecity.app/fullchain.pem",
+      #nginx
       "apt-get update",
       "apt-get install -y nginx",
       "ufw allow 'Nginx Full'",
+      "systemctl enable nginx",
+      "systemctl start nginx",
     ]
   }
 
@@ -174,6 +187,10 @@ resource "digitalocean_droplet" "load_balancers" {
       monitor_domain = var.monitor_domain
     })
     destination = "/etc/nginx/sites-available/default"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["systemctl reload nginx"]
   }
 
   ########## Keepalived ##########
