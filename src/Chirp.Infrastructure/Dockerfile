@@ -6,11 +6,9 @@ WORKDIR /src
 
 COPY src/Chirp.Core ./Chirp.Core
 COPY src/Chirp.Infrastructure ./Chirp.Infrastructure
-COPY src/Chirp.Web ./Chirp.Web
 
-RUN dotnet restore Chirp.Web
-
-RUN dotnet publish -c Release -o /app/publish Chirp.Web
+RUN dotnet restore Chirp.Infrastructure
+RUN dotnet publish -c Release -o /app/publish Chirp.Infrastructure
 
 # Run
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runner
@@ -20,4 +18,4 @@ COPY --from=build /app/publish .
 
 USER $APP_UID
 
-ENTRYPOINT ["dotnet", "Chirp.Web.dll"]
+ENTRYPOINT ["dotnet", "Chirp.Infrastructure.dll"]

@@ -18,8 +18,6 @@ RUN apk update && apk upgrade --no-cache
 WORKDIR /app
 COPY --from=build /app/publish .
 
-RUN mkdir -p /app/keys && chown -R "$APP_UID" /app/keys
-
 USER $APP_UID
 
 ENTRYPOINT ["dotnet", "Chirp.Api.dll"]

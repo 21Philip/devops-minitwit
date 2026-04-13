@@ -27,9 +27,7 @@ public class Program
 
         builder.Services.AddDefaultIdentity<Author>().AddEntityFrameworkStores<CheepDBContext>();
 
-        builder.Services.AddDataProtection()
-            .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
-            .SetApplicationName("minitwit");
+        builder.Services.AddDataProtection().PersistKeysToDbContext<CheepDBContext>();
 
         builder.Services.AddRazorPages();
 

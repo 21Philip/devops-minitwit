@@ -1,6 +1,7 @@
 // Copyright (c) devops-gruppe-connie. All rights reserved.
 
 using Chirp.Core;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace Chirp.Infrastructure
     /// Represents the database context for the Chirp application, managing database operations
     /// for authors, cheeps, and their relationships.
     /// </summary>
-    public class CheepDBContext : IdentityDbContext<Author, IdentityRole<int>, int>
+    public class CheepDBContext : IdentityDbContext<Author, IdentityRole<int>, int>, IDataProtectionKeyContext
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CheepDBContext"/> class with specified options.
@@ -21,6 +22,8 @@ namespace Chirp.Infrastructure
             : base(dbContextOptions)
         {
         }
+
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
         public DbSet<Cheep> Cheeps { get; set; }
 

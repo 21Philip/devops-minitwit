@@ -1,0 +1,35 @@
+global_defs {
+    script_user root
+    enable_script_security
+}
+
+vrrp_script check_nginx {
+    script "systemctl is-active --quiet nginx"
+    interval 2
+    weight 3
+}
+
+vrrp_instance VI_1 {
+    interface eth1
+    state ${state}
+    priority ${priority}
+
+    virtual_router_id 33
+    unicast_src_ip ${self_ip}
+    unicast_peer {
+    %{ for ip in peer_ips ~}
+        ${ip}
+    %{ endfor ~}
+    }
+
+    authentication {
+        auth_type PASS
+        auth_pass ${password}
+    }
+
+    track_script {
+        check_nginx
+    }
+
+    notify_master /etc/keepalived/master.sh
+}

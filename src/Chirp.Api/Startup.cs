@@ -148,11 +148,7 @@ namespace Org.OpenAPITools
             })
             .AddEntityFrameworkStores<CheepDBContext>();
 
-            // Must be changed if we ever deploy several instances.
-            // We should persist keys to the database
-            services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"))
-                .SetApplicationName("minitwit");
+            services.AddDataProtection().PersistKeysToDbContext<CheepDBContext>();
         }
 
         /// <summary>
@@ -169,13 +165,6 @@ namespace Org.OpenAPITools
             else
             {
                 app.UseHsts();
-            }
-
-            // Check if database exists, otherwise create it.
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
-                db.Database.EnsureCreated();
             }
 
             app.UseDefaultFiles();

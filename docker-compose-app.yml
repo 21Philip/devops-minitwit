@@ -1,36 +1,4 @@
 services:
-  postgres:
-    image: postgres:17
-    container_name: dbserver
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "pg123"
-      POSTGRES_DB: "primarydb"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - internal
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"      
-        max-file: "3"
-    
-  keys-init:
-    image: busybox
-    command: ["sh", "-c", "chown -R 1654:1654 /app/keys"]
-    volumes:
-      - dataprotection_keys:/app/keys
-    networks:
-      - internal
-
   api:
     image: cecilieelkjaer/minitwit-api:latest
     build:
@@ -38,20 +6,12 @@ services:
       dockerfile: src/Chirp.Api/Dockerfile
     container_name: apiserver
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ENV DOTNET_RUNNING_IN_CONTAINER="true"
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
-    volumes:
-      - dataprotection_keys:/app/keys
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=${MINITWIT_DB_CONNECTION}
     ports:
       - "5000:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      keys-init:
-        condition: service_completed_successfully
     networks:
-      - internal
+      - app_internal
     logging:
       driver: "json-file"
       options:
@@ -65,20 +25,12 @@ services:
       dockerfile: src/Chirp.Web/Dockerfile
     container_name: webserver
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ENV DOTNET_RUNNING_IN_CONTAINER="true"
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
-    volumes:
-      - dataprotection_keys:/app/keys
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=${MINITWIT_DB_CONNECTION}
     ports:
       - "5001:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      keys-init:
-        condition: service_completed_successfully
     networks:
-      - internal
+      - app_internal
     labels:
       logging: "promtail"
     logging: 
@@ -93,16 +45,12 @@ services:
       dockerfile: ./Dockerfile
       context: ./monitoring/prometheus
     container_name: prometheus
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ENV DOTNET_RUNNING_IN_CONTAINER="true"
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
     networks:
-      - internal
+      - app_internal
     labels:
       logging: "promtail"
     logging:
@@ -123,7 +71,7 @@ services:
       - loki-data:/loki
     command: -config.file=/etc/loki/loki-config.yml
     networks:
-      - internal
+      - app_internal
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -142,7 +90,7 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
     networks:
-      - internal
+      - app_internal
     depends_on:
       - loki
     restart: unless-stopped
@@ -159,13 +107,11 @@ services:
       context: ./monitoring/grafana
     container_name: grafana
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ENV DOTNET_RUNNING_IN_CONTAINER="true"
-      - ConnectionStrings__DefaultConnection=Host=dbserver;Database=primarydb;Username=postgres;Password=pg123
+      - GF_DATABASE_URL=${GRAFANA_DB_CONNECTION}
     ports:
       - "3000:3000"
     networks:
-      - internal
+      - app_internal
     volumes:
       - grafana-storage:/var/lib/grafana
     depends_on:
@@ -179,12 +125,10 @@ services:
 
 volumes:
   grafana-storage: {}
-  postgres_data:
-  dataprotection_keys:
   loki-data:
 
 networks:
-  internal:
+  app_internal:
     driver: bridge
-    name: internal
+    name: app_internal
     
