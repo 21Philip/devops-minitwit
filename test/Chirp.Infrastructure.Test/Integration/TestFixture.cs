@@ -1,6 +1,5 @@
 // Copyright (c) devops-gruppe-connie. All rights reserved.
 
-using Chirp.Web;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -11,7 +10,7 @@ using Xunit;
 
 namespace Chirp.Infrastructure.Test.Integration;
 
-public class IntegrationTestFixture : WebApplicationFactory<Program>, IAsyncLifetime
+public class IntegrationTestFixture : WebApplicationFactory<Web.Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer postgres;
 
