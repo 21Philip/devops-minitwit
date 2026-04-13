@@ -6,3 +6,6 @@ dotnet_diagnostic.SA1606.severity = suggestion
 dotnet_diagnostic.SA1614.severity = suggestion
 dotnet_diagnostic.SA1607.severity = suggestion
 dotnet_diagnostic.SA1108.severity = suggestion
+
+[**/Migrations/*.cs]
+dotnet_analyzer_diagnostic.severity = none
