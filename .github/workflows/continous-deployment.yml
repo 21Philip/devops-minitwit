@@ -137,57 +137,57 @@ jobs:
             my_project_mac.zip
             my_project_win.zip
 
-  deploy:
-    needs: [test, test-playwright]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+  # deploy:
+  #   needs: [test, test-playwright]
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+  #     - name: Log in to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build images
-        run: docker compose build
+  #     - name: Build images
+  #       run: docker compose build
 
-      - name: Install Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.6
-        with:
-          version: v0.69.3
+  #     - name: Install Trivy
+  #       uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.6
+  #       with:
+  #         version: v0.69.3
 
-      - name: Scan Docker images with Trivy
-        run: |
-          IMAGES=$(docker compose config --images)
-          for IMAGE in $IMAGES; do
-            echo "Scanning $IMAGE..."
-            trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed --ignorefile .trivyignore --scanners vuln "$IMAGE"
-          done
+  #     - name: Scan Docker images with Trivy
+  #       run: |
+  #         IMAGES=$(docker compose config --images)
+  #         for IMAGE in $IMAGES; do
+  #           echo "Scanning $IMAGE..."
+  #           trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed --ignorefile .trivyignore --scanners vuln "$IMAGE"
+  #         done
 
-      - name: Push images
-        run: docker compose push
+  #     - name: Push images
+  #       run: docker compose push
 
-      - name: Update docker-compose.yml on server
-        run: |
-          echo "${{ secrets.SSH_KEY }}" > ssh_key
-          chmod 600 ssh_key
-          scp -i ssh_key -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/app/
-          rm ssh_key
+  #     - name: Update docker-compose.yml on server
+  #       run: |
+  #         echo "${{ secrets.SSH_KEY }}" > ssh_key
+  #         chmod 600 ssh_key
+  #         scp -i ssh_key -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/app/
+  #         rm ssh_key
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /app
-            docker compose pull
-            docker compose up -d --remove-orphans
+  #     - name: Deploy via SSH
+  #       uses: appleboy/ssh-action@v1.0.3
+  #       with:
+  #         host: ${{ secrets.SSH_HOST }}
+  #         username: ${{ secrets.SSH_USER }}
+  #         key: ${{ secrets.SSH_KEY }}
+  #         script: |
+  #           cd /app
+  #           docker compose pull
+  #           docker compose up -d --remove-orphans
