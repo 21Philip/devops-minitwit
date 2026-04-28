@@ -4,6 +4,7 @@ using Chirp.Core;
 using Chirp.Infrastructure;
 using Chirp.Web.Monitoring;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
 
@@ -33,6 +34,7 @@ public class Program
 
         // Register Prometheus metrics and hosted service
         builder.Services.AddHostedService<CpuGaugeService>();
+        builder.Services.AddHostedService<FollowersLeaderboardService>();
 
         var app = builder.Build();
 
@@ -44,7 +46,7 @@ public class Program
             await next();
             logger.LogInformation("HTTP {Method} {Path} responded {StatusCode}", context.Request.Method, context.Request.Path, context.Response.StatusCode);
         });
-
+        
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
         {
@@ -58,8 +60,7 @@ public class Program
         app.UseHttpMetrics(); // built-in middleware from prometheus-net to collect request metrics
 
         app.UseStaticFiles();
-
-        // Custom middleware to measure request duration and increment response counter
+        
         app.Use(async (context, next) =>
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -70,17 +71,27 @@ public class Program
             finally
             {
                 sw.Stop();
+                
+                var endpoint = context.GetEndpoint();
 
-                // Record duration in milliseconds
-                Chirp.Web.Monitoring.Metrics.RequestDuration.Observe(sw.Elapsed.TotalMilliseconds);
-                Chirp.Web.Monitoring.Metrics.ResponseCounter.Inc();
+                var route =
+                    (endpoint as RouteEndpoint)?.RoutePattern?.RawText
+                    ?? endpoint?.Metadata.GetMetadata<RouteEndpoint>()?.RoutePattern?.RawText
+                    ?? endpoint?.DisplayName
+                    ?? "unknown";
+
+                var method = context.Request.Method;
+                var status = context.Response.StatusCode.ToString();
+                
+                Chirp.Web.Monitoring.Metrics.HttpResponses.WithLabels(method, route, status).Inc();
+                Chirp.Web.Monitoring.Metrics.HttpRequestDuration.WithLabels(method, route, status).Observe(sw.Elapsed.TotalSeconds);
             }
         });
 
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapMetrics(); // maps /metrics
+        app.MapMetrics(); 
         app.MapRazorPages();
 
         app.Run();

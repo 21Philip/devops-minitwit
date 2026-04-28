@@ -9,11 +9,32 @@ public static class Metrics
     // Gauge for CPU load percent
     public static readonly Gauge CpuGauge = MetricsFactory.CreateGauge("minitwit_cpu_load_percent", "Current load of the CPU in percent.");
 
-    // Counter for HTTP responses
-    public static readonly Counter ResponseCounter = MetricsFactory.CreateCounter("minitwit_http_responses_total", "The count of HTTP responses sent.");
+    public static readonly Counter HttpResponses = Prometheus.Metrics.CreateCounter(
+      "minitwit_http_responses_total",
+      "HTTP responses sent.",
+      new CounterConfiguration { LabelNames = new[] { "method", "route", "status" } });
 
-    // Histogram for request durations (milliseconds)
-    public static readonly Histogram RequestDuration = MetricsFactory.CreateHistogram("minitwit_request_duration_milliseconds", "Request duration distribution.");
+    public static readonly Histogram HttpRequestDuration = Prometheus.Metrics.CreateHistogram(
+      "minitwit_http_request_duration_seconds",
+      "HTTP request duration in seconds.",
+      new HistogramConfiguration
+      {
+        LabelNames = new[] { "method", "route", "status" },
+        Buckets = Histogram.ExponentialBuckets(0.005, 2, 12) // 5ms .. ~10s
+      });
+    
+    public static readonly Counter CheepsPosted = Prometheus.Metrics.CreateCounter(
+      "minitwit_cheeps_posted_total",
+      "Number of cheeps successfully posted.");
+    
+    public static readonly Counter AuthorsFollowed = Prometheus.Metrics.CreateCounter(
+        "minitwit_authors_followed_total",
+        "Number of follow actions performed by users.");
+    
+    public static readonly Gauge UserFollowers = Prometheus.Metrics.CreateGauge(
+      "minitwit_user_followers",
+      "Number of followers per user.",
+      new GaugeConfiguration { LabelNames = new[] { "user" } });
 }
 
 internal static class MetricsFactory

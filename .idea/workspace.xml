@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="" />
+    <list default="true" id="58c2e271-3a34-4047-b14c-53ede0a6a43f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/Chirp.Web/Monitoring/FollowersLeaderboardService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/monitoring/grafana/dashboards/dashboard.json" beforeDir="false" afterPath="$PROJECT_DIR$/monitoring/grafana/dashboards/dashboard.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Monitoring/Minitwit-Metrics.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Monitoring/Minitwit-Metrics.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Pages/Shared/TimelineModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Pages/Shared/TimelineModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Chirp.Web/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Chirp.Web/Program.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -15,17 +22,46 @@
       <entry key="_C:/Users/joha5/Documents/UNI/6.Sem/DevOps/devops-minitwit" value="2oTwhEwzIEltvuAEeu6uyxAG6H6" />
     </persistenceIdMap>
   </component>
+  <component name="CopilotUserSelectedChatMode">
+    <option name="chatModeId" value="Ask" />
+  </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
+      <entry key="agent-panel" value="GPT-5.2" />
       <entry key="edit-panel" value="GPT-5 mini" />
-      <entry key="chat-panel" value="GPT-5 mini" />
-      <entry key="agent-panel" value="GPT-5 mini" />
+      <entry key="chat-panel" value="GPT-5.2" />
     </selectedModels>
   </component>
   <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/Logging" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Users-With-Same-Username" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -53,11 +89,6 @@
     <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/AuthorRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/CheepDBContext.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/CheepRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/Migrations/20241205112312_NewMigration.Designer.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/Migrations/20241205112312_NewMigration.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/Migrations/20260211164935_AddGlobalInteger.Designer.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/Migrations/20260211231606_SetAuthorIdAsPrimaryKey.Designer.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/Migrations/20260211232749_ReplaceAuthorIdWithIdentityId.Designer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Infrastructure/Migrations/CheepDBContextModelSnapshot.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Areas/Identity/Pages/Account/Login.cshtml.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Areas/Identity/Pages/Account/Manage/DeletePersonalData.cshtml" root0="FORCE_HIGHLIGHTING" root1="SKIP_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
@@ -67,24 +98,23 @@
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Areas/Identity/Pages/Account/Register.cshtml" root0="FORCE_HIGHLIGHTING" root1="SKIP_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Areas/Identity/Pages/Account/Register.cshtml.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Areas/Identity/Pages/_ViewStart.cshtml" root0="FORCE_HIGHLIGHTING" root1="SKIP_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/DbInitializer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Monitoring/CpuGaugeService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Monitoring/FollowersLeaderboardService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Monitoring/Minitwit-Metrics.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/Public.cshtml" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/Public.cshtml.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/PublicTimeline.cshtml" root0="FORCE_HIGHLIGHTING" root1="SKIP_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/PublicTimeline.cshtml.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/SearchResult.cshtml" root0="FORCE_HIGHLIGHTING" root1="SKIP_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/Shared/TimelineModel.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/Shared/_ValidationScriptsPartial.cshtml" root0="FORCE_HIGHLIGHTING" root1="SKIP_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/UserTimeline.cshtml" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Pages/UserTimeline.cshtml.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/Program.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Chirp.Web/bin/Debug/net8.0/Chirp.Web.deps.json" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/test/Chirp.Infrastructure.Test/UnitTestChirpInfrastructure.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/test/Chirp.Web.Playwright.Test/UiTests.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -106,7 +136,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "Monitoring",
+    "git-widget-placeholder": "MoreMonitoring",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -129,6 +159,8 @@
       <workItem from="1771311844015" duration="3180000" />
       <workItem from="1771916572738" duration="3091000" />
       <workItem from="1772521801932" duration="3450000" />
+      <workItem from="1776147480451" duration="2515000" />
+      <workItem from="1777364341719" duration="6479000" />
     </task>
     <task id="LOCAL-00001" summary="Changed names in the LICENSE.md to the names of the members of our group">
       <option name="closed" value="true" />
@@ -199,7 +231,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/Logging" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
