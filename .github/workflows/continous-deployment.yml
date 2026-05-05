@@ -210,7 +210,7 @@ jobs:
 
     strategy:
       matrix:
-        host: ${{ fromJson(vars.APP_SERVER_IPS) }}
+        host: ${{ fromJson(secrets.APP_SERVER_IPS) }}
 
     steps:
       - name: Update docker-compose-app.yml on any app/minitwit server
