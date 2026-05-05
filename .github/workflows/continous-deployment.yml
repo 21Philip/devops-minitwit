@@ -130,7 +130,7 @@ jobs:
           zip -r ../../my_project_win.zip .
 
       - name: Create release
-        uses: softprops/action-gh-release@v2.0.8
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
         with:
           files: |
             my_project_linux.zip
@@ -147,10 +147,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -180,14 +180,18 @@ jobs:
 
     steps:
       - name: Update docker-compose-db.yml on database server
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }} 
+          SSH_USER: ${{ secrets.SSH_USER }} 
+          DB_HOST: ${{ secrets.DB_HOST }} 
         run: |
-          echo "${{ secrets.SSH_KEY }}" > ssh_key
+          echo "$SSH_KEY" > ssh_key
           chmod 600 ssh_key
-          scp -i ssh_key -o StrictHostKeyChecking=no docker-compose-db.yml ${{ secrets.SSH_USER }}@${{ secrets.DB_HOST }}:/app/
+          scp -i ssh_key -o StrictHostKeyChecking=no docker-compose-db.yml $SSH_USER@$DB_HOST:/app/
           rm ssh_key
 
       - name: Pull via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 #v1.0.3
         with:
           host: ${{ secrets.DB_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -207,14 +211,17 @@ jobs:
 
     steps:
       - name: Update docker-compose-app.yml on any app/minitwit server
+        env: 
+          SSH_KEY: ${{ secrets.SSH_KEY }} 
+          SSH_USER: ${{ secrets.SSH_USER }} 
         run: |
-          echo "${{ secrets.SSH_KEY }}" > ssh_key
+          echo "$SSH_KEY" > ssh_key
           chmod 600 ssh_key
-          scp -i ssh_key -o StrictHostKeyChecking=no docker-compose-app.yml ${{ secrets.SSH_USER }}@${{ matrix.host }}:/app/
+          scp -i ssh_key -o StrictHostKeyChecking=no docker-compose-app.yml $SSH_USER@${{ matrix.host }}:/app/
           rm ssh_key
 
       - name: Pull via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 #v1.0.3
         with:
           host: ${{ matrix.host }}
           username: ${{ secrets.SSH_USER }}
