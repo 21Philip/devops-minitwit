@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -195,7 +195,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum (rate(minitwit_http_responses_total[5m]))",
+          "expr": "minitwit_http_responses_total",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -207,7 +207,7 @@
           "useBackend": false
         }
       ],
-      "title": "Total HTTP Responses",
+      "title": "Total HTTP Responses Since Last Deploy",
       "type": "timeseries"
     },
     {
@@ -430,5 +430,5 @@
   "timezone": "browser",
   "title": "Minitwit Example Dashboard",
   "uid": "fegau3n6gywaoa",
-  "version": 2
+  "version": 9
 }
