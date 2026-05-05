@@ -43,3 +43,10 @@ CVE-2026-34986
 
 # jackc/pgproto3/v2 DoS - Alloy v1.14.2 ships v2.3.3, no fixed version available yet
 CVE-2026-32286
+
+# The project is over. Wont fix future issues. 
+CVE-2026-32280
+CVE-2026-32281
+CVE-2026-32283
+CVE-2026-33816
+CVE-2026-39883
