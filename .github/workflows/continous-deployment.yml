@@ -213,6 +213,9 @@ jobs:
         host: ${{ fromJson(vars.APP_SERVER_IPS) }}
 
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Update docker-compose-app.yml on any app/minitwit server
         env: 
           SSH_KEY: ${{ secrets.SSH_KEY }} 
