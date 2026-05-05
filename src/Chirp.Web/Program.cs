@@ -35,6 +35,7 @@ public class Program
         // Register Prometheus metrics and hosted service
         builder.Services.AddHostedService<CpuGaugeService>();
         builder.Services.AddHostedService<FollowersLeaderboardService>();
+        builder.Services.AddHostedService<CheepsAndFollowersMetricsService>();
 
         var app = builder.Build();
 
@@ -82,9 +83,7 @@ public class Program
 
                 var method = context.Request.Method;
                 var status = context.Response.StatusCode.ToString();
-
-                Chirp.Web.Monitoring.Metrics.HttpResponses.WithLabels(method, route, status).Inc();
-                Chirp.Web.Monitoring.Metrics.HttpRequestDuration.WithLabels(method, route, status).Observe(sw.Elapsed.TotalSeconds);
+                Chirp.Web.Monitoring.Metrics.HttpResponses.Inc();
             }
         });
 

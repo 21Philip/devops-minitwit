@@ -21,13 +21,10 @@ namespace Chirp.Web.Monitoring
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             this.logger.LogInformation("CpuGaugeService starting.");
-
-            // Poll CPU usage at interval
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    // Simple CPU usage estimate using Process.TotalProcessorTime over 1s
                     var cpuPercent = await GetCpuUsageForProcessAsync(1000, stoppingToken).ConfigureAwait(false);
                     Metrics.CpuGauge.Set(cpuPercent);
 
@@ -35,7 +32,6 @@ namespace Chirp.Web.Monitoring
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
-                    // shutting down
                     break;
                 }
                 catch (System.Exception ex)

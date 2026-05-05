@@ -6,30 +6,17 @@ namespace Chirp.Web.Monitoring;
 
 public static class Metrics
 {
-    // Gauge for CPU load percent
     public static readonly Gauge CpuGauge = MetricsFactory.CreateGauge("minitwit_cpu_load_percent", "Current load of the CPU in percent.");
 
-    public static readonly Counter HttpResponses = Prometheus.Metrics.CreateCounter(
-      "minitwit_http_responses_total",
-      "HTTP responses sent.",
-      new CounterConfiguration { LabelNames = new[] { "method", "route", "status" } });
+    public static readonly Counter HttpResponses = MetricsFactory.CreateCounter("minitwit_http_responses_total", "The count of HTTP responses sent.");
 
-    public static readonly Histogram HttpRequestDuration = Prometheus.Metrics.CreateHistogram(
-      "minitwit_http_request_duration_seconds",
-      "HTTP request duration in seconds.",
-      new HistogramConfiguration
-      {
-        LabelNames = new[] { "method", "route", "status" },
-        Buckets = Histogram.ExponentialBuckets(0.005, 2, 12), // 5ms .. ~10s
-      });
+    public static readonly Gauge CheepsPosted = Prometheus.Metrics.CreateGauge(
+        "minitwit_cheeps_posted_total",
+        "Total number of cheeps in the database.");
 
-    public static readonly Counter CheepsPosted = Prometheus.Metrics.CreateCounter(
-      "minitwit_cheeps_posted_total",
-      "Number of cheeps successfully posted.");
-
-    public static readonly Counter AuthorsFollowed = Prometheus.Metrics.CreateCounter(
+    public static readonly Gauge AuthorsFollowed = Prometheus.Metrics.CreateGauge(
         "minitwit_authors_followed_total",
-        "Number of follow actions performed by users.");
+        "Total sum of followers across all authors.");
 
     public static readonly Gauge UserFollowers = Prometheus.Metrics.CreateGauge(
       "minitwit_user_followers",
