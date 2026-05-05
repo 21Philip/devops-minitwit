@@ -1,3 +1,5 @@
+// Copyright (c) devops-gruppe-connie. All rights reserved.
+
 using Chirp.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,12 +25,12 @@ public class FollowersLeaderboardService : BackgroundService
         {
             try
             {
-                using var scope = scopeFactory.CreateScope();
+                using var scope = this.scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<CheepDBContext>();
 
                 var followers = await db.Authors
                     .Where(a => a.Name != null)
-                    .Select(a => new { Name = a.Name!, Count = a.Followers.Count })
+                    .Select(a => new { Name = a.Name!, Count = a.Followers!.Count })
                     .ToListAsync(stoppingToken);
 
                 foreach (var row in followers)
@@ -38,7 +40,7 @@ public class FollowersLeaderboardService : BackgroundService
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to update follower leaderboard metric");
+                this.logger.LogWarning(ex, "Failed to update follower leaderboard metric");
             }
 
             await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);

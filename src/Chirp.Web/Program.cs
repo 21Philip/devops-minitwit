@@ -46,7 +46,7 @@ public class Program
             await next();
             logger.LogInformation("HTTP {Method} {Path} responded {StatusCode}", context.Request.Method, context.Request.Path, context.Response.StatusCode);
         });
-        
+
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
         {
@@ -60,7 +60,7 @@ public class Program
         app.UseHttpMetrics(); // built-in middleware from prometheus-net to collect request metrics
 
         app.UseStaticFiles();
-        
+
         app.Use(async (context, next) =>
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -71,7 +71,7 @@ public class Program
             finally
             {
                 sw.Stop();
-                
+
                 var endpoint = context.GetEndpoint();
 
                 var route =
@@ -82,7 +82,7 @@ public class Program
 
                 var method = context.Request.Method;
                 var status = context.Response.StatusCode.ToString();
-                
+
                 Chirp.Web.Monitoring.Metrics.HttpResponses.WithLabels(method, route, status).Inc();
                 Chirp.Web.Monitoring.Metrics.HttpRequestDuration.WithLabels(method, route, status).Observe(sw.Elapsed.TotalSeconds);
             }
@@ -91,7 +91,7 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapMetrics(); 
+        app.MapMetrics();
         app.MapRazorPages();
 
         app.Run();

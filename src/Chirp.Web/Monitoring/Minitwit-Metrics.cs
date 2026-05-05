@@ -20,17 +20,17 @@ public static class Metrics
       new HistogramConfiguration
       {
         LabelNames = new[] { "method", "route", "status" },
-        Buckets = Histogram.ExponentialBuckets(0.005, 2, 12) // 5ms .. ~10s
+        Buckets = Histogram.ExponentialBuckets(0.005, 2, 12), // 5ms .. ~10s
       });
-    
+
     public static readonly Counter CheepsPosted = Prometheus.Metrics.CreateCounter(
       "minitwit_cheeps_posted_total",
       "Number of cheeps successfully posted.");
-    
+
     public static readonly Counter AuthorsFollowed = Prometheus.Metrics.CreateCounter(
         "minitwit_authors_followed_total",
         "Number of follow actions performed by users.");
-    
+
     public static readonly Gauge UserFollowers = Prometheus.Metrics.CreateGauge(
       "minitwit_user_followers",
       "Number of followers per user.",

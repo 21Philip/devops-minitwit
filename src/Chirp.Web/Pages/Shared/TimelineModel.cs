@@ -95,7 +95,7 @@ public class TimelineModel : PageModel
         await this.AuthorRepository.FollowUserAsync(author.Id, followAuthor.Id);
         this.Logger.LogInformation("User {AuthorName} followed {FollowAuthorName} from timeline", author.Name, followAuthor.Name);
         Chirp.Web.Monitoring.Metrics.AuthorsFollowed.Inc();
-        
+
         // updates the current author's list of followed authors
         this.FollowedAuthors = await this.AuthorRepository.GetFollowing(author.Id);
 
