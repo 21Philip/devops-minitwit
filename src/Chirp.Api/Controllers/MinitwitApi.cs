@@ -59,7 +59,7 @@ namespace Chirp.API.Controllers
         /// <summary>
         ///
         /// </summary>
-        /// <remarks>Get list of users followed by the given user.  - Query param &#x60;?no&#x3D;&#x60; limits result count. - Optionally updates a &#39;latest&#39; global value via &#x60;?latest&#x3D;&#x60; query param.</remarks>
+        /// <remarks> Test demo -- Get list of users followed by the given user.  - Query param &#x60;?no&#x3D;&#x60; limits result count. - Optionally updates a &#39;latest&#39; global value via &#x60;?latest&#x3D;&#x60; query param.</remarks>
         /// <param name="username"></param>
         /// <param name="latest">Optional: &#x60;latest&#x60; value to update.</param>
         /// <param name="no">Optional: &#x60;no&#x60; limits result count.</param>
