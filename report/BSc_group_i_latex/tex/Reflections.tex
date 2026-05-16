@@ -1,0 +1,37 @@
+\begin{comment}
+Describe the biggest issues, how you solved them, and which are major lessons learned with regards to:
+
+* evolution and refactoring
+* operation, and
+* maintenance
+
+of your ITU-MiniTwit systems. Link back to respective commit messages, issues, tickets, etc. to illustrate these.
+
+Also reflect and describe what was the "DevOps" style of your work. For example, what did you do differently to previous development projects and how did it work?
+\end{comment}
+
+\section{Reflection perspective}
+
+\subsection{Evolution}
+
+\subsubsection{Technical Debt}
+A major lesson from the project was how technical debt accumulates when minor deficiencies are deferred instead of being addressed early. As we based our MiniTwit on our earlier Chirp project from the BDSA course, this meant that we often trusted the existing components and did not revisit all parts of the codebase before implementing new features covered in the lectures, instead we prioritized progress over cleanup. 
+\\This became visible in several places. For example, when changing the database from SQLite to PostgreSQL, we left initialization code in the production code long after the system had moved to the PostgreSQL database. Also during the integration with the simulator, we never fixed the GET /latest endpoint, which returned 404 instead of a valid response if no simulator traffic had yet arrived. Individually, these issues seemed minor and harmless, and were therefore deprioritized in favor of more urgent tasks. The lesson learned was that technical debt rarely disappears on its own, once an issue is deprioritized, it often stays and continues to affect the system.
+
+\subsubsection{Refactoring}
+Rather than rewriting from scratch, the group chose to port the Chirp! codebase from the BDSA course (df2513d). This saved time initially, but the codebase carried assumptions that did not fit the DevOps course. It was originally built for SQLite and hosted on Azure as a single instance, so we switched it to PostgreSQL and containerized deployment on DigitalOcean. This meant that we had to refactor some of our database logic, since SQLite and PostgreSQL handle case sensitivity differently. We patched it for PostgreSQL, but this broke the unit tests since they were still running against SQLite. The fix was reverted (59f3f78, ec44939), and the underlying mismatch was never resolved. Similarly, wiring the application up to the simulator required a custom authentication handler (9c7dd39) and disabling all of ASP.NET Core Identity's password requirements (41a2e80), since the simulator registers users with very weak passwords.
+
+\subsection{Operation and Maintenance}
+
+\subsubsection{Logging}
+Implementing logging challenged us initially. We had uncertainties about what to log and how to structure it.
+We updated our logging throughout, in order to collect all the necessary information. 
+Looking back, we should have spent more time identifying what information would have been important to log, that could help us evaluate and improve the system later.
+
+\subsubsection{Grafana}
+We added monitoring to our application through Prometheus with Grafana for visualization. Up until the final weeks of the project, we had only implemented a global counter for HTTP requests, as well as a live status for the deployed website. Due to our limited number of dashboards, we didn't utilize monitoring to check the status of the website as much as we could have throughout the project. \\
+We ended the project with the monitoring dashboards in (Figure \ref{fig:dashboard} \& Figure \ref{fig:logging_dashboard}). Ideally, we would have expanded and implemented more consequential monitoring, such as CPU usage, but due to time constraints during the semester and our lack of experience with monitoring, we didn't make as extensive use of it as we could have.
+
+\subsection{DevOps Reflections}
+Working in a DevOps style changed how we approached the project compared to previous projects  such as Chirp! from BDSA. One of the biggest differences was the deployment strategy. Instead of deploying by copying the entire codebase, we worked with Docker images, which was a valuable learning experience and made the process more consistent and reliable. However, we could have made better use of the tools we set up. For example, Grafana dashboards were created but not regularly checked and alerts were never set up.\\
+Since we used Chirp!, the system was already relatively well-developed, and most of our work was thereby more operational rather than developmental, with the API being one of the few parts that was developed further. In the beginning much of the work had to be done collaboratively, since the tasks were tightly coupled, such as setting up CI/CD pipelines, introducing containerization with Docker and Vagrant, and getting the existing system into a deployable state. In practice much of our knowledge sharing happened through informal discussions rather than written documentation, which worked while the project was active, but made maintenance harder afterwards. The biggest lesson during the project has been that tools such as CI/CD, Docker, and monitoring are valuable, but only if they become part of the group’s actual working habits.
