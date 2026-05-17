@@ -5,6 +5,8 @@ on:
     paths:
       - 'report/**'
       - '.github/workflows/build-latex.yml'
+    paths-ignore:
+      - 'report/build/**'
   workflow_dispatch:
 
 permissions:
