@@ -1,0 +1,45 @@
+name: Build report PDF
+
+on:
+  push:
+    paths:
+      - 'report/**'
+      - '.github/workflows/build-latex.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: report/BSc_group_i.tex
+          work_in_root_file_dir: true
+
+      - name: Create output directory
+        run: mkdir -p report/build
+
+      - name: Copy PDF to target directory
+        run: cp report/BSc_group_i.pdf report/build/BSc_group_i.pdf
+
+      - name: Commit and push PDF
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add report//report.pdf
+
+          # Only commit if the PDF changed
+          git diff --cached --quiet || git commit -m "Update generated PDF"
+
+          git push
