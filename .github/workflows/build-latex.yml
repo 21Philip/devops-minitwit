@@ -1,4 +1,4 @@
-name: Build report PDF
+name: Build LaTeX into PDF
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add report//report.pdf
+          git add report/build/BSc_group_i.pdf
 
           # Only commit if the PDF changed
           git diff --cached --quiet || git commit -m "Update generated PDF"
