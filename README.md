@@ -6,32 +6,17 @@ By DevopsGruppeConnie (group i)
 
 ## Demos
 ### IaC
-<div style="text-align: center; max-width: 100%;">
-    <video controls style="width: 80%; height: auto;">
-        <source src="report/images/iac.mp4" type="video/mp4">
-    </video>
-</div>
+![iac](./report/images/iac.gif)
 
 ### CI-CD
-<div style="text-align: center; max-width: 100%;">
-    <video controls style="width: 80%; height: auto;">
-        <source src="report/images/ci-cd.mp4" type="video/mp4">
-    </video>
-</div>
+![ci-cd](./report/images/ci-cd.gif)
 
 ### Monitoring
-<div style="text-align: center; max-width: 100%;">
-    <video controls style="width: 80%; height: auto;">
-        <source src="report/images/monitor.mp4" type="video/mp4">
-    </video>
-</div>
+![monitor](./report/images/monitor.gif)
 
 ### Logging
-<div style="text-align: center; max-width: 100%;">
-    <video controls style="width: 80%; height: auto;">
-        <source src="report/images/logging.mp4" type="video/mp4">
-    </video>
-</div>
+![logging](./report/images/logging.gif)
+
 
 ## How to run locally
 ### Requires: 
