@@ -22,7 +22,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: Compile LaTeX
-        uses: xu-cheng/latex-action@v3
+        uses: xu-cheng/latex-action@e2f99d4b3685b0da93f97e1b86ad8fab81105098
         with:
           root_file: report/BSc_group_i.tex
           work_in_root_file_dir: true

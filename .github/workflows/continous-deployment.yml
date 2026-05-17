@@ -11,11 +11,13 @@ on:
       - 'v*.*.*'
     paths-ignore:
       - 'report/**'
+      - '.github/workflows/build-latex.yml'
   pull_request:
     branches:
       - main
     paths-ignore:
       - 'report/**'
+      - '.github/workflows/build-latex.yml'
   workflow_dispatch:
 
 jobs:
