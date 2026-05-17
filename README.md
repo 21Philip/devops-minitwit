@@ -22,14 +22,14 @@ By DevopsGruppeConnie (group i)
 ### Monitoring
 <div style="text-align: center; max-width: 100%;">
     <video controls style="width: 80%; height: auto;">
-        <source src="video3.mp4" type="video/mp4">
+        <source src="report/images/monitor.mp4" type="video/mp4">
     </video>
 </div>
 
-### Logiing
+### Logging
 <div style="text-align: center; max-width: 100%;">
     <video controls style="width: 80%; height: auto;">
-        <source src="video4.mp4" type="video/mp4">
+        <source src="report/images/logging.mp4" type="video/mp4">
     </video>
 </div>
 
